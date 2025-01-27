@@ -4,9 +4,9 @@ import { GetDerbyByIdResponse } from '@/lib/derby';
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const id = parseInt(params.id);
+  const id = parseInt((await params).id);
   if (isNaN(id)) {
     return NextResponse.json({ error: 'Invalid id' }, { status: 400 });
   }
