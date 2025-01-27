@@ -8,10 +8,10 @@ datasource db {
 }
 
 model car {
-  id                           BigInt   @id @default(autoincrement())
+  id                           Int      @id @default(autoincrement())
   created_at                   DateTime @default(now()) @db.Timestamp(6)
-  den_id                       BigInt
-  owner                        String   @db.VarChar
+  den_id                       Int
+  owner                        String
   den                          den      @relation(fields: [den_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   heat_heat_lane_1_car_idTocar heat[]   @relation("heat_lane_1_car_idTocar")
   heat_heat_lane_2_car_idTocar heat[]   @relation("heat_lane_2_car_idTocar")
@@ -22,32 +22,33 @@ model car {
 }
 
 model den {
-  id         BigInt   @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   created_at DateTime @default(now()) @db.Timestamp(6)
-  name       String   @db.VarChar
-  dirby_id   BigInt
+  name       String
+  dirby_id   Int
   car        car[]
   derby      derby    @relation(fields: [dirby_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   heat       heat[]
 }
 
 model derby {
-  id         BigInt   @id @default(autoincrement())
-  created_at DateTime @db.Timestamp(6)
-  time       DateTime @db.Timestamp(6)
-  den        den[]
+  id            Int      @id @default(autoincrement())
+  created_at    DateTime @db.Timestamp(6)
+  time          DateTime @db.Timestamp(6)
+  location_name String
+  den           den[]
 }
 
 model heat {
   id                          BigInt    @id @default(autoincrement())
   created_at                  DateTime  @db.Timestamp(6)
-  den_id                      BigInt
-  lane_1_car_id               BigInt?
-  lane_2_car_id               BigInt?
-  lane_3_car_id               BigInt?
-  lane_4_car_id               BigInt?
-  lane_5_car_id               BigInt?
-  lane_6_car_id               BigInt?
+  den_id                      Int
+  lane_1_car_id               Int?
+  lane_2_car_id               Int?
+  lane_3_car_id               Int?
+  lane_4_car_id               Int?
+  lane_5_car_id               Int?
+  lane_6_car_id               Int?
   lane_1_car_time             Int?      @db.SmallInt
   lane_2_car_time             Int?      @db.SmallInt
   lane_3_car_time             Int?      @db.SmallInt
