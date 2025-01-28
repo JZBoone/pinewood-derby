@@ -3,17 +3,9 @@ import path from 'path';
 import { expectedResponse, mappedCsv, parsedCsv } from './pinewood-derby-2024';
 import { POST } from './route';
 import { validateCsv } from '@/api-biz/csv';
-
-async function makeRequest(csv: string) {
-  const req = new Request('http://localhost/api/derby/csv', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'text/csv',
-    },
-    body: csv,
-  });
-  return POST(req);
-}
+import { derby } from '@prisma/client';
+import { db } from '@/api-biz/db';
+import { DateTime } from 'luxon';
 
 describe('validateCsv', () => {
   test('it maps parsed records', () => {
@@ -23,11 +15,52 @@ describe('validateCsv', () => {
 });
 
 describe('POST /api/derby/csv', () => {
+  let derby: derby;
+  async function makeRequest(params: { derbyId?: number; csv: string }) {
+    const { derbyId, csv } = params;
+    let url = `http://localhost/api/derby/csv`;
+    if (derbyId) {
+      url += `?derby_id=${derbyId}`;
+    }
+    const req = new Request(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/csv',
+      },
+      body: csv,
+    });
+    return POST(req);
+  }
+  beforeEach(async () => {
+    derby = await db.derby.create({
+      data: {
+        time: DateTime.now().plus({ week: 1 }).toUTC().toISO(),
+        created_at: DateTime.now().toUTC().toISO(),
+        location_name: 'Williams Elmentary',
+      },
+    });
+  });
   describe('validation', () => {
+    test('missing derby id', async () => {
+      const csv =
+        "Car Number,Car Name,Scout,Den,Superlative\n1,,Kelan Brandt,1,Cubmaster's Choice";
+      const res = await makeRequest({ csv, derbyId: undefined });
+      expect(res.status).toBe(400);
+      const json = await res.json();
+      expect(json).toEqual({ error: 'Missing derby_id query parameter' });
+    });
+    test('invalid derby id', async () => {
+      const csv =
+        "Car Number,Car Name,Scout,Den,Superlative\n1,,Kelan Brandt,1,Cubmaster's Choice";
+      const res = await makeRequest({ csv, derbyId: 999 });
+      expect(res.status).toBe(400);
+      const json = await res.json();
+      expect(json).toEqual({ error: 'Invalid derby_id' });
+    });
     test('invalid car number', async () => {
       const csv =
         "Car Number,Car Name,Scout,Den,Superlative\nfoo,,Kelan Brandt,1,Cubmaster's Choice";
-      const res = await makeRequest(csv);
+      const res = await makeRequest({ csv, derbyId: derby.id });
       expect(res.status).toBe(400);
       const json = await res.json();
       expect(json).toEqual({ error: 'Invalid value for Car Number: foo' });
@@ -35,7 +68,7 @@ describe('POST /api/derby/csv', () => {
     test('missing car number', async () => {
       const csv =
         "Car Number,Car Name,Scout,Den,Superlative\n,,Kelan Brandt,1,Cubmaster's Choice";
-      const res = await makeRequest(csv);
+      const res = await makeRequest({ csv, derbyId: derby.id });
       expect(res.status).toBe(400);
       const json = await res.json();
       expect(json).toEqual({ error: 'Missing required value for Car Number' });
@@ -43,7 +76,7 @@ describe('POST /api/derby/csv', () => {
     test('missing den', async () => {
       const csv =
         "Car Number,Car Name,Scout,Den,Superlative\n1,,Kelan Brandt,,Cubmaster's Choice";
-      const res = await makeRequest(csv);
+      const res = await makeRequest({ csv, derbyId: derby.id });
       expect(res.status).toBe(400);
       const json = await res.json();
       expect(json).toEqual({ error: 'Missing required value for Den' });
@@ -51,7 +84,7 @@ describe('POST /api/derby/csv', () => {
     test('invalid den', async () => {
       const csv =
         "Car Number,Car Name,Scout,Den,Superlative\n1,,Kelan Brandt,foo,Cubmaster's Choice";
-      const res = await makeRequest(csv);
+      const res = await makeRequest({ csv, derbyId: derby.id });
       expect(res.status).toBe(400);
       const json = await res.json();
       expect(json).toEqual({ error: 'Invalid value for Den: foo' });
@@ -62,7 +95,7 @@ describe('POST /api/derby/csv', () => {
       path.join(__dirname, './pinewood-derby-2024.csv'),
       'utf8'
     );
-    const res = await makeRequest(csv);
+    const res = await makeRequest({ csv, derbyId: derby.id });
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json).toEqual(expectedResponse);
