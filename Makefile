@@ -25,7 +25,7 @@ node_modules: package-lock.json ## Install node modules
 
 .PHONY: lint
 lint: ## Check ESLint for any errors
-	npx eslint ./src/**/*.ts
+	npm run lint
 
 ##@ Testing
 
