@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 
-type DeserializedCsvRecord = {
+export type DeserializedCsvRecord = {
   carNumber: number;
   carName: string | null;
   owner: string;
