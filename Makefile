@@ -14,6 +14,8 @@
 help: ## Shows the help
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[\/%.a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-30s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
+ALL_TESTS := $(shell find ./src -name '*.test.ts')
+
 ##@ Development
 
 .PHONY: run
@@ -32,6 +34,12 @@ lint: ## Check ESLint for any errors
 .PHONY: test
 test: node_modules test-db test-db-migrate ## Run tests
 	npx dotenv -e .env.test -- npm test
+
+.PRECIOUS: %.test.ts
+%.test.ts: ## Run an individual test with 'make <path to .test.ts>'
+$(ALL_TESTS): node_modules test-db test-db-migrate
+	@echo "Testing $@..."
+	npx dotenv -e .env.test -- npm test -- $@
 
 .PHONY: test-db
 test-db: ## Start test database
