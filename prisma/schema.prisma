@@ -28,10 +28,12 @@ model den {
   id         Int      @id @default(autoincrement())
   created_at DateTime @default(now()) @db.Timestamp(6)
   name       String
-  dirby_id   Int
+  derby_id   Int
   car        car[]
-  derby      derby    @relation(fields: [dirby_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  derby      derby    @relation(fields: [derby_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   heat       heat[]
+
+  @@unique([derby_id, name], map: "unique_derby_id_name")
 }
 
 model derby {

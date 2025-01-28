@@ -6,6 +6,7 @@ import { validateCsv } from '@/api-biz/csv';
 import { derby } from '@prisma/client';
 import { db } from '@/api-biz/db';
 import { DateTime } from 'luxon';
+import { nowIsoString } from '@/lib/util';
 
 describe('validateCsv', () => {
   test('it maps parsed records', () => {
@@ -35,7 +36,7 @@ describe('POST /api/derby/csv', () => {
     derby = await db.derby.create({
       data: {
         time: DateTime.now().plus({ week: 1 }).toUTC().toISO(),
-        created_at: DateTime.now().toUTC().toISO(),
+        created_at: nowIsoString(),
         location_name: 'Williams Elmentary',
       },
     });
