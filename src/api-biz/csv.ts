@@ -1,4 +1,6 @@
 import { get } from 'lodash';
+import { createDens } from './den';
+import { createCars } from './car';
 
 export type DeserializedCsvRecord = {
   carNumber: number;
@@ -69,4 +71,15 @@ export function validateCsv(
     records.push(record as DeserializedCsvRecord);
   }
   return { data: records, valid: true };
+}
+
+export async function processCsv(params: {
+  records: DeserializedCsvRecord[];
+  derbyId: number;
+}) {
+  const { records, derbyId } = params;
+  const denNumbers = Array.from(new Set(records.map((r) => r.denNumber)));
+  const { dens } = await createDens({ derbyId, denNumbers });
+  const { cars } = await createCars({ derbyId, records });
+  return { dens, cars };
 }

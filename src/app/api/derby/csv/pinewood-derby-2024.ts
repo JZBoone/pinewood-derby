@@ -605,7 +605,3 @@ export const mappedCsv = [
     superlative: null,
   },
 ];
-
-export const expectedResponse = {
-  data: mappedCsv,
-};
