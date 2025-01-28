@@ -16,7 +16,7 @@ CREATE TABLE "den" (
     "id" SERIAL NOT NULL,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "name" TEXT NOT NULL,
-    "dirby_id" INTEGER NOT NULL,
+    "derby_id" INTEGER NOT NULL,
 
     CONSTRAINT "den_pkey" PRIMARY KEY ("id")
 );
@@ -33,7 +33,7 @@ CREATE TABLE "derby" (
 
 -- CreateTable
 CREATE TABLE "heat" (
-    "id" BIGSERIAL NOT NULL,
+    "id" SERIAL NOT NULL,
     "created_at" TIMESTAMP(6) NOT NULL,
     "den_id" INTEGER NOT NULL,
     "lane_1_car_id" INTEGER,
@@ -53,11 +53,14 @@ CREATE TABLE "heat" (
     CONSTRAINT "heat_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateIndex
+CREATE UNIQUE INDEX "unique_derby_id_name" ON "den"("derby_id", "name");
+
 -- AddForeignKey
 ALTER TABLE "car" ADD CONSTRAINT "car_den_id_fkey" FOREIGN KEY ("den_id") REFERENCES "den"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE "den" ADD CONSTRAINT "den_dirby_id_fkey" FOREIGN KEY ("dirby_id") REFERENCES "derby"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE "den" ADD CONSTRAINT "den_derby_id_fkey" FOREIGN KEY ("derby_id") REFERENCES "derby"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "heat" ADD CONSTRAINT "heat_den_id_fkey" FOREIGN KEY ("den_id") REFERENCES "den"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;

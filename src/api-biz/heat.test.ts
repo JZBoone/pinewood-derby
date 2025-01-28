@@ -1,5 +1,7 @@
 import { car } from '@prisma/client';
-import { groupCars } from './heat';
+import { groupCars, makeHeatsForGroup } from './heat';
+import { db } from './db';
+import { DateTime } from 'luxon';
 
 function makeCars(count: number): car[] {
   const cars: car[] = [];
@@ -54,4 +56,39 @@ test.each(testCases)('groupCars', ({ cars, expectedGroups }) => {
       ids.add(car.id);
     }
   }
+});
+
+describe('makeHeatsForGroup', () => {
+  async function makeCars(denId: number, cars: number): Promise<car[]> {
+    return await Promise.all(
+      Array.from({ length: cars }).map((_, i) =>
+        db.car.create({
+          data: {
+            den_id: denId,
+            number: i,
+            owner: 'owner ' + i,
+          },
+        })
+      )
+    );
+  }
+  async function setup() {
+    const derby = await db.derby.create({
+      data: {
+        time: DateTime.now().plus({ week: 1 }).toUTC().toISO(),
+        created_at: DateTime.now().toUTC().toISO(),
+        location_name: 'Williams Elmentary',
+      },
+    });
+    const den = await db.den.create({
+      data: { derby_id: derby.id, name: '1' },
+    });
+    const cars = await makeCars(den.id, 6);
+    return { derby, den, cars };
+  }
+  it('should create heats for each group', async () => {
+    const { cars } = await setup();
+    const heats = await makeHeatsForGroup(cars);
+    expect(heats.length).toBe(6);
+  });
 });

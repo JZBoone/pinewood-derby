@@ -45,7 +45,7 @@ model derby {
 }
 
 model heat {
-  id                          BigInt    @id @default(autoincrement())
+  id                          Int       @id @default(autoincrement())
   created_at                  DateTime  @db.Timestamp(6)
   den_id                      Int
   lane_1_car_id               Int?
