@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres
+    container_name: pinewood-derby-db
+    environment:
+      POSTGRES_USER: scout
+      POSTGRES_PASSWORD: cubscoutsftw
+      POSTGRES_DB: testdb
+    ports:
+      - "5432:5432"
