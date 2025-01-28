@@ -12,6 +12,9 @@ model car {
   created_at                   DateTime @default(now()) @db.Timestamp(6)
   den_id                       Int
   owner                        String
+  number                       Int      @db.SmallInt
+  superlative                  String?
+  name                         String?
   den                          den      @relation(fields: [den_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   heat_heat_lane_1_car_idTocar heat[]   @relation("heat_lane_1_car_idTocar")
   heat_heat_lane_2_car_idTocar heat[]   @relation("heat_lane_2_car_idTocar")
