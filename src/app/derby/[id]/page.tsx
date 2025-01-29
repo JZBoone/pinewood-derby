@@ -2,8 +2,9 @@
 
 import Image from 'next/image';
 import { useEffect, useState, use } from 'react';
-import { get } from 'lodash';
+import { get, isNil } from 'lodash';
 import { fetchDerbyData, DerbyData } from './derby-data';
+import { car } from '@prisma/client';
 
 interface Props {
   params: Promise<{
@@ -21,6 +22,7 @@ export default function Derby({ params }: Props) {
     async function loadDerbies() {
       try {
         const data = await fetchDerbyData(resolvedParams.id);
+        console.log(data);
         setDerbyData(data);
       } catch (err: unknown) {
         setError(`Oh no! Error loading derby data: ${get(err, 'message')}`);
@@ -46,6 +48,7 @@ export default function Derby({ params }: Props) {
           {!loading &&
             derbyData &&
             `${formatDate(derbyData.derby.time.toString())} ${derbyData.derby.location_name}`}
+          {!loading && derbyData && <DensList dens={derbyData.dens} />}
         </h1>
 
         <div className="flex gap-4 items-center flex-col sm:flex-row">
@@ -74,6 +77,33 @@ export default function Derby({ params }: Props) {
           </a>
         </div>
       </main>
+    </div>
+  );
+}
+interface DensListProps {
+  dens: DerbyData['dens'];
+}
+
+function DensList({ dens }: DensListProps) {
+  function carDisplayName(car: car) {
+    return [`#${car.number}`, car.name ? `(${car.name})` : null, '-', car.owner]
+      .filter((value) => !isNil(value))
+      .join(' ');
+  }
+  return (
+    <div className="dens-list">
+      {dens.map((den) => (
+        <div key={den.id} className="den">
+          <h2 className="den-name">Den {den.name}</h2>
+          <ul className="cars-list">
+            {den.cars.map((car) => (
+              <li key={car.id} className="car">
+                {carDisplayName(car)}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
     </div>
   );
 }
