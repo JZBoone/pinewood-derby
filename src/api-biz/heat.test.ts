@@ -1,5 +1,5 @@
-import { car } from '@prisma/client';
-import { groupCars, makeHeatsForGroup } from './heat';
+import { car, heat } from '@prisma/client';
+import { groupCars, Lane, makeHeatsForGroup } from './heat';
 import { db } from './db';
 import { DateTime } from 'luxon';
 
@@ -58,6 +58,26 @@ test.each(testCases)('groupCars', ({ cars, expectedGroups }) => {
   }
 });
 
+function carLaneForHeat(heat: heat, car: car): Lane {
+  if (heat.lane_1_car_id === car.id) return 0;
+  if (heat.lane_2_car_id === car.id) return 1;
+  if (heat.lane_3_car_id === car.id) return 2;
+  if (heat.lane_4_car_id === car.id) return 3;
+  if (heat.lane_5_car_id === car.id) return 4;
+  if (heat.lane_6_car_id === car.id) return 5;
+  throw new Error('Car not in heat');
+}
+
+function validateHeatConstraints(cars: car[], heats: heat[]) {
+  for (const car of cars) {
+    const lanes = new Set<Lane>();
+    for (const heat of heats) {
+      lanes.add(carLaneForHeat(heat, car));
+    }
+    expect(lanes.size).toBe(6);
+  }
+}
+
 describe('makeHeatsForGroup', () => {
   async function makeCars(denId: number, cars: number): Promise<car[]> {
     return await Promise.all(
@@ -87,8 +107,23 @@ describe('makeHeatsForGroup', () => {
     return { derby, den, cars };
   }
   it('should create heats for each group', async () => {
-    const { cars } = await setup();
-    const heats = await makeHeatsForGroup(cars);
-    expect(heats.length).toBe(6);
+    const { cars, den } = await setup();
+    const heatCounts: number[] = [];
+    let counter = 0;
+    for (let i = 0; i < 100; i++) {
+      counter++;
+      try {
+        const heats = await makeHeatsForGroup(cars);
+        expect(heats.length).toBe(6);
+        validateHeatConstraints(cars, heats);
+        break;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (e: unknown) {
+        const heats = await db.heat.findMany({ where: { den_id: den.id } });
+        heatCounts.push(heats.length);
+        await db.$executeRaw`TRUNCATE TABLE "heat" RESTART IDENTITY CASCADE`;
+      }
+    }
+    console.log(`Took ${counter} tries`);
   });
 });

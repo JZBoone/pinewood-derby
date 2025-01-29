@@ -1,0 +1,25 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Jest Tests",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceRoot}/node_modules/.bin/jest",
+      "args": [
+        "--runInBand",
+        "--detectOpenHandles",
+        "--no-cache",
+        "--testTimeout=1000000000",
+        "src/api-biz/heat.test.ts"
+      ],
+      "env": {
+        "NODE_ENV": "test",
+        "DATABASE_URL": "postgresql://scout:cubscoutsftw@localhost:5432/testdb"
+      },
+      "runtimeArgs": ["--inspect-brk"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    }
+  ]
+}

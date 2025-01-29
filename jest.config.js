@@ -6,6 +6,7 @@ const createJestConfig = nextJest({
 });
 
 const customJestConfig = {
+  preset: 'ts-jest',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   testEnvironment: 'node', // Use "node" for API route testing
 };
