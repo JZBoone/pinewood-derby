@@ -36,3 +36,15 @@ export async function createCars(params: {
   );
   return { cars };
 }
+
+/**
+ * Get all cars for a derby
+ */
+export async function getCars(derbyId: number): Promise<car[]> {
+  const dens = await db.den.findMany({
+    where: { derby_id: derbyId },
+    select: { id: true },
+  });
+  const denIds = dens.map((den) => den.id);
+  return db.car.findMany({ where: { den_id: { in: denIds } } });
+}

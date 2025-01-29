@@ -36,3 +36,10 @@ export async function createDens(params: {
     dens: [...dens, ...createdDens],
   };
 }
+
+/**
+ * Get all dens for a specific derby.
+ */
+export async function getDens(derbyId: number): Promise<den[]> {
+  return db.den.findMany({ where: { derby_id: derbyId } });
+}
