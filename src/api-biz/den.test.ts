@@ -1,8 +1,39 @@
 import { derby } from '@prisma/client';
-import { createDens } from './den';
+import { createDens, sortDens } from './den';
 import { db } from './db';
 import { DateTime } from 'luxon';
 import { nowIsoString } from '@/lib/util';
+
+describe('sortDens', () => {
+  describe('sortDens', () => {
+    const testCases = [
+      {
+        description: 'should sort dens by name in ascending order',
+        input: [
+          { id: 1, name: '102', derby_id: 1 },
+          { id: 2, name: '101', derby_id: 1 },
+          { id: 3, name: '103', derby_id: 1 },
+        ],
+        expected: ['101', '102', '103'],
+      },
+      {
+        description: 'should handle dens with non-numeric names',
+        input: [
+          { id: 1, name: 'A', derby_id: 1 },
+          { id: 2, name: 'B', derby_id: 1 },
+          { id: 3, name: 'C', derby_id: 1 },
+        ],
+        expected: ['A', 'B', 'C'],
+      },
+    ];
+
+    test.only.each(testCases)('$description', ({ input, expected }) => {
+      const sortedDens = sortDens(input);
+      const sortedNames = sortedDens.map((den) => den.name);
+      expect(sortedNames).toEqual(expected);
+    });
+  });
+});
 
 describe('createDens', () => {
   let derby: derby;

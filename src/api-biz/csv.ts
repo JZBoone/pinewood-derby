@@ -1,6 +1,8 @@
-import { get } from 'lodash';
-import { createDens } from './den';
+import { get, groupBy } from 'lodash';
+import { createDens, sortDens } from './den';
 import { createCars } from './car';
+import { groupCars, makeHeats } from './heat';
+import { heat } from '@prisma/client';
 
 export type DeserializedCsvRecord = {
   carNumber: number;
@@ -81,5 +83,16 @@ export async function processCsv(params: {
   const denNumbers = Array.from(new Set(records.map((r) => r.denNumber)));
   const { dens } = await createDens({ derbyId, denNumbers });
   const { cars } = await createCars({ derbyId, records });
-  return { dens, cars };
+  const carsByDen = groupBy(cars, 'den_id');
+  const sortedDens = sortDens(dens);
+  const heats: heat[] = [];
+  for (const den of sortedDens) {
+    const groups = groupCars(carsByDen[den.id] || []);
+    for (const group of groups) {
+      const { heats: _heats } = await makeHeats(group);
+      heats.push(..._heats);
+    }
+  }
+
+  return { dens, cars, heats };
 }

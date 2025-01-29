@@ -2,6 +2,13 @@ import { den } from '@prisma/client';
 import { db } from './db';
 
 /**
+ * Sort dens by name. We want the younger dens to go first, so sorting is important.
+ */
+export function sortDens<T extends { name: string }>(dens: T[]): T[] {
+  return dens.sort((a, b) => parseInt(a.name) - parseInt(b.name));
+}
+
+/**
  * idempotent
  */
 export async function createDens(params: {

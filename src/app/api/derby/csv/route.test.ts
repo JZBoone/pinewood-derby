@@ -98,8 +98,9 @@ describe('POST /api/derby/csv', () => {
     );
     const res = await makeRequest({ csv, derbyId: derby.id });
     expect(res.status).toBe(200);
-    const json = await res.json();
-    expect(json.cars.length).toBe(43);
-    expect(json.dens.length).toBe(6);
+    const { dens, cars, heats } = await res.json();
+    expect(cars.length).toBe(43);
+    expect(dens.length).toBe(6);
+    expect(heats.length).toBe(54);
   });
 });
