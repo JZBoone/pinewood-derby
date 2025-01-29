@@ -27,7 +27,7 @@ describe('sortDens', () => {
       },
     ];
 
-    test.only.each(testCases)('$description', ({ input, expected }) => {
+    test.each(testCases)('$description', ({ input, expected }) => {
       const sortedDens = sortDens(input);
       const sortedNames = sortedDens.map((den) => den.name);
       expect(sortedNames).toEqual(expected);
