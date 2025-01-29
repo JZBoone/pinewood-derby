@@ -1,6 +1,8 @@
 import { getHeatById, postTimes } from '@/api-biz/heat';
 import { NextResponse } from 'next/server';
 
+type Time = number | null | 'DNF';
+
 export async function POST(req: Request) {
   const body = await req.json();
 
@@ -15,7 +17,8 @@ export async function POST(req: Request) {
     !Array.isArray(body.times) ||
     body.times.length !== 6 ||
     body.times.some(
-      (time: number | null) => typeof time !== 'number' && time !== null
+      (time: Time) =>
+        typeof time !== 'number' && time !== null && time !== 'DNF'
     )
   ) {
     return NextResponse.json({ error: 'Invalid times' }, { status: 400 });
@@ -27,7 +30,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invalid heat id' }, { status: 400 });
   }
 
-  await postTimes(body.id, body.times);
+  await postTimes(
+    body.id,
+    body.times.map((time: Time) => (time === 'DNF' ? null : time))
+  );
 
   return NextResponse.json({ success: true });
 }
