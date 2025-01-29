@@ -5,6 +5,7 @@ import { useEffect, useState, use, Fragment } from 'react';
 import { get } from 'lodash';
 import { fetchDerbyData, DerbyData } from './derby-data';
 import { CarsList } from '@/client-biz/cars-list';
+import BackButton from '@/client-biz/back-button';
 
 interface Props {
   params: Promise<{
@@ -39,6 +40,7 @@ export default function Derby({ params }: Props) {
 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+      <BackButton></BackButton>
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
         <h1 className="text-2xl font-bold text-center sm:text-left">
           {loading && 'Loading...'}

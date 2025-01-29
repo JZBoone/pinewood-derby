@@ -4,6 +4,7 @@ import { useEffect, useState, use } from 'react';
 import { get } from 'lodash';
 import { fetchHeatsData, HeatsData } from '@/client-biz/heat';
 import { CarsList } from '@/client-biz/cars-list';
+import BackButton from '@/client-biz/back-button';
 
 interface Props {
   params: Promise<{
@@ -47,6 +48,7 @@ export default function Derby({ params }: Props) {
             <HeatGroup key={i} group={group} groupNumber={i + 1} />
           ))}
       </main>
+      <BackButton></BackButton>
     </div>
   );
 }
