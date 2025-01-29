@@ -33,7 +33,7 @@ type LaneNeighborsByLane = {
   [carId: number]: { [lane: number]: LaneNeighbors };
 };
 
-type LaneCar = car['id'] | null;
+export type LaneCar = car['id'] | null;
 
 function bothNeighborsMatch(
   neighbors1: LaneNeighbors,
@@ -46,6 +46,7 @@ function bothNeighborsMatch(
 }
 /**
  * Checks if placing a car in a lane would break a neighbor constraint.
+ * A car cannot have the same left and right neighbors in two different heats.
  */
 export function breaksNeighborConstraint(params: {
   laneCars: LaneCar[];
@@ -93,6 +94,18 @@ export function breaksNeighborConstraint(params: {
           return bothNeighborsMatch(neighbors, updatedRightLaneNeighbors);
         }
       )
+    ) {
+      return true;
+    }
+  }
+  if (leftNeighbor !== null && rightNeighbor !== null) {
+    if (
+      Object.entries(laneNeighborsByLaneMap[car]).some(([lane, neighbors]) => {
+        if (+lane === laneIndex) {
+          return false;
+        }
+        return bothNeighborsMatch(neighbors, [leftNeighbor, rightNeighbor]);
+      })
     ) {
       return true;
     }
@@ -164,44 +177,62 @@ function makeHeatLanesWithConstraints(params: {
       break;
     }
   }
-  // bad luck, try again
-  if (laneCars.filter((laneCar) => laneCar !== null).length !== cars.length) {
-    return makeHeatLanesWithConstraints(params);
-  }
   return laneCars;
 }
 
-async function makeHeatWithContraints(params: {
-  laneNeighborsByLaneMap: LaneNeighborsByLane;
-  cars: car[];
-}): Promise<heat> {
-  const laneCars = makeHeatLanesWithConstraints(params);
-  const { cars } = params;
+// In a sample of 1000 runs for 6 cars, the average attempts was 44 and the max was 357
+const MAX_ATTEMPTS = 1_000;
 
-  const heat = await db.heat.create({
-    data: {
-      created_at: new Date(),
-      den_id: cars[0]!.den_id,
-      lane_1_car_id: laneCars[0],
-      lane_2_car_id: laneCars[1],
-      lane_3_car_id: laneCars[2],
-      lane_4_car_id: laneCars[3],
-      lane_5_car_id: laneCars[4],
-      lane_6_car_id: laneCars[5],
-    },
-  });
-  return heat;
-}
-
-export async function makeHeatsForGroup(cars: car[]): Promise<heat[]> {
-  const heats: heat[] = [];
-  const laneNeighborsByLaneMap: LaneNeighborsByLane = {};
-  cars.forEach((car) => {
-    laneNeighborsByLaneMap[car.id] = {};
-  });
-
-  for (let i = 0; i < lanes.length; i++) {
-    heats.push(await makeHeatWithContraints({ laneNeighborsByLaneMap, cars }));
+export async function makeHeats(
+  cars: car[]
+): Promise<{ heats: heat[]; attempts: number }> {
+  let heatsToCreate: LaneCar[][] = [];
+  let readyToCreate = false;
+  let attempts = 0;
+  while (!readyToCreate) {
+    const laneNeighborsByLaneMap: LaneNeighborsByLane = {};
+    cars.forEach((car) => {
+      laneNeighborsByLaneMap[car.id] = {};
+    });
+    if (attempts > MAX_ATTEMPTS) {
+      throw new Error(
+        `Failed to configure heats after ${MAX_ATTEMPTS} attempts`
+      );
+    }
+    for (let i = 0; i < lanes.length; i++) {
+      const laneCars = makeHeatLanesWithConstraints({
+        laneNeighborsByLaneMap,
+        cars,
+      });
+      if (cars.some((car) => laneCars.indexOf(car.id) === -1)) {
+        // bad luck, try again
+        heatsToCreate = [];
+        attempts++;
+        break;
+      }
+      heatsToCreate.push(laneCars);
+      if (heatsToCreate.length === lanes.length) {
+        readyToCreate = true;
+        break;
+      }
+    }
   }
-  return heats;
+
+  const heats = await Promise.all(
+    heatsToCreate.map((laneCars) =>
+      db.heat.create({
+        data: {
+          created_at: new Date(),
+          den_id: cars[0]!.den_id,
+          lane_1_car_id: laneCars[0],
+          lane_2_car_id: laneCars[1],
+          lane_3_car_id: laneCars[2],
+          lane_4_car_id: laneCars[3],
+          lane_5_car_id: laneCars[4],
+          lane_6_car_id: laneCars[5],
+        },
+      })
+    )
+  );
+  return { heats, attempts };
 }

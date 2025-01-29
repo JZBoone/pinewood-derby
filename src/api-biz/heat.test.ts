@@ -1,5 +1,5 @@
 import { car, heat } from '@prisma/client';
-import { groupCars, Lane, makeHeatsForGroup } from './heat';
+import { groupCars, Lane, LaneCar, makeHeats } from './heat';
 import { db } from './db';
 import { DateTime } from 'luxon';
 
@@ -68,13 +68,54 @@ function carLaneForHeat(heat: heat, car: car): Lane {
   throw new Error('Car not in heat');
 }
 
+function heatNeighbors(heat: heat, car: car): [LaneCar, LaneCar] | [LaneCar] {
+  if (heat.lane_1_car_id === car.id) return [null, heat.lane_2_car_id];
+  if (heat.lane_2_car_id === car.id)
+    return [heat.lane_1_car_id, heat.lane_3_car_id];
+  if (heat.lane_3_car_id === car.id)
+    return [heat.lane_2_car_id, heat.lane_4_car_id];
+  if (heat.lane_4_car_id === car.id)
+    return [heat.lane_3_car_id, heat.lane_5_car_id];
+  if (heat.lane_5_car_id === car.id)
+    return [heat.lane_4_car_id, heat.lane_6_car_id];
+  if (heat.lane_6_car_id === car.id) return [heat.lane_5_car_id, null];
+  throw new Error('Car not in heat');
+}
+
 function validateHeatConstraints(cars: car[], heats: heat[]) {
+  // first validate that each car is in each lane exactly once
   for (const car of cars) {
     const lanes = new Set<Lane>();
     for (const heat of heats) {
       lanes.add(carLaneForHeat(heat, car));
     }
     expect(lanes.size).toBe(6);
+  }
+  // next validate that a car does not have the same left and right neighbors in 2 heats
+  for (const car of cars) {
+    const neighborsByHeat: { [heatId: number]: [LaneCar, LaneCar] } = {};
+    for (const heat of heats) {
+      const neighbors = heatNeighbors(heat, car);
+      if (neighbors.length === 1 || neighbors.includes(null)) {
+        continue;
+      }
+      neighborsByHeat[heat.id] = neighbors;
+    }
+    for (const [heatId1, neighbors1] of Object.entries(neighborsByHeat)) {
+      for (const [heatId2, neighbors2] of Object.entries(neighborsByHeat)) {
+        if (heatId1 === heatId2) {
+          continue;
+        }
+        if (
+          neighbors1[0] === neighbors2[0] &&
+          neighbors1[1] === neighbors2[1]
+        ) {
+          throw new Error(
+            `Car ${car.id} has the same neighbors in heats ${heatId1} and ${heatId2}`
+          );
+        }
+      }
+    }
   }
 }
 
@@ -92,7 +133,7 @@ describe('makeHeatsForGroup', () => {
       )
     );
   }
-  async function setup() {
+  async function setup(params?: { numberOfCars?: number }) {
     const derby = await db.derby.create({
       data: {
         time: DateTime.now().plus({ week: 1 }).toUTC().toISO(),
@@ -103,27 +144,25 @@ describe('makeHeatsForGroup', () => {
     const den = await db.den.create({
       data: { derby_id: derby.id, name: '1' },
     });
-    const cars = await makeCars(den.id, 6);
+    const cars = await makeCars(den.id, params?.numberOfCars ?? 6);
     return { derby, den, cars };
   }
-  it('should create heats for each group', async () => {
-    const { cars, den } = await setup();
-    const heatCounts: number[] = [];
-    let counter = 0;
-    for (let i = 0; i < 100; i++) {
-      counter++;
-      try {
-        const heats = await makeHeatsForGroup(cars);
-        expect(heats.length).toBe(6);
-        validateHeatConstraints(cars, heats);
-        break;
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (e: unknown) {
-        const heats = await db.heat.findMany({ where: { den_id: den.id } });
-        heatCounts.push(heats.length);
-        await db.$executeRaw`TRUNCATE TABLE "heat" RESTART IDENTITY CASCADE`;
-      }
+
+  const testCases: { numberOfCars: number }[] = [
+    { numberOfCars: 2 },
+    { numberOfCars: 3 },
+    { numberOfCars: 4 },
+    { numberOfCars: 5 },
+    { numberOfCars: 6 },
+  ];
+
+  test.each(testCases)(
+    'should create heats for a group of $numberOfCars cars',
+    async ({ numberOfCars }) => {
+      const { cars: cars } = await setup({ numberOfCars });
+      const { heats } = await makeHeats(cars);
+      expect(heats.length).toBe(6);
+      validateHeatConstraints(cars, heats);
     }
-    console.log(`Took ${counter} tries`);
-  });
+  );
 });
