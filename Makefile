@@ -18,8 +18,14 @@ ALL_TESTS := $(shell find ./src -name '*.test.ts')
 
 ##@ Development
 
+.PHONY: db-migrate-dev
+db-migrate-dev: db ## Apply existing migrations to the database
+	@echo "Waiting for the database to be ready..."
+	@until docker exec pinewood-derby-db pg_isready -U testuser; do sleep 1; done
+	npx dotenv -e .env.dev -- npx prisma migrate dev
+
 .PHONY: run
-run: node_modules ## Run the app locally
+run: node_modules db db-migrate-dev ## Run the app locally
 	npm run dev
 
 node_modules: package-lock.json ## Install node modules
@@ -32,25 +38,31 @@ lint: ## Check ESLint for any errors
 ##@ Testing
 
 .PHONY: test
-test: node_modules test-db test-db-migrate ## Run tests
+test: node_modules db db-migrate-test ## Run tests
 	npx dotenv -e .env.test -- npm test
 
 .PRECIOUS: %.test.ts
 %.test.ts: ## Run an individual test with 'make <path to .test.ts>'
-$(ALL_TESTS): node_modules test-db test-db-migrate
+$(ALL_TESTS): node_modules db db-migrate-test
 	@echo "Testing $@..."
 	npx dotenv -e .env.test -- npm test -- $@
 
-.PHONY: test-db
-test-db: ## Start test database
-	docker compose up -d
-
-.PHONY: test-db-clean
-test-db-clean: ## Stop and remove the test database
-	docker compose down
-
-.PHONY: test-db-migrate
-test-db-migrate: test-db ## Apply existing migrations to the database
+.PHONY: db-migrate-test
+db-migrate-test: db ## Apply existing migrations to the database
 	@echo "Waiting for the database to be ready..."
 	@until docker exec pinewood-derby-db pg_isready -U testuser; do sleep 1; done
 	npx dotenv -e .env.test -- npx prisma migrate dev
+
+##@ Local Database
+
+.PHONY: db
+db: ## Start local database
+	docker compose up -d
+
+.PHONY: db-down
+db-down: ## Stop the database
+	docker compose down
+
+.PHONY: db-down-clean
+db-down-clean: ## Stop the database and remove all volumes
+	docker compose down -v
