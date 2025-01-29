@@ -1,5 +1,5 @@
 import { den } from '@prisma/client';
 
-export type GetAllDensResponse = {
+export type GetDensResponse = {
   dens: den[];
 };

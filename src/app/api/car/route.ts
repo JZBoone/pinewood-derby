@@ -1,6 +1,6 @@
-import { getCars } from '@/api-biz/car';
+import { getDerbyCars } from '@/api-biz/car';
 import { getDerbyById } from '@/api-biz/derby';
-import { GetAllCarsResponse } from '@/lib/car';
+import { GetCarsResponse } from '@/lib/car';
 import { NextResponse } from 'next/server';
 
 export async function GET(req: Request) {
@@ -25,7 +25,7 @@ export async function GET(req: Request) {
   if (!derby) {
     return NextResponse.json({ error: 'invalid derby_id' }, { status: 400 });
   }
-  const cars = await getCars(derbyId);
-  const response: GetAllCarsResponse = { cars: cars };
+  const cars = await getDerbyCars(derbyId);
+  const response: GetCarsResponse = { cars: cars };
   return NextResponse.json(response);
 }

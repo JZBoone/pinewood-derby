@@ -19,3 +19,16 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.superlative {
+  font-weight: bold;
+  font-style: italic;
+  text-align: center;
+  color: #ff6347;
+  background: linear-gradient(90deg, #ffdf00, #ff6347, #ff4500);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  border-radius: 8px;
+  padding: 0 8px;
+}

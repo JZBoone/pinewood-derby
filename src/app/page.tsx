@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { derby } from '@prisma/client';
 import { fetchDerbies } from '@/client-biz/derby';
@@ -14,10 +15,9 @@ export default function Home() {
     async function loadDerbies() {
       try {
         const data = await fetchDerbies();
-        console.log(data);
         setDerbies(data);
       } catch (err: unknown) {
-        setError(`Failed to fetch derbies: ${get(err, 'message')}`);
+        setError(`Oh no! Error loading derbies: ${get(err, 'message')}`);
       } finally {
         setLoading(false);
       }
@@ -39,9 +39,12 @@ export default function Home() {
         <ul className="list-inside text-lg text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
           {derbies.map((derby) => (
             <li key={derby.id}>
-              <a href={`/derby/${derby.id}`} className="text-white underline">
+              <Link
+                href={`/derby/${derby.id}`}
+                className="text-white underline"
+              >
                 {formatDate(derby.time.toString())} {derby.location_name}
-              </a>
+              </Link>
             </li>
           ))}
           {loading && <li>Loading...</li>}

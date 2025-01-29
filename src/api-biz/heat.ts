@@ -236,3 +236,7 @@ export async function makeHeats(
   );
   return { heats, attempts };
 }
+
+export async function getHeats(denId: number): Promise<heat[]> {
+  return db.heat.findMany({ where: { den_id: denId } });
+}

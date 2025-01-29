@@ -43,3 +43,7 @@ export async function createDens(params: {
 export async function getDens(derbyId: number): Promise<den[]> {
   return db.den.findMany({ where: { derby_id: derbyId } });
 }
+
+export async function getDenById(id: number) {
+  return db.den.findUnique({ where: { id } });
+}

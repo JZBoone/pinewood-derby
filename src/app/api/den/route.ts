@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDens, sortDens } from '@/api-biz/den';
 import { getDerbyById } from '@/api-biz/derby';
-import { GetAllDensResponse } from '@/lib/den';
+import { GetDensResponse } from '@/lib/den';
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
@@ -26,6 +26,6 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'invalid derby_id' }, { status: 400 });
   }
   const dens = await getDens(derbyId);
-  const response: GetAllDensResponse = { dens: sortDens(dens) };
+  const response: GetDensResponse = { dens: sortDens(dens) };
   return NextResponse.json(response);
 }
