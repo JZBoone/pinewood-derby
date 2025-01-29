@@ -7,7 +7,9 @@ export async function fetchDerbies(): Promise<derby[]> {
   return response.data.derbies;
 }
 
-export async function fetchDerbyById(id: number): Promise<derby | null> {
+export async function fetchDerbyById(
+  id: number | string
+): Promise<derby | null> {
   const response = await axiosClient.get<GetDerbyByIdResponse>(
     `/api/derby/${id}`
   );

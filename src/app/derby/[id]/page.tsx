@@ -2,9 +2,8 @@
 
 import Image from 'next/image';
 import { useEffect, useState, use } from 'react';
-import { derby } from '@prisma/client';
-import { fetchDerbyById } from '@/client-biz/derby';
 import { get } from 'lodash';
+import { fetchDerbyData, DerbyData } from './derby-data';
 
 interface Props {
   params: Promise<{
@@ -14,17 +13,17 @@ interface Props {
 
 export default function Derby({ params }: Props) {
   const resolvedParams = use(params);
-  const [derby, setDerby] = useState<derby | null>(null);
+  const [derbyData, setDerbyData] = useState<DerbyData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadDerbies() {
       try {
-        const data = await fetchDerbyById(Number(resolvedParams.id));
-        setDerby(data);
+        const data = await fetchDerbyData(resolvedParams.id);
+        setDerbyData(data);
       } catch (err: unknown) {
-        setError(`Failed to fetch derbies: ${get(err, 'message')}`);
+        setError(`Oh no! Error loading derby data: ${get(err, 'message')}`);
       } finally {
         setLoading(false);
       }
@@ -42,11 +41,11 @@ export default function Derby({ params }: Props) {
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
         <h1 className="text-4xl font-bold text-center sm:text-left">
           {loading && 'Loading...'}
-          {!loading && !error && !derby && 'Derby not found'}
+          {!loading && !error && !derbyData && 'Derby not found'}
           {error && 'Error loading derby'}
           {!loading &&
-            derby &&
-            `${formatDate(derby.time.toString())} ${derby.location_name}`}
+            derbyData &&
+            `${formatDate(derbyData.derby.time.toString())} ${derbyData.derby.location_name}`}
         </h1>
 
         <div className="flex gap-4 items-center flex-col sm:flex-row">
