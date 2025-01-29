@@ -38,7 +38,7 @@ export async function fetchHeatsData(denId: string | number) {
       heats: _groupHeats,
     });
   }
-  return { groups: groupHeats, den };
+  return { groups: groupHeats, den, cars };
 }
 
 export type HeatsData = Awaited<ReturnType<typeof fetchHeatsData>>;

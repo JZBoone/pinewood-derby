@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useState, use } from 'react';
-import { get } from 'lodash';
+import { get, keyBy } from 'lodash';
 import { fetchHeatsData, HeatsData } from '@/client-biz/heat';
 import { CarsList } from '@/client-biz/cars-list';
 import BackButton from '@/client-biz/back-button';
+import { car, heat } from '@prisma/client';
 
 interface Props {
   params: Promise<{
@@ -45,7 +46,12 @@ export default function Derby({ params }: Props) {
         {!loading &&
           heatsData &&
           heatsData.groups.map((group, i) => (
-            <HeatGroup key={i} group={group} groupNumber={i + 1} />
+            <HeatGroup
+              key={i}
+              group={group}
+              groupNumber={i + 1}
+              carsById={keyBy(heatsData.cars, 'id')}
+            />
           ))}
       </main>
       <BackButton></BackButton>
@@ -56,17 +62,70 @@ export default function Derby({ params }: Props) {
 interface HeatGroupProps {
   group: HeatsData['groups'][number];
   groupNumber: number;
+  carsById: { [carId: number]: car };
 }
 
-function HeatGroup({ group, groupNumber }: HeatGroupProps) {
+function HeatGroup({ group, groupNumber, carsById }: HeatGroupProps) {
   return (
     <div className="mb-4">
       <h2 className="den-name text-2xl font-bold mb-2 mt-4">
         Group {groupNumber}
       </h2>
-      <ul className="cars-list list-none p-0 text-2xl">
+      <ul className="list-none p-0 text-2xl">
         {<CarsList cars={group.cars} />}
       </ul>
+      {group.heats.map((heat, heatIndex) => (
+        <Heat
+          key={heat.id}
+          heat={heat}
+          carsById={carsById}
+          heatNumber={heatIndex + 1}
+        />
+      ))}
+    </div>
+  );
+}
+
+interface HeatProps {
+  heat: heat;
+  heatNumber: number;
+  carsById: { [carId: number]: car };
+}
+
+function Heat({ heat, carsById, heatNumber }: HeatProps) {
+  return (
+    <div className="text-2xl">
+      <h2 className="den-name font-bold mb-2 mt-4">Heat #{heatNumber}</h2>
+      <div>
+        Lane 1:{' '}
+        {heat.lane_1_car_id &&
+          `#${carsById[heat.lane_1_car_id]?.number} - ${carsById[heat.lane_1_car_id]?.owner}`}
+      </div>
+      <div>
+        Lane 2:{' '}
+        {heat.lane_2_car_id &&
+          `#${carsById[heat.lane_2_car_id]?.number} - ${carsById[heat.lane_2_car_id]?.owner}`}
+      </div>
+      <div>
+        Lane 3:{' '}
+        {heat.lane_3_car_id &&
+          `#${carsById[heat.lane_3_car_id]?.number} - ${carsById[heat.lane_3_car_id]?.owner}`}
+      </div>
+      <div>
+        Lane 4:{' '}
+        {heat.lane_4_car_id &&
+          `#${carsById[heat.lane_4_car_id]?.number} - ${carsById[heat.lane_4_car_id]?.owner}`}
+      </div>
+      <div>
+        Lane 5:{' '}
+        {heat.lane_5_car_id &&
+          `#${carsById[heat.lane_5_car_id]?.number} - ${carsById[heat.lane_5_car_id]?.owner}`}
+      </div>
+      <div>
+        Lane 6:{' '}
+        {heat.lane_6_car_id &&
+          `#${carsById[heat.lane_6_car_id]?.number} - ${carsById[heat.lane_6_car_id]?.owner}`}
+      </div>
     </div>
   );
 }
