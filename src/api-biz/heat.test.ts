@@ -149,6 +149,7 @@ describe('makeHeatsForGroup', () => {
   }
 
   const testCases: { numberOfCars: number }[] = [
+    { numberOfCars: 1 },
     { numberOfCars: 2 },
     { numberOfCars: 3 },
     { numberOfCars: 4 },
