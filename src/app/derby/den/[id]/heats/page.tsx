@@ -5,7 +5,7 @@ import { get, keyBy } from 'lodash';
 import { fetchHeatsData, HeatsData } from '@/client-biz/heat';
 import { CarsList } from '@/client-biz/cars-list';
 import BackButton from '@/client-biz/back-button';
-import { car, heat } from '@prisma/client';
+import { car } from '@prisma/client';
 
 interface Props {
   params: Promise<{
@@ -87,12 +87,26 @@ function HeatGroup({ group, groupNumber, carsById }: HeatGroupProps) {
 }
 
 interface HeatProps {
-  heat: heat;
+  heat: HeatsData['groups'][number]['heats'][number];
   heatNumber: number;
   carsById: { [carId: number]: car };
 }
 
 function Heat({ heat, carsById, heatNumber }: HeatProps) {
+  const getWinnerEmoji = (time: number | null) => {
+    return time ===
+      Math.min(
+        heat.lane_1_car_time || Infinity,
+        heat.lane_2_car_time || Infinity,
+        heat.lane_3_car_time || Infinity,
+        heat.lane_4_car_time || Infinity,
+        heat.lane_5_car_time || Infinity,
+        heat.lane_6_car_time || Infinity
+      )
+      ? ' 🏆'
+      : '';
+  };
+
   return (
     <div className="text-2xl">
       <h2
@@ -106,7 +120,11 @@ function Heat({ heat, carsById, heatNumber }: HeatProps) {
         {heat.lane_1_car_id &&
           `#${carsById[heat.lane_1_car_id]?.number} - ${carsById[heat.lane_1_car_id]?.owner}`}
         {heat.lane_1_car_time && (
-          <span className="text-red-500"> - Time: {heat.lane_1_car_time}</span>
+          <span className="text-red-500">
+            {' '}
+            - {heat.lane_1_car_time}
+            {getWinnerEmoji(heat.lane_1_car_time)}
+          </span>
         )}
       </div>
       <div>
@@ -114,7 +132,11 @@ function Heat({ heat, carsById, heatNumber }: HeatProps) {
         {heat.lane_2_car_id &&
           `#${carsById[heat.lane_2_car_id]?.number} - ${carsById[heat.lane_2_car_id]?.owner}`}
         {heat.lane_2_car_time && (
-          <span className="text-red-500"> - Time: {heat.lane_2_car_time}</span>
+          <span className="text-red-500">
+            {' '}
+            - {heat.lane_2_car_time}
+            {getWinnerEmoji(heat.lane_2_car_time)}
+          </span>
         )}
       </div>
       <div>
@@ -122,7 +144,11 @@ function Heat({ heat, carsById, heatNumber }: HeatProps) {
         {heat.lane_3_car_id &&
           `#${carsById[heat.lane_3_car_id]?.number} - ${carsById[heat.lane_3_car_id]?.owner}`}
         {heat.lane_3_car_time && (
-          <span className="text-red-500"> - Time: {heat.lane_3_car_time}</span>
+          <span className="text-red-500">
+            {' '}
+            - {heat.lane_3_car_time}
+            {getWinnerEmoji(heat.lane_3_car_time)}
+          </span>
         )}
       </div>
       <div>
@@ -130,7 +156,11 @@ function Heat({ heat, carsById, heatNumber }: HeatProps) {
         {heat.lane_4_car_id &&
           `#${carsById[heat.lane_4_car_id]?.number} - ${carsById[heat.lane_4_car_id]?.owner}`}
         {heat.lane_4_car_time && (
-          <span className="text-red-500"> - Time: {heat.lane_4_car_time}</span>
+          <span className="text-red-500">
+            {' '}
+            - {heat.lane_4_car_time}
+            {getWinnerEmoji(heat.lane_4_car_time)}
+          </span>
         )}
       </div>
       <div>
@@ -138,7 +168,11 @@ function Heat({ heat, carsById, heatNumber }: HeatProps) {
         {heat.lane_5_car_id &&
           `#${carsById[heat.lane_5_car_id]?.number} - ${carsById[heat.lane_5_car_id]?.owner}`}
         {heat.lane_5_car_time && (
-          <span className="text-red-500"> - Time: {heat.lane_5_car_time}</span>
+          <span className="text-red-500">
+            {' '}
+            - {heat.lane_5_car_time}
+            {getWinnerEmoji(heat.lane_5_car_time)}
+          </span>
         )}
       </div>
       <div>
@@ -146,7 +180,11 @@ function Heat({ heat, carsById, heatNumber }: HeatProps) {
         {heat.lane_6_car_id &&
           `#${carsById[heat.lane_6_car_id]?.number} - ${carsById[heat.lane_6_car_id]?.owner}`}
         {heat.lane_6_car_time && (
-          <span className="text-red-500"> - Time: {heat.lane_6_car_time}</span>
+          <span className="text-red-500">
+            {' '}
+            - {heat.lane_6_car_time}
+            {getWinnerEmoji(heat.lane_6_car_time)}
+          </span>
         )}
       </div>
     </div>

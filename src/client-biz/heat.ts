@@ -16,6 +16,36 @@ function getHeatCars(heat: heat) {
     .sort();
 }
 
+function heatWinner(heat: heat): car['id'] | null {
+  let winner: car['id'] | null = null;
+  let bestTime = Infinity;
+  if (heat.lane_1_car_time && heat.lane_1_car_time < bestTime) {
+    winner = heat.lane_1_car_id;
+    bestTime = heat.lane_1_car_time;
+  }
+  if (heat.lane_2_car_time && heat.lane_2_car_time < bestTime) {
+    winner = heat.lane_2_car_id;
+    bestTime = heat.lane_2_car_time;
+  }
+  if (heat.lane_3_car_time && heat.lane_3_car_time < bestTime) {
+    winner = heat.lane_3_car_id;
+    bestTime = heat.lane_3_car_time;
+  }
+  if (heat.lane_4_car_time && heat.lane_4_car_time < bestTime) {
+    winner = heat.lane_4_car_id;
+    bestTime = heat.lane_4_car_time;
+  }
+  if (heat.lane_5_car_time && heat.lane_5_car_time < bestTime) {
+    winner = heat.lane_5_car_id;
+    bestTime = heat.lane_5_car_time;
+  }
+  if (heat.lane_6_car_time && heat.lane_6_car_time < bestTime) {
+    winner = heat.lane_6_car_id;
+    bestTime = heat.lane_6_car_time;
+  }
+  return winner;
+}
+
 export async function fetchHeatsData(denId: string | number) {
   const response = await axiosClient.get<GetHeatsResponse>(
     `/api/den/heat?den_id=${denId}`
@@ -28,14 +58,17 @@ export async function fetchHeatsData(denId: string | number) {
       groups.push(heatCars);
     }
   }
-  const groupHeats: { cars: car[]; heats: heat[] }[] = [];
+  const groupHeats: {
+    cars: car[];
+    heats: (heat & { winner?: car['id'] | null })[];
+  }[] = [];
   for (const group of groups) {
     const _groupHeats = heats.filter((heat) =>
       isEqual(getHeatCars(heat), group)
     );
     groupHeats.push({
       cars: cars.filter((car) => group.includes(car.id)),
-      heats: _groupHeats,
+      heats: _groupHeats.map((heat) => ({ ...heat, winner: heatWinner(heat) })),
     });
   }
   return { groups: groupHeats, den, cars };

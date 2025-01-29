@@ -240,3 +240,22 @@ export async function makeHeats(
 export async function getHeats(denId: number): Promise<heat[]> {
   return db.heat.findMany({ where: { den_id: denId } });
 }
+
+export async function getHeatById(heatId: heat['id']) {
+  return db.heat.findUnique({ where: { id: heatId } });
+}
+
+export async function postTimes(heatId: heat['id'], times: (number | null)[]) {
+  return db.heat.update({
+    where: { id: heatId },
+    data: {
+      lane_1_car_time: times[0],
+      lane_2_car_time: times[1],
+      lane_3_car_time: times[2],
+      lane_4_car_time: times[3],
+      lane_5_car_time: times[4],
+      lane_6_car_time: times[5],
+      raced_at: new Date(),
+    },
+  });
+}
