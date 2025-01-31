@@ -4,8 +4,12 @@ import { db } from './db';
 /**
  * Sort dens by name. We want the younger dens to go first, so sorting is important.
  */
-export function sortDens<T extends { name: string }>(dens: T[]): T[] {
-  return dens.sort((a, b) => parseInt(a.name) - parseInt(b.name));
+export function sortDens<T extends { sort_order: number | null }>(
+  dens: T[]
+): T[] {
+  return dens.sort(
+    (a, b) => (a.sort_order ?? Infinity) - (b.sort_order ?? Infinity)
+  );
 }
 
 /**

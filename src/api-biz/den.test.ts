@@ -10,20 +10,14 @@ describe('sortDens', () => {
       {
         description: 'should sort dens by name in ascending order',
         input: [
-          { id: 1, name: '102', derby_id: 1 },
-          { id: 2, name: '101', derby_id: 1 },
-          { id: 3, name: '103', derby_id: 1 },
+          { id: 1, name: '6', sort_order: 1, derby_id: 1 },
+          { id: 2, name: '3', sort_order: 2, derby_id: 1 },
+          { id: 3, name: '5', sort_order: 3, derby_id: 1 },
+          { id: 3, name: '8', sort_order: 4, derby_id: 1 },
+          { id: 3, name: '1', sort_order: 5, derby_id: 1 },
+          { id: 3, name: '99', sort_order: null, derby_id: 1 },
         ],
-        expected: ['101', '102', '103'],
-      },
-      {
-        description: 'should handle dens with non-numeric names',
-        input: [
-          { id: 1, name: 'A', derby_id: 1 },
-          { id: 2, name: 'B', derby_id: 1 },
-          { id: 3, name: 'C', derby_id: 1 },
-        ],
-        expected: ['A', 'B', 'C'],
+        expected: ['6', '3', '5', '8', '1', '99'],
       },
     ];
 
