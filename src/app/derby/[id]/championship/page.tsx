@@ -22,24 +22,32 @@ export default function Derby({ params }: Props) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
+    let loadedOnce = false;
     async function loadDerby() {
-      try {
-        const data = await fetchChampionshipData(resolvedParams.id);
-        setChampionshipData(data);
-      } catch (err: unknown) {
-        if (loading) {
-          setError(`Oh no! Error loading championship: ${get(err, 'message')}`);
+      while (mounted) {
+        try {
+          const data = await fetchChampionshipData(resolvedParams.id);
+          setChampionshipData(data);
+        } catch (err: unknown) {
+          if (!loadedOnce) {
+            setError(
+              `Oh no! Error loading championship: ${get(err, 'message')}`
+            );
+          }
+        } finally {
+          loadedOnce = true;
+          setLoading(false);
         }
-      } finally {
-        setLoading(false);
+        await new Promise((resolve) => setTimeout(resolve, 3_000));
       }
     }
 
-    const interval = setInterval(async () => {
-      await loadDerby();
-    }, 3_000);
+    loadDerby();
 
-    return () => clearInterval(interval);
+    return () => {
+      mounted = false;
+    };
   }, [resolvedParams.id]);
 
   function formatDate(date: string) {
