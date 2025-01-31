@@ -20,7 +20,7 @@ export default function Derby({ params }: Props) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function loadDerbies() {
+    async function loadData() {
       try {
         const data = await fetchHeatsData(resolvedParams.id);
         setHeatsData(data);
@@ -31,7 +31,11 @@ export default function Derby({ params }: Props) {
       }
     }
 
-    loadDerbies();
+    const interval = setInterval(async () => {
+      await loadData();
+    }, 1_000);
+
+    return () => clearInterval(interval);
   }, [resolvedParams.id]);
 
   return (
