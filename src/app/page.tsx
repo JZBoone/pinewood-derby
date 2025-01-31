@@ -6,19 +6,30 @@ import { derby } from '@prisma/client';
 import { fetchDerbies } from '@/client-biz/derby';
 import { postFakeTimes } from '@/client-biz/heat';
 import { get } from 'lodash';
+import { makeChampionship } from '@/client-biz/championship';
 
 export default function Home() {
   const [derbies, setDerbies] = useState<derby[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  function handleMakeFakeTimes() {
-    postFakeTimes(derbies[0]?.id)
+  function handleMakeFakeTimesClick(derbyId: derby['id']) {
+    postFakeTimes(derbyId)
       .then(() => {
         alert('Fake times created successfully!');
       })
       .catch((err: unknown) => {
         alert(`Error creating fake times: ${get(err, 'message')}`);
+      });
+  }
+
+  function handleMakeChampionshipClick(derbyId: derby['id']) {
+    makeChampionship(derbyId)
+      .then(() => {
+        alert('Let the championship begin!');
+      })
+      .catch((err: unknown) => {
+        alert(`Error creating championship: ${get(err, 'message')}`);
       });
   }
 
@@ -53,18 +64,27 @@ export default function Home() {
               <Link href={`/derby/${derby.id}`} className="text-2xl underline">
                 {formatDate(derby.time.toString())} {derby.location_name}
               </Link>
+              <button
+                id={`make-championship-${derby.id}`}
+                style={{ display: 'none' }}
+                onClick={() => handleMakeChampionshipClick(derby.id)}
+                className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+              >
+                Make Championship
+              </button>
+              <button
+                id={`fake-times-${derby.id}`}
+                style={{ display: 'none' }}
+                onClick={() => handleMakeFakeTimesClick(derby.id)}
+                className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+              >
+                Fake Times
+              </button>
             </li>
           ))}
           {loading && <li>Loading...</li>}
           {error && <div className="text-red-500">{error}</div>}
         </ul>
-        <button
-          style={{ display: 'none' }}
-          onClick={handleMakeFakeTimes}
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
-        >
-          Make Fake Times
-        </button>
       </main>
     </div>
   );

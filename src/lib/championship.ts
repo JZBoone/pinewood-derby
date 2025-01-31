@@ -7,3 +7,7 @@ export type ChampionshipData = {
   derby: derby;
   dens: den[];
 };
+
+export type MakeChampionShipBody = {
+  derby_id: derby['id'];
+};
