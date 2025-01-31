@@ -15,6 +15,7 @@ export async function fetchDerbyData(derbyId: string | number) {
     throw new Error('Derby not found');
   }
   return {
+    championshipsCreated: heats.some((heat) => heat.den_id === null),
     derby,
     dens: dens.map((den) => {
       return {

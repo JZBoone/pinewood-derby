@@ -42,12 +42,13 @@ model derby {
   time          DateTime @db.Timestamp(6)
   location_name String
   den           den[]
+  heat          heat[]
 }
 
 model heat {
   id                          Int       @id @default(autoincrement())
   created_at                  DateTime  @db.Timestamp(6)
-  den_id                      Int
+  den_id                      Int?
   lane_1_car_id               Int?
   lane_2_car_id               Int?
   lane_3_car_id               Int?
@@ -61,7 +62,9 @@ model heat {
   lane_5_car_time             Int?      @db.SmallInt
   lane_6_car_time             Int?      @db.SmallInt
   raced_at                    DateTime? @db.Timestamp(6)
-  den                         den       @relation(fields: [den_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  derby_id                    Int
+  den                         den?      @relation(fields: [den_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  derby                       derby     @relation(fields: [derby_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   car_heat_lane_1_car_idTocar car?      @relation("heat_lane_1_car_idTocar", fields: [lane_1_car_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   car_heat_lane_2_car_idTocar car?      @relation("heat_lane_2_car_idTocar", fields: [lane_2_car_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   car_heat_lane_3_car_idTocar car?      @relation("heat_lane_3_car_idTocar", fields: [lane_3_car_id], references: [id], onDelete: NoAction, onUpdate: NoAction)

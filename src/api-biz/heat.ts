@@ -1,4 +1,4 @@
-import { car, heat } from '@prisma/client';
+import { car, derby, heat } from '@prisma/client';
 import { shuffle } from 'lodash';
 import { db } from './db';
 
@@ -183,8 +183,13 @@ function makeHeatLanesWithConstraints(params: {
 // In a sample of 1000 runs for 6 cars, the average attempts was 44 and the max was 357
 const MAX_ATTEMPTS = 1_000;
 
+/**
+ * A heat is in the championship if it has no den_id
+ */
 export async function makeHeats(
-  cars: car[]
+  cars: car[],
+  derbyId: derby['id'],
+  championship: boolean = false
 ): Promise<{ heats: heat[]; attempts: number }> {
   let heatsToCreate: LaneCar[][] = [];
   let readyToCreate = false;
@@ -222,8 +227,9 @@ export async function makeHeats(
     heatsToCreate.map((laneCars) =>
       db.heat.create({
         data: {
+          derby_id: derbyId,
           created_at: new Date(),
-          den_id: cars[0]!.den_id,
+          den_id: championship ? null : cars[0]!.den_id,
           lane_1_car_id: laneCars[0],
           lane_2_car_id: laneCars[1],
           lane_3_car_id: laneCars[2],
@@ -238,9 +244,7 @@ export async function makeHeats(
 }
 
 export async function getDerbyHeats(derbyId: number): Promise<heat[]> {
-  const dens = await db.den.findMany({ where: { derby_id: derbyId } });
-  const denIds = dens.map((den) => den.id);
-  return db.heat.findMany({ where: { den_id: { in: denIds } } });
+  return db.heat.findMany({ where: { derby_id: derbyId } });
 }
 
 export async function getDenHeats(denId: number): Promise<heat[]> {

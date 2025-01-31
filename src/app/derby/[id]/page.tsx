@@ -20,7 +20,7 @@ export default function Derby({ params }: Props) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function loadDerbies() {
+    async function loadDerby() {
       try {
         const data = await fetchDerbyData(resolvedParams.id);
         setDerbyData(data);
@@ -34,7 +34,7 @@ export default function Derby({ params }: Props) {
     }
 
     const interval = setInterval(async () => {
-      await loadDerbies();
+      await loadDerby();
     }, 1_000);
 
     return () => clearInterval(interval);
@@ -56,6 +56,14 @@ export default function Derby({ params }: Props) {
             derbyData &&
             `${formatDate(derbyData.derby.time.toString())} ${derbyData.derby.location_name}`}
         </h1>
+        {!loading && derbyData?.championshipsCreated && (
+          <Link
+            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-red-500 text-white gap-2 hover:bg-red-700 text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
+            href={`/derby/${resolvedParams.id}/championships`}
+          >
+            Championships
+          </Link>
+        )}
         {!loading && derbyData && <DensList dens={derbyData.dens} />}
       </main>
     </div>

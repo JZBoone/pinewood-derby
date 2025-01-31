@@ -89,7 +89,7 @@ export async function processCsv(params: {
   for (const den of sortedDens) {
     const groups = groupCars(carsByDen[den.id] || []);
     for (const group of groups) {
-      const { heats: _heats } = await makeHeats(group);
+      const { heats: _heats } = await makeHeats(group, derbyId);
       heats.push(..._heats);
     }
   }

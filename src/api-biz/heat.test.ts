@@ -160,8 +160,8 @@ describe('makeHeatsForGroup', () => {
   test.each(testCases)(
     'should create heats for a group of $numberOfCars cars',
     async ({ numberOfCars }) => {
-      const { cars: cars } = await setup({ numberOfCars });
-      const { heats } = await makeHeats(cars);
+      const { cars: cars, derby } = await setup({ numberOfCars });
+      const { heats } = await makeHeats(cars, derby.id);
       expect(heats.length).toBe(6);
       validateHeatConstraints(cars, heats);
     }

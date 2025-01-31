@@ -10,6 +10,11 @@ export type GetDerbyHeatsResponse = {
   heats: heat[];
 };
 
+export type PostHeatRequestBody = {
+  id: heat['id'];
+  times: (number | null)[];
+};
+
 export function carTime(heat: heat, carId: car['id']): number | null {
   if (heat.lane_1_car_id === carId) {
     return heat.lane_1_car_time;
