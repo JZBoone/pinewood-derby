@@ -70,6 +70,7 @@ export async function fetchDenHeatsData(denId: string | number) {
       cars: cars.filter((car) => group.includes(car.id)),
       heats: _groupHeats
         .map((heat) => ({ ...heat, winner: heatWinner(heat) }))
+        // sort so that the UI doesn't thrash after each poll
         .sort(
           (a, b) =>
             new Date(a.created_at).getTime() - new Date(b.created_at).getTime()

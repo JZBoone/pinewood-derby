@@ -69,6 +69,7 @@ export async function getChampionship(derbyId: derby['id']) {
   const [heats, dens] = await Promise.all([
     db.heat.findMany({
       where: { derby_id: derbyId, den_id: null },
+      orderBy: { created_at: 'asc' },
     }),
     db.den.findMany({ where: { derby_id: derbyId } }),
   ]);
