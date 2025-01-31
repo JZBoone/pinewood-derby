@@ -68,7 +68,12 @@ export async function fetchDenHeatsData(denId: string | number) {
     );
     groupHeats.push({
       cars: cars.filter((car) => group.includes(car.id)),
-      heats: _groupHeats.map((heat) => ({ ...heat, winner: heatWinner(heat) })),
+      heats: _groupHeats
+        .map((heat) => ({ ...heat, winner: heatWinner(heat) }))
+        .sort(
+          (a, b) =>
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        ),
     });
   }
   return { groups: groupHeats, den, cars };
