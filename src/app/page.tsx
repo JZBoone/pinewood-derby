@@ -50,10 +50,7 @@ export default function Home() {
         <ul className="list-inside text-lg text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
           {derbies.map((derby) => (
             <li key={derby.id}>
-              <Link
-                href={`/derby/${derby.id}`}
-                className="text-white underline"
-              >
+              <Link href={`/derby/${derby.id}`} className="text-2xl underline">
                 {formatDate(derby.time.toString())} {derby.location_name}
               </Link>
             </li>
