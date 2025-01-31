@@ -62,6 +62,7 @@ export default function Home() {
           {error && <div className="text-red-500">{error}</div>}
         </ul>
         <button
+          style={{ display: 'none' }}
           onClick={handleMakeFakeTimes}
           className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
         >

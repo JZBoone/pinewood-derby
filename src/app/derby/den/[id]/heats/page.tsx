@@ -36,7 +36,7 @@ export default function Derby({ params }: Props) {
 
     const interval = setInterval(async () => {
       await loadData();
-    }, 1_000);
+    }, 3_000);
 
     return () => clearInterval(interval);
   }, [resolvedParams.id]);
