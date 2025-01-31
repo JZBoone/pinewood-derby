@@ -56,12 +56,12 @@ export default function Derby({ params }: Props) {
             derbyData &&
             `${formatDate(derbyData.derby.time.toString())} ${derbyData.derby.location_name}`}
         </h1>
-        {!loading && derbyData?.championshipsCreated && (
+        {!loading && derbyData?.championshipCreated && (
           <Link
             className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-red-500 text-white gap-2 hover:bg-red-700 text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href={`/derby/${resolvedParams.id}/championships`}
+            href={`/derby/${resolvedParams.id}/championship`}
           >
-            Championships
+            Championship
           </Link>
         )}
         {!loading && derbyData && <DensList dens={derbyData.dens} />}

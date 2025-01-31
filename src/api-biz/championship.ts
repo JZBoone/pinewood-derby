@@ -5,8 +5,8 @@ import { getDerbyHeats, makeHeats } from './heat';
 import { averageTimeForCar } from '@/lib/heat';
 import { carsWithTimes } from '@/lib/car';
 
-export async function makeChampionships(derbyId: derby['id']) {
-  // make this operation idempotent so that you can regenerate the championships
+export async function makeChampionship(derbyId: derby['id']) {
+  // make this operation idempotent so that you can regenerate the championship
   await db.heat.deleteMany({
     where: { derby_id: derbyId, den_id: null },
   });
@@ -65,10 +65,13 @@ function getHeatCars(heats: heat[]): car['id'][] {
   return Array.from(carIds);
 }
 
-export async function getChampionships(derbyId: derby['id']) {
-  const heats = await db.heat.findMany({
-    where: { derby_id: derbyId, den_id: null },
-  });
+export async function getChampionship(derbyId: derby['id']) {
+  const [heats, dens] = await Promise.all([
+    db.heat.findMany({
+      where: { derby_id: derbyId, den_id: null },
+    }),
+    db.den.findMany({ where: { derby_id: derbyId } }),
+  ]);
   const heatCarIds = getHeatCars(heats);
   if (heatCarIds.length === 0) {
     throw new Error('No cars in heats');
@@ -79,5 +82,6 @@ export async function getChampionships(derbyId: derby['id']) {
   return {
     heats,
     cars: carsWithTimes(cars, heats),
+    dens,
   };
 }

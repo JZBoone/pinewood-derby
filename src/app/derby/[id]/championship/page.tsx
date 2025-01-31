@@ -2,9 +2,10 @@
 
 import BackButton from '@/client-biz/back-button';
 import { CarsList } from '@/client-biz/cars-list';
-import { fetchChampionshipsData } from '@/client-biz/championships';
-import { ChampionshipsData } from '@/lib/championships';
-import { get } from 'lodash';
+import { fetchChampionshipData } from '@/client-biz/championship';
+import { Heat } from '@/client-biz/heat-component';
+import { ChampionshipData } from '@/lib/championship';
+import { get, keyBy } from 'lodash';
 import { use, useEffect, useState } from 'react';
 
 interface Props {
@@ -15,21 +16,19 @@ interface Props {
 
 export default function Derby({ params }: Props) {
   const resolvedParams = use(params);
-  const [championshipsData, setChampionshipsData] =
-    useState<ChampionshipsData | null>(null);
+  const [championshipData, setChampionshipData] =
+    useState<ChampionshipData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadDerby() {
       try {
-        const data = await fetchChampionshipsData(resolvedParams.id);
-        setChampionshipsData(data);
+        const data = await fetchChampionshipData(resolvedParams.id);
+        setChampionshipData(data);
       } catch (err: unknown) {
         if (loading) {
-          setError(
-            `Oh no! Error loading championships: ${get(err, 'message')}`
-          );
+          setError(`Oh no! Error loading championship: ${get(err, 'message')}`);
         }
       } finally {
         setLoading(false);
@@ -53,31 +52,45 @@ export default function Derby({ params }: Props) {
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
         <h1 className="text-2xl font-bold text-center sm:text-left">
           {loading && 'Loading...'}
-          {!loading && !error && !championshipsData && 'Derby not found'}
+          {!loading && !error && !championshipData && 'Derby not found'}
           {error && <div className="text-red-600">{error}</div>}
           {!loading &&
-            championshipsData &&
-            `${formatDate(championshipsData.derby.time.toString())} ${championshipsData.derby.location_name}`}
+            championshipData &&
+            `${formatDate(championshipData.derby.time.toString())} ${championshipData.derby.location_name}`}
         </h1>
-        {!loading && championshipsData && (
-          <DenChampions cars={championshipsData.cars} />
+        {!loading && championshipData && (
+          <DenChampions
+            cars={championshipData.cars}
+            dens={championshipData.dens}
+          />
         )}
+        {!loading &&
+          championshipData &&
+          championshipData.heats.map((heat, heatIndex) => (
+            <Heat
+              key={heat.id}
+              heat={heat}
+              carsById={keyBy(championshipData.cars, 'id')}
+              heatNumber={heatIndex + 1}
+            />
+          ))}
       </main>
     </div>
   );
 }
 
 interface DenChampionsProps {
-  cars: ChampionshipsData['cars'];
+  cars: ChampionshipData['cars'];
+  dens: ChampionshipData['dens'];
 }
 
-function DenChampions({ cars }: DenChampionsProps) {
+function DenChampions({ cars, dens }: DenChampionsProps) {
   return (
     <div>
       <div className="den mb-4">
         <h2 className="den-name text-2xl font-bold mb-2 mt-4">Den Champions</h2>
         <ul className="cars-list list-none p-0 text-2xl">
-          {<CarsList cars={cars} />}
+          {<CarsList cars={cars} dens={dens} />}
         </ul>
       </div>
     </div>

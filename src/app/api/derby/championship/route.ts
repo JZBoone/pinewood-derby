@@ -1,6 +1,6 @@
-import { getChampionships, makeChampionships } from '@/api-biz/championship';
+import { getChampionship, makeChampionship } from '@/api-biz/championship';
 import { getDerbyById } from '@/api-biz/derby';
-import { ChampionshipsData } from '@/lib/championships';
+import { ChampionshipData } from '@/lib/championship';
 import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invalid derby_id' }, { status: 400 });
   }
 
-  const heats = await makeChampionships(body.derby_id);
+  const heats = await makeChampionship(body.derby_id);
 
   return NextResponse.json({ heats });
 }
@@ -46,7 +46,7 @@ export async function GET(req: Request) {
   if (!derby) {
     return NextResponse.json({ error: 'invalid derby_id' }, { status: 400 });
   }
-  const { heats, cars } = await getChampionships(derbyId);
-  const response: ChampionshipsData = { cars, heats, derby };
+  const { heats, cars, dens } = await getChampionship(derbyId);
+  const response: ChampionshipData = { cars, heats, derby, dens };
   return NextResponse.json(response);
 }
