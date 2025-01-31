@@ -246,14 +246,14 @@ export async function makeHeats(
 export async function getDerbyHeats(derbyId: number): Promise<heat[]> {
   return db.heat.findMany({
     where: { derby_id: derbyId },
-    orderBy: { created_at: 'asc' },
+    orderBy: { id: 'asc' },
   });
 }
 
 export async function getDenHeats(denId: number): Promise<heat[]> {
   return db.heat.findMany({
     where: { den_id: denId },
-    orderBy: { created_at: 'asc' },
+    orderBy: { id: 'asc' },
   });
 }
 
