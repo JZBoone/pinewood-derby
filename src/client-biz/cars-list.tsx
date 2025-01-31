@@ -25,9 +25,7 @@ export function CarsList({ cars, dens }: CarsListProps) {
           >
             {car.average_time && formatRaceTime(car.average_time)}
           </span>
-          <span className="superlative w-48 text-xl">
-            {car.superlative || ''}
-          </span>
+          <span className="name w-48 text-xl">{car.name || ''}</span>
           {dens && <span className="w-48 text-xl"></span>}
         </li>
       ))}
