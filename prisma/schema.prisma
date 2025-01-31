@@ -63,6 +63,7 @@ model heat {
   lane_6_car_time             Int?      @db.SmallInt
   raced_at                    DateTime? @db.Timestamp(6)
   derby_id                    Int
+  status                      String    @default("inactive")
   den                         den?      @relation(fields: [den_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   derby                       derby     @relation(fields: [derby_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   car_heat_lane_1_car_idTocar car?      @relation("heat_lane_1_car_idTocar", fields: [lane_1_car_id], references: [id], onDelete: NoAction, onUpdate: NoAction)

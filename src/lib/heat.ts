@@ -46,3 +46,8 @@ export function averageTimeForCar(carId: number, heats: heat[]): number | null {
   }
   return carTimes.reduce((sum, time) => sum + time, 0) / carTimes.length;
 }
+
+/**
+ * Only one heat in a derby should be active at a time.
+ */
+export type HeatStatus = 'inactive' | 'active';

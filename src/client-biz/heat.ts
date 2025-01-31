@@ -85,6 +85,16 @@ export async function fetchDerbyHeats(derbyId: string | number) {
   return heats;
 }
 
+export function activateHeat(
+  derbyId: string | number,
+  heatId: string | number
+) {
+  return axiosClient.post(`/api/heat/activate`, {
+    id: heatId,
+    derby_id: derbyId,
+  });
+}
+
 const randomTime = () => Number((Math.random() * 5 + 2).toFixed(3)) * 1000;
 
 export async function postFakeTimes(derbyId: string | number) {

@@ -275,3 +275,18 @@ export async function postTimes(heatId: heat['id'], times: (number | null)[]) {
     },
   });
 }
+
+export async function activate(derbyId: derby['id'], heatId: heat['id']) {
+  await db.heat.updateMany({
+    where: { derby_id: derbyId, id: { not: heatId } },
+    data: {
+      status: 'inactive',
+    },
+  });
+  await db.heat.update({
+    where: { id: heatId },
+    data: {
+      status: 'active',
+    },
+  });
+}

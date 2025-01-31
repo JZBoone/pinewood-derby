@@ -1,4 +1,6 @@
-import { getHeatById, postTimes } from '@/api-biz/heat';
+import { db } from '@/api-biz/db';
+import { getDerbyById } from '@/api-biz/derby';
+import { postTimes } from '@/api-biz/heat';
 import { NextResponse } from 'next/server';
 
 type Time = number | null | 'DNF';
@@ -6,7 +8,7 @@ type Time = number | null | 'DNF';
 export async function POST(req: Request) {
   const body = await req.json();
 
-  if (typeof body.id !== 'number') {
+  if (typeof body.derby_id !== 'number') {
     return NextResponse.json(
       { error: 'Invalid request body' },
       { status: 400 }
@@ -24,14 +26,22 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invalid times' }, { status: 400 });
   }
 
-  const heat = await getHeatById(body.id);
+  const derby = await getDerbyById(body.derby_id);
+
+  if (!derby) {
+    return NextResponse.json({ error: 'Invalid derby_id' }, { status: 400 });
+  }
+
+  const heat = await db.heat.findFirst({
+    where: { derby_id: derby.id, status: 'active' },
+  });
 
   if (!heat) {
-    return NextResponse.json({ error: 'Invalid heat id' }, { status: 400 });
+    return NextResponse.json({ error: 'No active heat' }, { status: 400 });
   }
 
   await postTimes(
-    body.id,
+    heat.id,
     body.times.map((time: Time) => (time === 'DNF' ? null : time))
   );
 

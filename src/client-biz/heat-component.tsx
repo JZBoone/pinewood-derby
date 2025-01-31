@@ -2,6 +2,7 @@
 
 import { car, heat } from '@prisma/client';
 import { formatRaceTime } from '@/client-biz/time';
+import { activateHeat } from './heat';
 
 interface HeatProps {
   heat: heat;
@@ -24,11 +25,19 @@ export function Heat({ heat, carsById, heatNumber }: HeatProps) {
       : '';
   };
 
+  async function handleActivateHeatClick() {
+    await activateHeat(heat.derby_id, heat.id);
+  }
+
   return (
-    <div className="text-2xl">
+    <div
+      className={`text-2xl ${heat.status === 'active' ? 'active-heat' : ''}`}
+      style={{ padding: '1rem' }}
+    >
+      <div></div>
       <h2
         className="den-name font-bold mb-2 mt-4 cursor-pointer"
-        onClick={() => navigator.clipboard.writeText(heat.id.toString())}
+        onDoubleClick={handleActivateHeatClick}
       >
         Heat #{heatNumber}
       </h2>

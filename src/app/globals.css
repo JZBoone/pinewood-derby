@@ -32,3 +32,21 @@ body {
   border-radius: 8px;
   padding: 0 8px;
 }
+
+.active-heat {
+  border: 4px dashed #ff4500;
+  border-radius: 16px;
+  animation: border-dance 1s infinite alternate;
+}
+
+@keyframes border-dance {
+  0% {
+    border-color: #ff4500;
+  }
+  50% {
+    border-color: #ffdf00;
+  }
+  100% {
+    border-color: #ff6347;
+  }
+}
