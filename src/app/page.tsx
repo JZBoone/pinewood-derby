@@ -68,7 +68,7 @@ export default function Home() {
                 id={`make-championship-${derby.id}`}
                 style={{ display: 'none' }}
                 onClick={() => handleMakeChampionshipClick(derby.id)}
-                className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+                className="mt-4 ml-4 px-4 py-2 bg-blue-500 text-white rounded"
               >
                 Make Championship
               </button>
@@ -76,7 +76,7 @@ export default function Home() {
                 id={`fake-times-${derby.id}`}
                 style={{ display: 'none' }}
                 onClick={() => handleMakeFakeTimesClick(derby.id)}
-                className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+                className="mt-4 ml-4 px-4 py-2 bg-blue-500 text-white rounded"
               >
                 Fake Times
               </button>
