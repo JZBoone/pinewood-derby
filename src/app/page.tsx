@@ -4,12 +4,23 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { derby } from '@prisma/client';
 import { fetchDerbies } from '@/client-biz/derby';
+import { postFakeTimes } from '@/client-biz/heat';
 import { get } from 'lodash';
 
 export default function Home() {
   const [derbies, setDerbies] = useState<derby[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  function handleMakeFakeTimes() {
+    postFakeTimes(derbies[0]?.id)
+      .then(() => {
+        alert('Fake times created successfully!');
+      })
+      .catch((err: unknown) => {
+        alert(`Error creating fake times: ${get(err, 'message')}`);
+      });
+  }
 
   useEffect(() => {
     async function loadDerbies() {
@@ -48,8 +59,14 @@ export default function Home() {
             </li>
           ))}
           {loading && <li>Loading...</li>}
-          {error && <li className="text-red-600">{error}</li>}
+          {error && <div className="text-red-600">{error}</div>}
         </ul>
+        <button
+          onClick={handleMakeFakeTimes}
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+        >
+          Make Fake Times
+        </button>
       </main>
     </div>
   );
