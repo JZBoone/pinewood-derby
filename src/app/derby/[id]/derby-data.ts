@@ -2,7 +2,7 @@ import { fetchCars } from '@/client-biz/car';
 import { fetchDens } from '@/client-biz/den';
 import { fetchDerbyById } from '@/client-biz/derby';
 import { fetchDerbyHeats } from '@/client-biz/heat';
-import { averageTimeForCar } from '@/lib/heat';
+import { carsWithTimes } from '@/lib/car';
 
 export async function fetchDerbyData(derbyId: string | number) {
   const [derby, dens, cars, heats] = await Promise.all([
@@ -20,17 +20,10 @@ export async function fetchDerbyData(derbyId: string | number) {
     dens: dens.map((den) => {
       return {
         ...den,
-        cars: cars
-          .filter((car) => car.den_id === den.id)
-          .map((car) => ({
-            ...car,
-            average_time: averageTimeForCar(car.id, heats),
-          }))
-          .sort((a, b) => {
-            if (a.average_time === null) return 1;
-            if (b.average_time === null) return -1;
-            return a.average_time - b.average_time;
-          }),
+        cars: carsWithTimes(
+          cars.filter((car) => car.den_id === den.id),
+          heats
+        ),
       };
     }),
   };

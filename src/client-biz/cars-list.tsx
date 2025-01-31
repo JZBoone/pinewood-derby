@@ -1,6 +1,6 @@
 'use client';
 
-import { CarWithAverageTime } from './car';
+import { CarWithAverageTime } from '@/lib/car';
 import { formatRaceTime } from './time';
 
 interface CarsListProps {

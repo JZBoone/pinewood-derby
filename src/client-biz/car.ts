@@ -8,5 +8,3 @@ export async function fetchCars(derbyId: number | string): Promise<car[]> {
   );
   return response.data.cars;
 }
-
-export type CarWithAverageTime = car & { average_time?: number | null };
