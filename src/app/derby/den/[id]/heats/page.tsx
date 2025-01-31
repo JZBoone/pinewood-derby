@@ -26,7 +26,9 @@ export default function Derby({ params }: Props) {
         const data = await fetchDenHeatsData(resolvedParams.id);
         setHeatsData(data);
       } catch (err: unknown) {
-        setError(`Oh no! Error loading heats: ${get(err, 'message')}`);
+        if (loading) {
+          setError(`Oh no! Error loading heats: ${get(err, 'message')}`);
+        }
       } finally {
         setLoading(false);
       }

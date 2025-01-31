@@ -25,7 +25,9 @@ export default function Derby({ params }: Props) {
         const data = await fetchDerbyData(resolvedParams.id);
         setDerbyData(data);
       } catch (err: unknown) {
-        setError(`Oh no! Error loading derby: ${get(err, 'message')}`);
+        if (loading) {
+          setError(`Oh no! Error loading derby: ${get(err, 'message')}`);
+        }
       } finally {
         setLoading(false);
       }
