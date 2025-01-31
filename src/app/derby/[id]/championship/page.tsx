@@ -53,7 +53,7 @@ export default function Derby({ params }: Props) {
         <h1 className="text-2xl font-bold text-center sm:text-left">
           {loading && 'Loading...'}
           {!loading && !error && !championshipData && 'Derby not found'}
-          {error && <div className="text-red-600">{error}</div>}
+          {error && <div className="text-red-500">{error}</div>}
           {!loading &&
             championshipData &&
             `${formatDate(championshipData.derby.time.toString())} ${championshipData.derby.location_name}`}

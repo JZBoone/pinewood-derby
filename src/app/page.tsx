@@ -59,7 +59,7 @@ export default function Home() {
             </li>
           ))}
           {loading && <li>Loading...</li>}
-          {error && <div className="text-red-600">{error}</div>}
+          {error && <div className="text-red-500">{error}</div>}
         </ul>
         <button
           onClick={handleMakeFakeTimes}
