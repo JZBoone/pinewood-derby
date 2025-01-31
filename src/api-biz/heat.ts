@@ -237,7 +237,13 @@ export async function makeHeats(
   return { heats, attempts };
 }
 
-export async function getHeats(denId: number): Promise<heat[]> {
+export async function getDerbyHeats(derbyId: number): Promise<heat[]> {
+  const dens = await db.den.findMany({ where: { derby_id: derbyId } });
+  const denIds = dens.map((den) => den.id);
+  return db.heat.findMany({ where: { den_id: { in: denIds } } });
+}
+
+export async function getDenHeats(denId: number): Promise<heat[]> {
   return db.heat.findMany({ where: { den_id: denId } });
 }
 

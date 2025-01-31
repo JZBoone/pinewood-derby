@@ -1,4 +1,4 @@
-import { GetHeatsResponse } from '@/lib/heat';
+import { GetDenHeatsResponse, GetDerbyHeatsResponse } from '@/lib/heat';
 import axiosClient from './axios';
 import { car, heat } from '@prisma/client';
 import { isEqual } from 'lodash';
@@ -46,8 +46,8 @@ function heatWinner(heat: heat): car['id'] | null {
   return winner;
 }
 
-export async function fetchHeatsData(denId: string | number) {
-  const response = await axiosClient.get<GetHeatsResponse>(
+export async function fetchDenHeatsData(denId: string | number) {
+  const response = await axiosClient.get<GetDenHeatsResponse>(
     `/api/den/heat?den_id=${denId}`
   );
   const { heats, cars, den } = response.data;
@@ -74,4 +74,13 @@ export async function fetchHeatsData(denId: string | number) {
   return { groups: groupHeats, den, cars };
 }
 
-export type HeatsData = Awaited<ReturnType<typeof fetchHeatsData>>;
+export type DenHeatsData = Awaited<ReturnType<typeof fetchDenHeatsData>>;
+
+export async function fetchDerbyHeats(derbyId: string | number) {
+  const response = await axiosClient.get<GetDerbyHeatsResponse>(
+    `/api/derby/heat?derby_id=${derbyId}`
+  );
+
+  const { heats } = response.data;
+  return heats;
+}

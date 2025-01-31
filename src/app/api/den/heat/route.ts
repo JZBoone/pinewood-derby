@@ -1,7 +1,7 @@
 import { getDenCars } from '@/api-biz/car';
 import { getDenById } from '@/api-biz/den';
-import { getHeats } from '@/api-biz/heat';
-import { GetHeatsResponse } from '@/lib/heat';
+import { getDenHeats } from '@/api-biz/heat';
+import { GetDenHeatsResponse } from '@/lib/heat';
 import { NextResponse } from 'next/server';
 
 export async function GET(req: Request) {
@@ -26,7 +26,10 @@ export async function GET(req: Request) {
   if (!den) {
     return NextResponse.json({ error: 'invalid den_id' }, { status: 400 });
   }
-  const [heats, cars] = await Promise.all([getHeats(denId), getDenCars(denId)]);
-  const response: GetHeatsResponse = { heats: heats, den, cars };
+  const [heats, cars] = await Promise.all([
+    getDenHeats(denId),
+    getDenCars(denId),
+  ]);
+  const response: GetDenHeatsResponse = { heats: heats, den, cars };
   return NextResponse.json(response);
 }

@@ -2,10 +2,11 @@
 
 import { useEffect, useState, use } from 'react';
 import { get, keyBy } from 'lodash';
-import { fetchHeatsData, HeatsData } from '@/client-biz/heat';
+import { fetchDenHeatsData, DenHeatsData } from '@/client-biz/heat';
 import { CarsList } from '@/client-biz/cars-list';
 import BackButton from '@/client-biz/back-button';
 import { car } from '@prisma/client';
+import { formatRaceTime } from '@/client-biz/time';
 
 interface Props {
   params: Promise<{
@@ -15,14 +16,14 @@ interface Props {
 
 export default function Derby({ params }: Props) {
   const resolvedParams = use(params);
-  const [heatsData, setHeatsData] = useState<HeatsData | null>(null);
+  const [heatsData, setHeatsData] = useState<DenHeatsData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadData() {
       try {
-        const data = await fetchHeatsData(resolvedParams.id);
+        const data = await fetchDenHeatsData(resolvedParams.id);
         setHeatsData(data);
       } catch (err: unknown) {
         setError(`Oh no! Error loading heats: ${get(err, 'message')}`);
@@ -64,7 +65,7 @@ export default function Derby({ params }: Props) {
 }
 
 interface HeatGroupProps {
-  group: HeatsData['groups'][number];
+  group: DenHeatsData['groups'][number];
   groupNumber: number;
   carsById: { [carId: number]: car };
 }
@@ -91,7 +92,7 @@ function HeatGroup({ group, groupNumber, carsById }: HeatGroupProps) {
 }
 
 interface HeatProps {
-  heat: HeatsData['groups'][number]['heats'][number];
+  heat: DenHeatsData['groups'][number]['heats'][number];
   heatNumber: number;
   carsById: { [carId: number]: car };
 }
@@ -126,7 +127,7 @@ function Heat({ heat, carsById, heatNumber }: HeatProps) {
         {heat.lane_1_car_time && (
           <span className="text-red-500">
             {' '}
-            - {heat.lane_1_car_time}
+            - {formatRaceTime(heat.lane_1_car_time)}
             {getWinnerEmoji(heat.lane_1_car_time)}
           </span>
         )}
@@ -138,7 +139,7 @@ function Heat({ heat, carsById, heatNumber }: HeatProps) {
         {heat.lane_2_car_time && (
           <span className="text-red-500">
             {' '}
-            - {heat.lane_2_car_time}
+            - {formatRaceTime(heat.lane_2_car_time)}
             {getWinnerEmoji(heat.lane_2_car_time)}
           </span>
         )}
@@ -150,7 +151,7 @@ function Heat({ heat, carsById, heatNumber }: HeatProps) {
         {heat.lane_3_car_time && (
           <span className="text-red-500">
             {' '}
-            - {heat.lane_3_car_time}
+            - {formatRaceTime(heat.lane_3_car_time)}
             {getWinnerEmoji(heat.lane_3_car_time)}
           </span>
         )}
@@ -162,7 +163,7 @@ function Heat({ heat, carsById, heatNumber }: HeatProps) {
         {heat.lane_4_car_time && (
           <span className="text-red-500">
             {' '}
-            - {heat.lane_4_car_time}
+            - {formatRaceTime(heat.lane_4_car_time)}
             {getWinnerEmoji(heat.lane_4_car_time)}
           </span>
         )}
@@ -174,7 +175,7 @@ function Heat({ heat, carsById, heatNumber }: HeatProps) {
         {heat.lane_5_car_time && (
           <span className="text-red-500">
             {' '}
-            - {heat.lane_5_car_time}
+            - {formatRaceTime(heat.lane_5_car_time)}
             {getWinnerEmoji(heat.lane_5_car_time)}
           </span>
         )}
@@ -186,7 +187,7 @@ function Heat({ heat, carsById, heatNumber }: HeatProps) {
         {heat.lane_6_car_time && (
           <span className="text-red-500">
             {' '}
-            - {heat.lane_6_car_time}
+            - {formatRaceTime(heat.lane_6_car_time)}
             {getWinnerEmoji(heat.lane_6_car_time)}
           </span>
         )}

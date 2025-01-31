@@ -31,7 +31,11 @@ export default function Derby({ params }: Props) {
       }
     }
 
-    loadDerbies();
+    const interval = setInterval(async () => {
+      await loadDerbies();
+    }, 1_000);
+
+    return () => clearInterval(interval);
   }, [resolvedParams.id]);
 
   function formatDate(date: string) {
