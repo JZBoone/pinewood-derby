@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState, use, Fragment } from 'react';
 import { get } from 'lodash';
@@ -46,10 +47,6 @@ export default function Derby({ params }: Props) {
     };
   }, [resolvedParams.id]);
 
-  function formatDate(date: string) {
-    return new Date(date).toLocaleDateString();
-  }
-
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <BackButton></BackButton>
@@ -58,9 +55,15 @@ export default function Derby({ params }: Props) {
           {loading && 'Loading...'}
           {!loading && !error && !derbyData && 'Derby not found'}
           {error && <div className="text-red-500">{error}</div>}
-          {!loading &&
-            derbyData &&
-            `${formatDate(derbyData.derby.time.toString())} ${derbyData.derby.location_name}`}
+          {!loading && derbyData && (
+            <Image
+              src={`/logo-${derbyData.derby.id}.png`}
+              alt="WordleGPT logo"
+              width={332}
+              height={272}
+              priority
+            />
+          )}
         </h1>
         {!loading && derbyData?.championshipCreated && (
           <Link
