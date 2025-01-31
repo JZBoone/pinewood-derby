@@ -1,6 +1,6 @@
 ## Setup
 
-You need node.js v20.11.1 installed.
+You need node.js installed (preferably the version specified in the .nvmrc file).
 
 Run `make` to see commands for local development and testing.
 
