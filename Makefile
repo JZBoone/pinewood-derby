@@ -35,6 +35,10 @@ node_modules: package-lock.json ## Install node modules
 lint: ## Check ESLint for any errors
 	npm run lint
 
+.PHONY: build
+build: ## Run production build
+	npm run build
+
 ##@ Testing
 
 .PHONY: test
