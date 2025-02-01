@@ -1,11 +1,11 @@
 'use client';
 
-import { CarWithAverageTime } from '@/lib/car';
+import { CarWithBestTime } from '@/lib/car';
 import { formatRaceTime } from './time';
 import { den } from '@prisma/client';
 
 interface CarsListProps {
-  cars: CarWithAverageTime[];
+  cars: CarWithBestTime[];
   dens?: den[];
 }
 
@@ -23,7 +23,7 @@ export function CarsList({ cars, dens }: CarsListProps) {
             className="average-time w-24 text-xl text-red-500"
             style={{ marginLeft: '8px' }}
           >
-            {car.best_time && formatRaceTime(car.best_time)}
+            {car.best_time && `${formatRaceTime(car.best_time)} ${car.scale_mph}`}
           </span>
           <span className="name w-48 text-xl">{car.name || ''}</span>
           {dens && <span className="w-48 text-xl"></span>}

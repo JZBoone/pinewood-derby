@@ -3,6 +3,7 @@
 import { car, heat } from '@prisma/client';
 import { formatRaceTime } from '@/client-biz/time';
 import { activateHeat } from './heat';
+import { scaleMph } from '@/lib/car';
 
 interface HeatProps {
   heat: heat;
@@ -25,7 +26,9 @@ export function Heat({ heat, carsById, heatNumber }: HeatProps) {
       : '';
   };
 
-  async function handleActivateHeatClick(event: React.MouseEvent<HTMLHeadingElement>) {
+  async function handleActivateHeatClick(
+    event: React.MouseEvent<HTMLHeadingElement>
+  ) {
     if (!event.shiftKey) {
       return;
     }
@@ -51,7 +54,8 @@ export function Heat({ heat, carsById, heatNumber }: HeatProps) {
         {heat.lane_1_car_time && (
           <span className="text-red-500">
             {' '}
-            - {formatRaceTime(heat.lane_1_car_time)}
+            - {formatRaceTime(heat.lane_1_car_time)}{' '}
+            {scaleMph(heat.lane_1_car_time)}
             {getWinnerEmoji(heat.lane_1_car_time)}
           </span>
         )}
@@ -63,7 +67,8 @@ export function Heat({ heat, carsById, heatNumber }: HeatProps) {
         {heat.lane_2_car_time && (
           <span className="text-red-500">
             {' '}
-            - {formatRaceTime(heat.lane_2_car_time)}
+            - {formatRaceTime(heat.lane_2_car_time)}{' '}
+            {scaleMph(heat.lane_2_car_time)}
             {getWinnerEmoji(heat.lane_2_car_time)}
           </span>
         )}
@@ -75,7 +80,8 @@ export function Heat({ heat, carsById, heatNumber }: HeatProps) {
         {heat.lane_3_car_time && (
           <span className="text-red-500">
             {' '}
-            - {formatRaceTime(heat.lane_3_car_time)}
+            - {formatRaceTime(heat.lane_3_car_time)}{' '}
+            {scaleMph(heat.lane_3_car_time)}
             {getWinnerEmoji(heat.lane_3_car_time)}
           </span>
         )}
@@ -87,7 +93,8 @@ export function Heat({ heat, carsById, heatNumber }: HeatProps) {
         {heat.lane_4_car_time && (
           <span className="text-red-500">
             {' '}
-            - {formatRaceTime(heat.lane_4_car_time)}
+            - {formatRaceTime(heat.lane_4_car_time)}{' '}
+            {scaleMph(heat.lane_4_car_time)}
             {getWinnerEmoji(heat.lane_4_car_time)}
           </span>
         )}
@@ -99,7 +106,8 @@ export function Heat({ heat, carsById, heatNumber }: HeatProps) {
         {heat.lane_5_car_time && (
           <span className="text-red-500">
             {' '}
-            - {formatRaceTime(heat.lane_5_car_time)}
+            - {formatRaceTime(heat.lane_5_car_time)}{' '}
+            {scaleMph(heat.lane_5_car_time)}
             {getWinnerEmoji(heat.lane_5_car_time)}
           </span>
         )}
@@ -111,7 +119,8 @@ export function Heat({ heat, carsById, heatNumber }: HeatProps) {
         {heat.lane_6_car_time && (
           <span className="text-red-500">
             {' '}
-            - {formatRaceTime(heat.lane_6_car_time)}
+            - {formatRaceTime(heat.lane_6_car_time)}{' '}
+            {scaleMph(heat.lane_6_car_time)}
             {getWinnerEmoji(heat.lane_6_car_time)}
           </span>
         )}

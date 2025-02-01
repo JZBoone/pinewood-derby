@@ -5,17 +5,26 @@ export type GetCarsResponse = {
   cars: car[];
 };
 
-export type CarWithAverageTime = car & { best_time?: number | null };
+export type CarWithBestTime = car & {
+  best_time?: number | null;
+  scale_mph?: string | null;
+};
 
-export function carsWithTimes(
-  cars: car[],
-  heats: heat[]
-): CarWithAverageTime[] {
+export function scaleMph(milliseconds: number): string {
+  const mph = 596576.4 / milliseconds;
+  return `${mph.toFixed(0)} mph`;
+}
+
+export function carsWithTimes(cars: car[], heats: heat[]): CarWithBestTime[] {
   return cars
-    .map((car) => ({
-      ...car,
-      best_time: bestTimeForCar(car.id, heats),
-    }))
+    .map((car) => {
+      const bestTime = bestTimeForCar(car.id, heats);
+      return {
+        ...car,
+        best_time: bestTime,
+        scale_mph: bestTime ? scaleMph(bestTime) : null,
+      };
+    })
     .sort((a, b) => {
       if (a.best_time === null) return 1;
       if (b.best_time === null) return -1;

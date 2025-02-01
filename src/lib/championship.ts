@@ -1,9 +1,9 @@
 import { den, derby, heat } from '@prisma/client';
-import { CarWithAverageTime } from './car';
+import { CarWithBestTime } from './car';
 
 export type ChampionshipData = {
   heats: heat[];
-  cars: CarWithAverageTime[];
+  cars: CarWithBestTime[];
   derby: derby;
   dens: den[];
 };
