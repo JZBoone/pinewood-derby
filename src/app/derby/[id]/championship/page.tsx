@@ -57,7 +57,7 @@ export default function Derby({ params }: Props) {
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <BackButton></BackButton>
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
+      <main className="flex flex-col gap-8 row-start-2 items-center sm:center">
         <h1 className="text-2xl font-bold text-center sm:text-left">
           {loading && 'Loading...'}
           {!loading && !error && !championshipData && 'Derby not found'}
@@ -94,13 +94,9 @@ interface DenChampionsProps {
 
 function DenChampions({ cars, dens }: DenChampionsProps) {
   return (
-    <div>
-      <div className="den mb-4">
-        <h2 className="den-name text-2xl font-bold mb-2 mt-4">Den Champions</h2>
-        <ul className="cars-list list-none p-0 text-2xl">
-          {<Cars cars={cars} dens={dens} />}
-        </ul>
-      </div>
+    <div className="mb-4">
+      <h2 className="text-2xl font-bold mb-2 mt-4">Den Champions</h2>
+      {<Cars cars={cars} dens={dens} />}
     </div>
   );
 }

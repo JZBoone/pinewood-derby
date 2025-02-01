@@ -32,7 +32,6 @@ export function Cars({ cars, dens }: CarsProps) {
             {car.scale_mph && car.scale_mph}
           </span>
           <span className="name w-48 text-xl">{car.name || ''}</span>
-          {dens && <span className="w-48 text-xl"></span>}
         </li>
       ))}
     </ul>
