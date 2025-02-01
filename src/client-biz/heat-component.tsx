@@ -26,7 +26,7 @@ export function Heat({ heat, carsById, heatNumber }: HeatProps) {
   };
 
   async function handleActivateHeatClick(event: React.MouseEvent<HTMLHeadingElement>) {
-    if (!event.ctrlKey) {
+    if (!event.shiftKey) {
       return;
     }
     await activateHeat(heat.derby_id, heat.id);
