@@ -3,7 +3,7 @@ import { getDerbyById } from '@/api-biz/derby';
 import { postTimes } from '@/api-biz/heat';
 import { NextResponse } from 'next/server';
 
-type Time = number | null | 'DNF';
+type Time = number | null;
 
 export async function POST(req: Request) {
   const body = await req.json();
@@ -18,10 +18,7 @@ export async function POST(req: Request) {
   if (
     !Array.isArray(body.times) ||
     body.times.length !== 6 ||
-    body.times.some(
-      (time: Time) =>
-        typeof time !== 'number' && time !== null && time !== 'DNF'
-    )
+    body.times.some((time: Time) => typeof time !== 'number' && time !== null)
   ) {
     return NextResponse.json({ error: 'Invalid times' }, { status: 400 });
   }
@@ -42,7 +39,7 @@ export async function POST(req: Request) {
 
   await postTimes(
     heat.id,
-    body.times.map((time: Time) => (time === 'DNF' ? null : time))
+    body.times.map((time: Time) => (time === 0 ? null : time))
   );
 
   return NextResponse.json({ success: true });
