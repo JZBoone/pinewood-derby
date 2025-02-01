@@ -1,4 +1,4 @@
-import { car, derby, heat } from '@prisma/client';
+import { car, den, derby, heat } from '@prisma/client';
 import { shuffle } from 'lodash';
 import { db } from './db';
 
@@ -289,4 +289,22 @@ export async function activate(derbyId: derby['id'], heatId: heat['id']) {
       status: 'active',
     },
   });
+}
+
+export async function regenerateHeatsForDen(params: {
+  denId: den['id'];
+  derbyId: den['derby_id'];
+}) {
+  const { denId, derbyId } = params;
+  await db.heat.deleteMany({ where: { den_id: denId } });
+  const cars = await db.car.findMany({
+    where: { den_id: denId },
+  });
+  const { heats } = await makeHeats(cars, derbyId);
+  const groups = groupCars(cars);
+  for (const group of groups) {
+    const { heats: _heats } = await makeHeats(group, derbyId);
+    heats.push(..._heats);
+  }
+  return heats;
 }

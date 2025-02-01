@@ -58,7 +58,7 @@ export default function Derby({ params }: Props) {
           {!loading && derbyData && (
             <Image
               src={`/logo-${derbyData.derby.id}.png`}
-              alt="WordleGPT logo"
+              alt="Derby logo"
               width={332}
               height={272}
               priority
