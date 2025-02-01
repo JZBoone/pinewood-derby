@@ -23,7 +23,7 @@ export function CarsList({ cars, dens }: CarsListProps) {
             className="average-time w-24 text-xl text-red-500"
             style={{ marginLeft: '8px' }}
           >
-            {car.average_time && formatRaceTime(car.average_time)}
+            {car.best_time && formatRaceTime(car.best_time)}
           </span>
           <span className="name w-48 text-xl">{car.name || ''}</span>
           {dens && <span className="w-48 text-xl"></span>}

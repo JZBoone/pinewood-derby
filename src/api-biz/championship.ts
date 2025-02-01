@@ -2,7 +2,7 @@ import { car, derby, heat } from '@prisma/client';
 import { db } from './db';
 import { getDerbyCars } from './car';
 import { getDerbyHeats, makeHeats } from './heat';
-import { averageTimeForCar } from '@/lib/heat';
+import { bestTimeForCar } from '@/lib/heat';
 import { carsWithTimes } from '@/lib/car';
 
 export async function makeChampionship(derbyId: derby['id']) {
@@ -17,12 +17,12 @@ export async function makeChampionship(derbyId: derby['id']) {
   const champions: car['id'][] = [];
   for (const denId of denIds) {
     const denCars = cars.filter((car) => car.den_id === denId);
-    let bestAverageTime = Infinity;
+    let bestTime = Infinity;
     let denChampion: car['id'] | null = null;
     for (const denCar of denCars) {
-      const averageTime = averageTimeForCar(denCar.id, heats);
-      if (averageTime && averageTime < bestAverageTime) {
-        bestAverageTime = averageTime;
+      const carBestTime = bestTimeForCar(denCar.id, heats);
+      if (carBestTime && carBestTime < bestTime) {
+        bestTime = carBestTime;
         denChampion = denCar.id;
       }
     }

@@ -37,14 +37,14 @@ export function carTime(heat: heat, carId: car['id']): number | null {
   return null;
 }
 
-export function averageTimeForCar(carId: number, heats: heat[]): number | null {
+export function bestTimeForCar(carId: number, heats: heat[]): number | null {
   const carTimes = heats
     .map((heat) => carTime(heat, carId))
     .filter((time): time is number => time !== null);
   if (carTimes.length === 0) {
     return null;
   }
-  return carTimes.reduce((sum, time) => sum + time, 0) / carTimes.length;
+  return Math.min(...carTimes);
 }
 
 /**

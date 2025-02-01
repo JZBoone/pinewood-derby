@@ -25,7 +25,10 @@ export function Heat({ heat, carsById, heatNumber }: HeatProps) {
       : '';
   };
 
-  async function handleActivateHeatClick() {
+  async function handleActivateHeatClick(event: React.MouseEvent<HTMLHeadingElement>) {
+    if (!event.ctrlKey) {
+      return;
+    }
     await activateHeat(heat.derby_id, heat.id);
   }
 
@@ -37,7 +40,7 @@ export function Heat({ heat, carsById, heatNumber }: HeatProps) {
       <div></div>
       <h2
         className="den-name font-bold mb-2 mt-4 cursor-pointer"
-        onDoubleClick={handleActivateHeatClick}
+        onClick={(e) => handleActivateHeatClick(e)}
       >
         Heat #{heatNumber}
       </h2>
