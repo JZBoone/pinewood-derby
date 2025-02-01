@@ -11,7 +11,7 @@ export type CarWithBestTime = car & {
 };
 
 export function scaleMph(milliseconds: number): string {
-  // I reverse engineered the math from the 2024 spreadsheet
+  // I reverse engineered the math from a screenshot of the 2024 spreadsheet
   const mph = 596576.4 / milliseconds;
   return `${mph.toFixed(0)} mph`;
 }
