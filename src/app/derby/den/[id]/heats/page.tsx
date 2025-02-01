@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState, use } from 'react';
+import React, { useEffect, useState, use } from 'react';
 import { get, keyBy } from 'lodash';
 import { fetchDenHeatsData, DenHeatsData } from '@/client-biz/heat';
-import { CarsList } from '@/client-biz/cars-list';
-import BackButton from '@/client-biz/back-button';
+import { Cars } from '@/components/cars';
+import BackButton from '@/components/back-button';
 import { car } from '@prisma/client';
-import { Heat } from '@/client-biz/heat-component';
+import { Heat } from '@/components/heat';
 
 interface Props {
   params: Promise<{
@@ -50,22 +50,27 @@ export default function Derby({ params }: Props) {
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <h1 className="text-2xl font-bold text-center sm:text-left">
+        <h1
+          className="text-2xl font-bold text-center sm:text-left"
+          style={{ paddingLeft: '0.75rem' }}
+        >
           {loading && 'Loading...'}
           {!loading && !error && !heatsData && 'Derby not found'}
           {error && 'Error loading derby'}
           {!loading && heatsData && `Den ${heatsData.den.name}`}
         </h1>
-        {!loading &&
-          heatsData &&
-          heatsData.groups.map((group, i) => (
-            <HeatGroup
-              key={i}
-              group={group}
-              groupNumber={i + 1}
-              carsById={keyBy(heatsData.cars, 'id')}
-            />
-          ))}
+        <div className="mb-4">
+          {!loading &&
+            heatsData &&
+            heatsData.groups.map((group, i) => (
+              <HeatGroup
+                key={i}
+                group={group}
+                groupNumber={i + 1}
+                carsById={keyBy(heatsData.cars, 'id')}
+              />
+            ))}
+        </div>
       </main>
       <BackButton></BackButton>
     </div>
@@ -80,13 +85,11 @@ interface HeatGroupProps {
 
 function HeatGroup({ group, groupNumber, carsById }: HeatGroupProps) {
   return (
-    <div className="mb-4">
-      <h2 className="den-name text-2xl font-bold mb-2 mt-4">
-        Group {groupNumber}
-      </h2>
-      <ul className="list-none p-0 text-2xl">
-        {<CarsList cars={group.cars} />}
-      </ul>
+    <React.Fragment>
+      <div className="mb-4" style={{ padding: '0.75rem' }}>
+        <h2 className="text-2xl font-bold mb-2 mt-4">Group {groupNumber}</h2>
+        {<Cars cars={group.cars} />}
+      </div>
       {group.heats.map((heat, heatIndex) => (
         <Heat
           key={heat.id}
@@ -95,6 +98,6 @@ function HeatGroup({ group, groupNumber, carsById }: HeatGroupProps) {
           heatNumber={heatIndex + 1}
         />
       ))}
-    </div>
+    </React.Fragment>
   );
 }

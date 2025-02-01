@@ -100,6 +100,7 @@ const randomTime = () => Number((Math.random() * 5 + 2).toFixed(3)) * 1000;
 export async function postFakeTimes(derbyId: string | number) {
   const heats = await fetchDerbyHeats(derbyId);
   for (const heat of heats) {
+    await activateHeat(derbyId, heat.id);
     const times: (number | null)[] = [];
     times.push(heat.lane_1_car_id ? randomTime() : null);
     times.push(heat.lane_2_car_id ? randomTime() : null);
@@ -108,7 +109,7 @@ export async function postFakeTimes(derbyId: string | number) {
     times.push(heat.lane_5_car_id ? randomTime() : null);
     times.push(heat.lane_6_car_id ? randomTime() : null);
     await axiosClient.post(`/api/heat`, {
-      id: heat.id,
+      derby_id: derbyId,
       times,
     });
   }

@@ -1,9 +1,9 @@
 'use client';
 
-import BackButton from '@/client-biz/back-button';
-import { CarsList } from '@/client-biz/cars-list';
+import BackButton from '@/components/back-button';
+import { Cars } from '@/components/cars';
 import { fetchChampionshipData } from '@/client-biz/championship';
-import { Heat } from '@/client-biz/heat-component';
+import { Heat } from '@/components/heat';
 import { ChampionshipData } from '@/lib/championship';
 import { get, keyBy } from 'lodash';
 import { use, useEffect, useState } from 'react';
@@ -98,7 +98,7 @@ function DenChampions({ cars, dens }: DenChampionsProps) {
       <div className="den mb-4">
         <h2 className="den-name text-2xl font-bold mb-2 mt-4">Den Champions</h2>
         <ul className="cars-list list-none p-0 text-2xl">
-          {<CarsList cars={cars} dens={dens} />}
+          {<Cars cars={cars} dens={dens} />}
         </ul>
       </div>
     </div>

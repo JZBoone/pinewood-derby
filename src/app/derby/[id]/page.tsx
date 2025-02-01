@@ -5,8 +5,8 @@ import Link from 'next/link';
 import { useEffect, useState, use, Fragment } from 'react';
 import { get } from 'lodash';
 import { fetchDerbyData, DerbyData } from './derby-data';
-import { CarsList } from '@/client-biz/cars-list';
-import BackButton from '@/client-biz/back-button';
+import { Cars } from '@/components/cars';
+import BackButton from '@/components/back-button';
 
 interface Props {
   params: Promise<{
@@ -84,28 +84,20 @@ interface DensListProps {
 }
 
 function DensList({ dens }: DensListProps) {
-  return (
-    <div className="dens-list">
-      {dens.map((den) => (
-        <Fragment key={den.id}>
-          <div key={den.id} className="den mb-4">
-            <h2 className="den-name text-2xl font-bold mb-2 mt-4">
-              Den {den.name}
-            </h2>
-            <ul className="cars-list list-none p-0 text-2xl">
-              {<CarsList cars={den.cars} />}
-            </ul>
-          </div>
-          <div className="flex gap-4 items-center flex-col sm:flex-row">
-            <Link
-              className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-              href={`/derby/den/${den.id}/heats`}
-            >
-              Go to Heats
-            </Link>
-          </div>
-        </Fragment>
-      ))}
-    </div>
-  );
+  return dens.map((den) => (
+    <Fragment key={den.id}>
+      <div key={den.id} className="mb-4">
+        <h2 className="text-2xl font-bold mb-2 mt-4">Den {den.name}</h2>
+        {<Cars cars={den.cars} />}
+      </div>
+      <div className="flex gap-4 items-center flex-col sm:flex-row">
+        <Link
+          className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
+          href={`/derby/den/${den.id}/heats`}
+        >
+          Go to Heats
+        </Link>
+      </div>
+    </Fragment>
+  ));
 }
