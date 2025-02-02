@@ -300,7 +300,7 @@ export async function regenerateHeatsForDen(params: {
   const cars = await db.car.findMany({
     where: { den_id: denId },
   });
-  const { heats } = await makeHeats(cars, derbyId);
+  const heats: heat[] = [];
   const groups = groupCars(cars);
   for (const group of groups) {
     const { heats: _heats } = await makeHeats(group, derbyId);
