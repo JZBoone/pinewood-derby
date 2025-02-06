@@ -26,7 +26,7 @@ db-migrate-dev: db ## Apply existing migrations to the database
 
 .PHONY: run
 run: node_modules db db-migrate-dev ## Run the app locally
-	npm run dev
+	npx dotenv -e .env.dev -- npm run dev
 
 node_modules: package-lock.json ## Install node modules
 	npm ci
