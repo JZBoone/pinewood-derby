@@ -1,12 +1,12 @@
-import { NextResponse } from 'next/server';
 import { getDerbyById } from '@/api-biz/derby';
 import { GetDerbyByIdResponse } from '@/lib/derby';
+import { NextResponse } from 'next/server';
 
 export async function GET(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const id = parseInt((await params).id);
+  const id = parseInt(params.id);
   if (isNaN(id)) {
     return NextResponse.json({ error: 'Invalid id' }, { status: 400 });
   }

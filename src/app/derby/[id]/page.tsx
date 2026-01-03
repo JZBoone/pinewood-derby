@@ -1,21 +1,20 @@
 'use client';
 
+import BackButton from '@/components/back-button';
+import { Cars } from '@/components/cars';
+import { get } from 'lodash';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState, use, Fragment } from 'react';
-import { get } from 'lodash';
-import { fetchDerbyData, DerbyData } from './derby-data';
-import { Cars } from '@/components/cars';
-import BackButton from '@/components/back-button';
+import { Fragment, useEffect, useState } from 'react';
+import { DerbyData, fetchDerbyData } from './derby-data';
 
 interface Props {
-  params: Promise<{
+  params: {
     id: string;
-  }>;
+  };
 }
 
 export default function Derby({ params }: Props) {
-  const resolvedParams = use(params);
   const [derbyData, setDerbyData] = useState<DerbyData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,7 +25,7 @@ export default function Derby({ params }: Props) {
     async function loadDerby() {
       while (mounted) {
         try {
-          const data = await fetchDerbyData(resolvedParams.id);
+          const data = await fetchDerbyData(params.id);
           setDerbyData(data);
         } catch (err: unknown) {
           if (!loadedOnce) {
@@ -45,7 +44,7 @@ export default function Derby({ params }: Props) {
     return () => {
       mounted = false;
     };
-  }, [resolvedParams.id]);
+  }, [params.id]);
 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">

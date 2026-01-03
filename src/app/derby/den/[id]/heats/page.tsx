@@ -1,21 +1,20 @@
 'use client';
 
-import React, { useEffect, useState, use } from 'react';
-import { get, keyBy } from 'lodash';
-import { fetchDenHeatsData, DenHeatsData } from '@/client-biz/heat';
-import { Cars } from '@/components/cars';
+import { DenHeatsData, fetchDenHeatsData } from '@/client-biz/heat';
 import BackButton from '@/components/back-button';
-import { car } from '@prisma/client';
+import { Cars } from '@/components/cars';
 import { Heat } from '@/components/heat';
+import { car } from '@prisma/client';
+import { get, keyBy } from 'lodash';
+import React, { useEffect, useState } from 'react';
 
 interface Props {
-  params: Promise<{
+  params: {
     id: string;
-  }>;
+  };
 }
 
 export default function Derby({ params }: Props) {
-  const resolvedParams = use(params);
   const [heatsData, setHeatsData] = useState<DenHeatsData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,7 +25,7 @@ export default function Derby({ params }: Props) {
     async function loadData() {
       while (mounted) {
         try {
-          const data = await fetchDenHeatsData(resolvedParams.id);
+          const data = await fetchDenHeatsData(params.id);
           setHeatsData(data);
         } catch (err: unknown) {
           if (!loadedOnce) {
@@ -45,7 +44,7 @@ export default function Derby({ params }: Props) {
     return () => {
       mounted = false;
     };
-  }, [resolvedParams.id]);
+  }, [params.id]);
 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
