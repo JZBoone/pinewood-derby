@@ -1,20 +1,21 @@
 'use client';
 
-import { fetchChampionshipData } from '@/client-biz/championship';
 import BackButton from '@/components/back-button';
 import { Cars } from '@/components/cars';
+import { fetchChampionshipData } from '@/client-biz/championship';
 import { Heat } from '@/components/heat';
 import { ChampionshipData } from '@/lib/championship';
 import { get, keyBy } from 'lodash';
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 
 interface Props {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default function Derby({ params }: Props) {
+  const resolvedParams = use(params);
   const [championshipData, setChampionshipData] =
     useState<ChampionshipData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +27,7 @@ export default function Derby({ params }: Props) {
     async function loadDerby() {
       while (mounted) {
         try {
-          const data = await fetchChampionshipData(params.id);
+          const data = await fetchChampionshipData(resolvedParams.id);
           setChampionshipData(data);
         } catch (err: unknown) {
           if (!loadedOnce) {
