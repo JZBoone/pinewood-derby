@@ -20,6 +20,8 @@
 # production
 /build
 
+/prisma/generated/
+
 # misc
 .DS_Store
 *.pem
