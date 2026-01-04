@@ -1,12 +1,17 @@
+import { validateCsv } from '@/api-biz/csv';
+import { db } from '@/api-biz/db';
+import { nowIsoString } from '@/lib/util';
 import { readFileSync } from 'fs';
+import { DateTime } from 'luxon';
 import path from 'path';
+import { fileURLToPath } from 'url';
+import { derby } from '../../../../../prisma/generated/prisma/client';
 import { mappedCsv, parsedCsv } from './pinewood-derby-2024';
 import { POST } from './route';
-import { validateCsv } from '@/api-biz/csv';
-import { derby } from '@prisma/client';
-import { db } from '@/api-biz/db';
-import { DateTime } from 'luxon';
-import { nowIsoString } from '@/lib/util';
+
+// 2. Recreate __dirname for ESM context
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 describe('validateCsv', () => {
   test('it maps parsed records', () => {

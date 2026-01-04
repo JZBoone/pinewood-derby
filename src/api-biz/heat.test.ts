@@ -1,7 +1,7 @@
-import { car, heat } from '@prisma/client';
-import { groupCars, Lane, LaneCar, makeHeats } from './heat';
-import { db } from './db';
 import { DateTime } from 'luxon';
+import { car, heat } from '../../prisma/generated/prisma/client';
+import { db } from './db';
+import { groupCars, Lane, LaneCar, makeHeats } from './heat';
 
 function makeCars(count: number): car[] {
   const cars: car[] = [];

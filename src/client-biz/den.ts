@@ -1,5 +1,5 @@
 import { GetDensResponse } from '@/lib/den';
-import { den } from '@prisma/client';
+import { den } from '../../prisma/generated/prisma/client';
 import axiosClient from './axios';
 
 export async function fetchDens(derbyId: number | string): Promise<den[]> {

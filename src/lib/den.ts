@@ -1,4 +1,4 @@
-import { den } from '@prisma/client';
+import { den } from '../../prisma/generated/prisma/client';
 
 export type GetDensResponse = {
   dens: den[];

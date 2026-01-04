@@ -1,7 +1,7 @@
 import { GetDenHeatsResponse, GetDerbyHeatsResponse } from '@/lib/heat';
-import axiosClient from './axios';
-import { car, heat } from '@prisma/client';
 import { isEqual } from 'lodash';
+import { car, heat } from '../../prisma/generated/prisma/client';
+import axiosClient from './axios';
 
 function getHeatCars(heat: heat) {
   return [

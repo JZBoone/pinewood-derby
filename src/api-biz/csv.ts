@@ -1,8 +1,8 @@
 import { get, groupBy } from 'lodash';
-import { createDens, sortDens } from './den';
+import { heat } from '../../prisma/generated/prisma/client';
 import { createCars } from './car';
+import { createDens, sortDens } from './den';
 import { groupCars, makeHeats } from './heat';
-import { heat } from '@prisma/client';
 
 export type DeserializedCsvRecord = {
   carNumber: number;

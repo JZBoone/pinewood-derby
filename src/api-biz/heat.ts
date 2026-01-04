@@ -1,5 +1,5 @@
-import { car, den, derby, heat } from '@prisma/client';
 import { shuffle } from 'lodash';
+import { car, den, derby, heat } from '../../prisma/generated/prisma/client';
 import { db } from './db';
 
 /**

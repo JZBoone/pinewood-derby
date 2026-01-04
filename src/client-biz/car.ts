@@ -1,6 +1,6 @@
-import axiosClient from './axios';
-import { car } from '@prisma/client';
 import { GetCarsResponse } from '@/lib/car';
+import { car } from '../../prisma/generated/prisma/client';
+import axiosClient from './axios';
 
 export async function fetchCars(derbyId: number | string): Promise<car[]> {
   const response = await axiosClient.get<GetCarsResponse>(
