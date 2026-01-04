@@ -1,9 +1,9 @@
 'use client';
 
-import { car, heat } from '@prisma/client';
-import { formatRaceTime } from '@/client-biz/time';
 import { activateHeat } from '@/client-biz/heat';
+import { formatRaceTime } from '@/client-biz/time';
 import { scaleMph } from '@/lib/car';
+import { car, heat } from '@generated/client';
 import React from 'react';
 
 interface HeatProps {

@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useEffect, useState, use } from 'react';
-import { get, keyBy } from 'lodash';
-import { fetchDenHeatsData, DenHeatsData } from '@/client-biz/heat';
-import { Cars } from '@/components/cars';
+import { DenHeatsData, fetchDenHeatsData } from '@/client-biz/heat';
 import BackButton from '@/components/back-button';
-import { car } from '@prisma/client';
+import { Cars } from '@/components/cars';
 import { Heat } from '@/components/heat';
+import { car } from '@generated/client';
+import { get, keyBy } from 'lodash';
+import React, { use, useEffect, useState } from 'react';
 
 interface Props {
   params: Promise<{

@@ -1,5 +1,5 @@
-import { car, heat } from '@prisma/client';
-import { bestTimeForCar as bestTimeForCar } from './heat';
+import { car, heat } from '@generated/client';
+import { bestTimeForCar } from './heat';
 
 export type GetCarsResponse = {
   cars: car[];

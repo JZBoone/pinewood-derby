@@ -1,6 +1,6 @@
-import { car } from '@prisma/client';
-import { db } from './db';
+import { car } from '@generated/client';
 import { DeserializedCsvRecord } from './csv';
+import { db } from './db';
 
 /**
  * not idempotent!

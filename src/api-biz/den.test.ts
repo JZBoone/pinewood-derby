@@ -1,8 +1,8 @@
-import { derby } from '@prisma/client';
-import { createDens, sortDens } from './den';
-import { db } from './db';
-import { DateTime } from 'luxon';
 import { nowIsoString } from '@/lib/util';
+import { derby } from '@generated/client';
+import { DateTime } from 'luxon';
+import { db } from './db';
+import { createDens, sortDens } from './den';
 
 describe('sortDens', () => {
   describe('sortDens', () => {

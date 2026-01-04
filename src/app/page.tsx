@@ -1,12 +1,12 @@
 'use client';
 
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { derby } from '@prisma/client';
+import { makeChampionship } from '@/client-biz/championship';
 import { fetchDerbies } from '@/client-biz/derby';
 import { postFakeTimes } from '@/client-biz/heat';
+import { derby } from '@generated/client';
 import { get } from 'lodash';
-import { makeChampionship } from '@/client-biz/championship';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 export default function Home() {
   const [derbies, setDerbies] = useState<derby[]>([]);

@@ -1,4 +1,4 @@
-import { den } from '@prisma/client';
+import { den } from '@generated/client';
 import { db } from './db';
 
 /**

@@ -1,4 +1,4 @@
-import { den, derby, heat } from '@prisma/client';
+import { den, derby, heat } from '@generated/client';
 import { CarWithBestTime } from './car';
 
 export type ChampionshipData = {

@@ -1,9 +1,9 @@
-import { car, derby, heat } from '@prisma/client';
-import { db } from './db';
-import { getDerbyCars } from './car';
-import { getDerbyHeats, makeHeats } from './heat';
-import { bestTimeForCar } from '@/lib/heat';
 import { carsWithTimes } from '@/lib/car';
+import { bestTimeForCar } from '@/lib/heat';
+import { car, derby, heat } from '@generated/client';
+import { getDerbyCars } from './car';
+import { db } from './db';
+import { getDerbyHeats, makeHeats } from './heat';
 
 export async function makeChampionship(derbyId: derby['id']) {
   // make this operation idempotent so that you can regenerate the championship
