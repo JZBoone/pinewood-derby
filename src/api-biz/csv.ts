@@ -1,5 +1,5 @@
+import { heat } from '@generated/client';
 import { get, groupBy } from 'lodash';
-import { heat } from '../../prisma/generated/prisma/client';
 import { createCars } from './car';
 import { createDens, sortDens } from './den';
 import { groupCars, makeHeats } from './heat';

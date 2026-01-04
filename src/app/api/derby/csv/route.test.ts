@@ -1,11 +1,11 @@
 import { validateCsv } from '@/api-biz/csv';
 import { db } from '@/api-biz/db';
 import { nowIsoString } from '@/lib/util';
+import { derby } from '@generated/client';
 import { readFileSync } from 'fs';
 import { DateTime } from 'luxon';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { derby } from '../../../../../prisma/generated/prisma/client';
 import { mappedCsv, parsedCsv } from './pinewood-derby-2024';
 import { POST } from './route';
 

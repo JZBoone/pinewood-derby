@@ -3,8 +3,8 @@
 import { activateHeat } from '@/client-biz/heat';
 import { formatRaceTime } from '@/client-biz/time';
 import { scaleMph } from '@/lib/car';
+import { car, heat } from '@generated/client';
 import React from 'react';
-import { car, heat } from '../../prisma/generated/prisma/client';
 
 interface HeatProps {
   heat: heat;

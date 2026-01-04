@@ -1,4 +1,4 @@
-import { car, den, heat } from '../../prisma/generated/prisma/client';
+import { car, den, heat } from '@generated/client';
 
 export type GetDenHeatsResponse = {
   heats: heat[];

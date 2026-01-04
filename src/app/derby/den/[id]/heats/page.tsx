@@ -4,9 +4,9 @@ import { DenHeatsData, fetchDenHeatsData } from '@/client-biz/heat';
 import BackButton from '@/components/back-button';
 import { Cars } from '@/components/cars';
 import { Heat } from '@/components/heat';
+import { car } from '@generated/client';
 import { get, keyBy } from 'lodash';
 import React, { use, useEffect, useState } from 'react';
-import { car } from '../../../../../../prisma/generated/prisma/client';
 
 interface Props {
   params: Promise<{

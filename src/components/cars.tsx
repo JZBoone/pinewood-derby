@@ -2,7 +2,7 @@
 
 import { formatRaceTime } from '@/client-biz/time';
 import { CarWithBestTime } from '@/lib/car';
-import { den } from '../../prisma/generated/prisma/client';
+import { den } from '@generated/client';
 
 interface CarsProps {
   cars: CarWithBestTime[];

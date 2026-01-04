@@ -1,5 +1,5 @@
 import { GetDerbiesResponse, GetDerbyByIdResponse } from '@/lib/derby';
-import { derby } from '../../prisma/generated/prisma/client';
+import { derby } from '@generated/client';
 import axiosClient from './axios';
 
 export async function fetchDerbies(): Promise<derby[]> {

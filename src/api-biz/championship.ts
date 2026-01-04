@@ -1,6 +1,6 @@
 import { carsWithTimes } from '@/lib/car';
 import { bestTimeForCar } from '@/lib/heat';
-import { car, derby, heat } from '../../prisma/generated/prisma/client';
+import { car, derby, heat } from '@generated/client';
 import { getDerbyCars } from './car';
 import { db } from './db';
 import { getDerbyHeats, makeHeats } from './heat';

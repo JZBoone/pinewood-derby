@@ -1,6 +1,6 @@
 import { nowIsoString } from '@/lib/util';
+import { derby } from '@generated/client';
 import { DateTime } from 'luxon';
-import { derby } from '../../prisma/generated/prisma/client';
 import { db } from './db';
 import { createDens, sortDens } from './den';
 

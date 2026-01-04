@@ -1,4 +1,4 @@
-import { car, heat } from '../../prisma/generated/prisma/client';
+import { car, heat } from '@generated/client';
 import { bestTimeForCar } from './heat';
 
 export type GetCarsResponse = {

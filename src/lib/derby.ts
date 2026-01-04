@@ -1,4 +1,4 @@
-import { derby } from '../../prisma/generated/prisma/client';
+import { derby } from '@generated/client';
 
 export type GetDerbiesResponse = {
   derbies: derby[];

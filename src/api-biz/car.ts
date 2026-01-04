@@ -1,4 +1,4 @@
-import { car } from '../../prisma/generated/prisma/client';
+import { car } from '@generated/client';
 import { DeserializedCsvRecord } from './csv';
 import { db } from './db';
 
