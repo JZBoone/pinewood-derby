@@ -1,9 +1,9 @@
-import { createCars } from './car';
-import { db } from './db';
-import { DeserializedCsvRecord } from './csv';
-import { DateTime } from 'luxon';
 import { nowIsoString } from '@/lib/util';
 import { pick } from 'lodash';
+import { DateTime } from 'luxon';
+import { createCars, deleteCar } from './car';
+import { DeserializedCsvRecord } from './csv';
+import { db } from './db';
 
 async function createDerby() {
   return db.derby.create({
@@ -79,5 +79,38 @@ describe('createCars', () => {
     await expect(createCars({ derbyId: derby.id, records })).rejects.toThrow(
       'One or more cars references a den that does not exist'
     );
+  });
+});
+
+describe('deleteCar', () => {
+  it('should delete a car and associated heats successfully', async () => {
+    const { derby } = await setup();
+    const den = await db.den.create({
+      data: { derby_id: derby.id, name: '3' },
+    });
+    const car = await db.car.create({
+      data: {
+        den_id: den.id,
+        number: 103,
+        name: 'The Annihilator',
+        owner: 'Dr. Doom',
+      },
+    });
+
+    const heat = await db.heat.create({
+      data: {
+        derby_id: derby.id,
+        lane_1_car_id: car.id,
+        created_at: new Date(),
+      },
+    });
+
+    await deleteCar(car.id);
+
+    const deletedCar = await db.car.findUnique({ where: { id: car.id } });
+    expect(deletedCar).toBeNull();
+
+    const deletedHeat = await db.heat.findUnique({ where: { id: heat.id } });
+    expect(deletedHeat).toBeNull();
   });
 });
