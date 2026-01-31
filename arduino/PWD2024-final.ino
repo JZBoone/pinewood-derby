@@ -157,9 +157,9 @@ void launchGate(){
 }
 
 void runRace(){
-  // while (digitalRead(8) == 1){
-  //   Serial.println("Waiting for gate to set");
-  // }
+  while (digitalRead(8) == 1){
+    Serial.println("Waiting for gate to set");
+  }
 
   prepRace();
   lightCount(-1);
