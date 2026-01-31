@@ -38,6 +38,42 @@ export async function createCars(params: {
 }
 
 /**
+ * not idempotent!
+ */
+export async function createCar(params: {
+  denId: number;
+  carNumber: number;
+  carName?: string;
+  owner: string;
+}): Promise<{ success: true; car: car } | { success: false; error: string }> {
+  const { denId, carNumber, carName, owner } = params;
+
+  const existingCar = await db.car.findFirst({
+    where: {
+      den_id: denId,
+      number: carNumber,
+    },
+  });
+
+  if (existingCar) {
+    return {
+      success: false,
+      error: 'Car with this number already exists in this den',
+    };
+  }
+
+  const car = await db.car.create({
+    data: {
+      den_id: denId,
+      number: carNumber,
+      name: carName,
+      owner: owner,
+    },
+  });
+  return { success: true, car };
+}
+
+/**
  * Get all cars for a derby
  */
 export async function getDerbyCars(derbyId: number): Promise<car[]> {
