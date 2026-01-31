@@ -1,4 +1,4 @@
-import { createCar, getDerbyCars } from '@/api-biz/car';
+import { createCar, deleteCar, getDerbyCars } from '@/api-biz/car';
 import { getDerbyById } from '@/api-biz/derby';
 import { GetCarsResponse } from '@/lib/car';
 import { NextResponse } from 'next/server';
@@ -33,23 +33,47 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const { denId, carNumber, carName, owner } = await req.json();
 
-    if (!denId || !carNumber || !owner) {
-      return NextResponse.json(
-        { error: 'denId, carNumber, and owner are required' },
-        { status: 400 }
-      );
-    }
+  if (!denId || !carNumber || !owner) {
+    return NextResponse.json(
+      { error: 'denId, carNumber, and owner are required' },
+      { status: 400 }
+    );
+  }
 
-    const result = await createCar({
-      denId,
-      carNumber,
-      carName,
-      owner,
-    });
+  const result = await createCar({
+    denId,
+    carNumber,
+    carName,
+    owner,
+  });
 
-    if (!result.success) {
-      return NextResponse.json({ error: result.error }, { status: 409 });
-    }
+  if (!result.success) {
+    return NextResponse.json({ error: result.error }, { status: 409 });
+  }
 
-    return NextResponse.json(result.car, { status: 201 });
+  return NextResponse.json(result.car, { status: 201 });
+}
+
+export async function DELETE(req: Request) {
+  const url = new URL(req.url);
+  const carIdRaw = url.searchParams.get('id');
+
+  if (!carIdRaw) {
+    return NextResponse.json(
+      { error: 'id query parameter is required' },
+      { status: 400 }
+    );
+  }
+  const carId = Number(carIdRaw);
+
+  if (isNaN(carId)) {
+    return NextResponse.json(
+      { error: 'id must be a valid number' },
+      { status: 400 }
+    );
+  }
+
+  await deleteCar(carId);
+
+  return new Response(null, { status: 204 });
 }

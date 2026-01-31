@@ -74,6 +74,27 @@ export async function createCar(params: {
 }
 
 /**
+ * Deletes a car.
+ */
+export async function deleteCar(carId: number): Promise<void> {
+  await db.$transaction([
+    db.heat.deleteMany({
+      where: {
+        OR: [
+          { lane_1_car_id: carId },
+          { lane_2_car_id: carId },
+          { lane_3_car_id: carId },
+          { lane_4_car_id: carId },
+          { lane_5_car_id: carId },
+          { lane_6_car_id: carId },
+        ],
+      },
+    }),
+    db.car.delete({ where: { id: carId } }),
+  ]);
+}
+
+/**
  * Get all cars for a derby
  */
 export async function getDerbyCars(derbyId: number): Promise<car[]> {
