@@ -32,7 +32,7 @@ describe('POST /api/derby', () => {
     });
 
     const res = await POST(request);
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(201);
     const json = await res.json();
     expect(json.id).toBeDefined();
     expect(json.created_at).toBeDefined();
