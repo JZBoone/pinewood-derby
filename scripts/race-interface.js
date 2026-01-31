@@ -3,8 +3,8 @@ import axios from 'axios';
 import { createInterface } from 'readline';
 import { SerialPort } from 'serialport';
 
-const DERBY_ID = 1;
-const API_URL = 'http://localhost:3000/api/heat';
+const DERBY_ID = 3;
+const API_URL = 'https://pinewood-derby.vercel.app/api/heat';
 const SERIAL_PORT_PATH = 'COM4'; 
 const BAUD_RATE = 9600;
 
