@@ -29,12 +29,12 @@ run: node_modules db db-migrate-dev ## Run the app locally
 	npx dotenv -e .env.dev -- npm run dev
 
 .PHONY: race-interface
-race: ## Connect to the arduino via Node.js script. Edit consts in scripts\race-interface.js to control where times are saved. I ran this from PowerShell (not Linux / Mac env)
+race-interface: ## Connect to the arduino via Node.js script. Edit consts in scripts\race-interface.js to control where times are saved. I ran this from PowerShell (not Linux / Mac env)
 	node ./scripts/race-interface.js
 
-.PHONY exhaust-db-connections
+.PHONY: exhaust-db-connections
 exhaust-db-connections: ## Run script to test exhaustion of DB connections
-	npx dotenv -e .env.dev -- npx tsx ./scripts/reproduce-db-limit.js
+	npx dotenv -e .env.dev -- npx tsx ./scripts/exhaust-db-connections.js
 
 node_modules: package-lock.json ## Install node modules
 	npm ci
