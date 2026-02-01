@@ -1,12 +1,10 @@
-// Run this with: npx tsx reproduce-db-limit.js
-// Make sure your .env has the original Session Mode connection string (Port 5432)
+// edit connection string in .env.dev
+// then run this with: npx dotenv -e .env.dev -- npx tsx ./scripts/reproduce-db-limit.js
 
 import { PrismaPg } from '@prisma/adapter-pg';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 
-// OPTION A: If you find an 'output' path in schema.prisma, point to that.
-// Example: If output is "../generated/client", use that relative to this script.
 const { PrismaClient } = require('../prisma/generated/prisma/client');
 
 const clients = [];
@@ -40,7 +38,6 @@ async function exhaustConnections() {
     }
   }
   
-  // Cleanup (optional, script will exit anyway)
   console.log("\nCleaning up...");
   await Promise.all(clients.map(c => c.$disconnect()));
 }
