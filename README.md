@@ -6,7 +6,7 @@ This repository contains all of the code for the Pack 272 Pinewood Derby. It inc
 
 This application is deployed on Vercel's free tier, utilizing automated CI/CD where pushes to the main branch trigger deployments in Vercel. The data persistence layer is powered by a Supabase PostgreSQL database (free tier).
 
-The application should connect to Supabase using Transaction Mode (port 6543) rather than the standard Session Mode. This configuration is needed for Vercel's serverless environment, as it uses a connection pooler (Supavisor) to multiplex many ephemeral serverless function instances onto a small number of actual database connections. This prevents "max client" exhaustion errors.
+The application should connect to Supabase using Transaction Mode (port 6543) rather than the standard Session Mode. This configuration is needed for Vercel's serverless environment, as it uses a connection pooler (Supavisor) to multiplex many ephemeral serverless function instances onto a small number of actual database connections. This prevents "max client" exhaustion errors. We should also append `?pgbouncer=true` to the `DATABASE_URL` environment variable so that Prisma knows not to use prepared statements which don't work with Supavisor multiplexing.
 
 ## Getting Started
 
@@ -72,3 +72,11 @@ Once all standard heats are finished:
 3.  Clicking it triggers `POST {{baseUrl}}/api/derby/championship`.
 
 **Logic**: This calculates the winner (best time) from each Den and generates new heats specifically for those winners.
+
+## Database Dumps
+
+To dump the database schema from supabase run:
+`npx supabase db dump --db-url "CONNECTION_STRING" -f db-schema-backup.sql`
+
+To dump the data from the database run:
+`npx supabase db dump --db-url "CONNECTION_STRING" -f db-data-backup.sql --use-copy --data-only`
