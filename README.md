@@ -12,22 +12,26 @@ The application should connect to Supabase using Transaction Mode (port 6543) ra
 
 ### Prerequisites
 
--   **Node.js**: Install the version specified in `.nvmrc`.
--   **Docker**: Required for running the local Postgres database.
+- **Node.js**: Install the version specified in `.nvmrc`.
+- **Docker**: Required for running the local Postgres database.
 
 ### Local Development
 
 This project uses a `Makefile` to simplify common development tasks. Run `make` to see a full list of available commands with descriptions.
 
--   **Start the App**: Run `make run` to spin up the local database, apply migrations, and start the Next.js dev server.
--   **Race Interface**: Run `make race` to connect to the Arduino and send race times to the website.
+- **Start the App**: Run `make run` to spin up the local database, apply migrations, and start the Next.js dev server.
+- **Race Interface**: Run `make race` to connect to the Arduino and send race times to the website.
 
 ### Testing Strategy
 
 Currently, tests are run locally and not in CI.
 
--   **Run Tests**: Execute `make test` to spin up a dedicated test database and run the suite.
--   **Run Individual Test**: Use `make <path/to/file.test.ts>` to run a specific test file.
+- **Run Tests**: Execute `make test` to spin up a dedicated test database and run the suite.
+- **Run Individual Test**: Use `make <path/to/file.test.ts>` to run a specific test file.
+
+### Database Migrations
+
+Run `make migration {migration-name}` to create a migration and run it against the development DB. Production database migrations are not run automatically. You must run `npx dotenv -e .env -- npx prisma migrate deploy`and have the database connection string in .env.
 
 ## How the Website Works
 
@@ -35,25 +39,25 @@ Currently, tests are run locally and not in CI.
 
 Some administrative actions do not yet have a UI and are performed via API calls using Postman.
 
--   **Importing Racers**: Once sign-ups are complete, download the CSV and `POST` it to `{{baseUrl}}/api/derby/csv?derby_id=X`.
--   **Postman Collection**: [`pinewood-derby.postman_collection.json`](./pinewood-derby.postman_collection.json). Ideally we make UI for all the things.
+- **Importing Racers**: Once sign-ups are complete, download the CSV and `POST` it to `{{baseUrl}}/api/derby/csv?derby_id=X`.
+- **Postman Collection**: [`pinewood-derby.postman_collection.json`](./pinewood-derby.postman_collection.json). Ideally we make UI for all the things.
 
 ### 2. Running Heats & The "Secret" Interface
 
 During the event, the website is displayed on a projector for the audience.
 
--   **Activating a Heat**: To set a heat as "Active" **Hold `Shift` + Click the Heat Number** on the heats list page.
-    -   *Note*: This relies on security-by-obscurity (users generally don't know this trick and are on mobile devices), as there is no formal authentication.
--   **Updating Scores**: Calling `POST {{baseUrl}}/api/heat` updates the times for the currently active heat.
--   **Re-running Heats**: You can overwrite times by posting scores to a heat that has been activated and already has times. Sometimes this is desirable if you want to re-run a heat. **Warning**: Ensure the correct heat is active before posting times, or you risk overwriting valid scores. The Arduino prints the times to the serial output. If you inadvertently overwrite a heat's times then you can look at the Arduino output, activate the heat again, and call `POST {{baseUrl}}/api/heat` with the overwritten times.
+- **Activating a Heat**: To set a heat as "Active" **Hold `Shift` + Click the Heat Number** on the heats list page.
+  - _Note_: This relies on security-by-obscurity (users generally don't know this trick and are on mobile devices), as there is no formal authentication.
+- **Updating Scores**: Calling `POST {{baseUrl}}/api/heat` updates the times for the currently active heat.
+- **Re-running Heats**: You can overwrite times by posting scores to a heat that has been activated and already has times. Sometimes this is desirable if you want to re-run a heat. **Warning**: Ensure the correct heat is active before posting times, or you risk overwriting valid scores. The Arduino prints the times to the serial output. If you inadvertently overwrite a heat's times then you can look at the Arduino output, activate the heat again, and call `POST {{baseUrl}}/api/heat` with the overwritten times.
 
 ### 3. Heat Generation Logic
 
 The system generates heats to ensure fairness:
 
--   **Lane Rotation**: A heat has a maximum of 6 cars (matching the 6-lane track).
--   **Splitting Dens**: If a den has 7 cars (more than one heat's worth), they are split evenly (e.g., groups of 4 and 3).
--   **Neighbor Avoidance**: The algorithm ensures a car never has the same two neighbors to prevent mechanical issues (like a neighbor's wheel falling off) from consistently affecting the same racer.
+- **Lane Rotation**: A heat has a maximum of 6 cars (matching the 6-lane track).
+- **Splitting Dens**: If a den has 7 cars (more than one heat's worth), they are split evenly (e.g., groups of 4 and 3).
+- **Neighbor Avoidance**: The algorithm ensures a car never has the same two neighbors to prevent mechanical issues (like a neighbor's wheel falling off) from consistently affecting the same racer.
 
 ### 4. Late Entries & Ad-Hoc Racers
 

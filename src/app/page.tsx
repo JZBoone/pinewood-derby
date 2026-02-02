@@ -1,5 +1,6 @@
 'use client';
 
+import { authClient } from '@/client-biz/auth';
 import { makeChampionship } from '@/client-biz/championship';
 import { fetchDerbies } from '@/client-biz/derby';
 import { postFakeTimes } from '@/client-biz/heat';
@@ -12,6 +13,9 @@ export default function Home() {
   const [derbies, setDerbies] = useState<derby[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const handleLogin = async () =>
+    authClient.signIn.social({ provider: 'google', callbackURL: '/' });
 
   function handleMakeFakeTimesClick(derbyId: derby['id']) {
     postFakeTimes(derbyId)
@@ -55,6 +59,7 @@ export default function Home() {
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
+        <button onClick={handleLogin}>Sign in with Google</button>
         <h1 className="text-4xl font-bold text-center sm:text-left">
           Pinewood Derbies
         </h1>

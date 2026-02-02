@@ -18,6 +18,14 @@ ALL_TESTS := $(shell find ./src -name '*.test.ts')
 
 ##@ Development
 
+.PHONY: migration
+migration: db ## Create a new migration with 'make migration <name>'
+	npx dotenv -e .env.dev -- npx prisma migrate dev --name $(filter-out $@,$(MAKECMDGOALS))
+
+.PHONY: migrate-prod
+migrate-prod: ## Migrate production database
+	npx dotenv -e .env -- npx prisma migrate deploy
+
 .PHONY: db-migrate-dev
 db-migrate-dev: db ## Apply existing migrations to the database
 	@echo "Waiting for the database to be ready..."
