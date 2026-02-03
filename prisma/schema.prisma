@@ -87,7 +87,6 @@ model User {
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
-  apiKeys       apiKey[]
   role          String    @default("user")
 
   apikeys Apikey[]
@@ -142,23 +141,6 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
-}
-
-model apiKey {
-  id         String    @id
-  name       String?
-  start      String?
-  prefix     String?
-  key        String    @unique
-  userId     String
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  enabled    Boolean   @default(true)
-  createdAt  DateTime
-  expiresAt  DateTime?
-  lastUsedAt DateTime?
-  metadata   String?
-
-  @@map("apiKey")
 }
 
 model Apikey {

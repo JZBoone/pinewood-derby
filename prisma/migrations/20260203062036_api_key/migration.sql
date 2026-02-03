@@ -1,21 +1,4 @@
 -- CreateTable
-CREATE TABLE "apiKey" (
-    "id" TEXT NOT NULL,
-    "name" TEXT,
-    "start" TEXT,
-    "prefix" TEXT,
-    "key" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-    "enabled" BOOLEAN NOT NULL DEFAULT true,
-    "createdAt" TIMESTAMP(3) NOT NULL,
-    "expiresAt" TIMESTAMP(3),
-    "lastUsedAt" TIMESTAMP(3),
-    "metadata" TEXT,
-
-    CONSTRAINT "apiKey_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "apikey" (
     "id" TEXT NOT NULL,
     "name" TEXT,
@@ -43,16 +26,10 @@ CREATE TABLE "apikey" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "apiKey_key_key" ON "apiKey"("key");
-
--- CreateIndex
 CREATE INDEX "apikey_key_idx" ON "apikey"("key");
 
 -- CreateIndex
 CREATE INDEX "apikey_userId_idx" ON "apikey"("userId");
-
--- AddForeignKey
-ALTER TABLE "apiKey" ADD CONSTRAINT "apiKey_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "apikey" ADD CONSTRAINT "apikey_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
