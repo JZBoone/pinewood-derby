@@ -8,12 +8,38 @@ import { NextResponse } from 'next/server';
 
 type Time = number | null;
 
-export async function POST(req: Request) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+type Headers = Awaited<ReturnType<typeof headers>>;
 
-  if (!session || !isAdmin(session.user.role)) {
+async function isValidApiKey(reqHeaders: Headers): Promise<boolean> {
+  const authHeader = reqHeaders.get('authorization');
+  const key = authHeader?.startsWith('Bearer ')
+    ? authHeader.split(' ')[1]
+    : null;
+  if (!key) {
+    return false;
+  }
+  const apiKeyData = await auth.api.verifyApiKey({
+    body: { key },
+  });
+  return apiKeyData.valid;
+}
+
+async function isValidAdminSession(reqHeaders: Headers): Promise<boolean> {
+  const session = await auth.api.getSession({
+    headers: reqHeaders,
+  });
+  return !!session && isAdmin(session.user.role);
+}
+
+export async function POST(req: Request) {
+  const reqHeaders = await headers();
+
+  const [validatedApiKey, validatedAdminSession] = await Promise.all([
+    isValidApiKey(reqHeaders),
+    isValidAdminSession(reqHeaders),
+  ]);
+
+  if (!validatedApiKey && !validatedAdminSession) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
