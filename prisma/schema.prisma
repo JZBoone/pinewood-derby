@@ -1,6 +1,7 @@
+
 generator client {
-  provider = "prisma-client"
-  output   = "./generated/prisma"
+  provider            = "prisma-client"
+  output              = "./generated/prisma"
   importFileExtension = "ts"
 }
 
@@ -86,6 +87,9 @@ model User {
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
+  role          String    @default("user")
+
+  apikeys Apikey[]
 
   @@unique([email])
   @@map("user")
@@ -137,4 +141,33 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+model Apikey {
+  id                  String    @id
+  name                String?
+  start               String?
+  prefix              String?
+  key                 String
+  userId              String
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refillInterval      Int?
+  refillAmount        Int?
+  lastRefillAt        DateTime?
+  enabled             Boolean?  @default(true)
+  rateLimitEnabled    Boolean?  @default(true)
+  rateLimitTimeWindow Int?      @default(86400000)
+  rateLimitMax        Int?      @default(10)
+  requestCount        Int?      @default(0)
+  remaining           Int?
+  lastRequest         DateTime?
+  expiresAt           DateTime?
+  createdAt           DateTime
+  updatedAt           DateTime
+  permissions         String?
+  metadata            String?
+
+  @@index([key])
+  @@index([userId])
+  @@map("apikey")
 }

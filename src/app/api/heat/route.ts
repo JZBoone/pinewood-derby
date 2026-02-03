@@ -1,11 +1,22 @@
 import { db } from '@/api-biz/db';
 import { getDerbyById } from '@/api-biz/derby';
 import { postTimes } from '@/api-biz/heat';
+import { auth } from '@/lib/auth';
+import { isAdmin } from '@/lib/user';
+import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 
 type Time = number | null;
 
 export async function POST(req: Request) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session || !isAdmin(session.user.role)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   const body = await req.json();
 
   if (typeof body.derby_id !== 'number') {
