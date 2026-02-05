@@ -43,6 +43,13 @@ const Lane: React.FC<LaneProps> = ({
 );
 
 export function Heat({ heat, carsById, heatNumber }: HeatProps) {
+  const [status, setStatus] = React.useState(heat.status);
+  const [isActivating, setIsActivating] = React.useState(false);
+
+  React.useEffect(() => {
+    setStatus(heat.status);
+  }, [heat.status]);
+
   const getWinnerEmoji = (time: number | null) => {
     return time ===
       Math.min(
@@ -58,25 +65,47 @@ export function Heat({ heat, carsById, heatNumber }: HeatProps) {
   };
 
   async function handleActivateHeatClick(
-    event: React.MouseEvent<HTMLHeadingElement>
+    event: React.MouseEvent<HTMLButtonElement>
   ) {
-    if (!event.shiftKey) {
+    event.preventDefault();
+    if (status === 'active' || isActivating) {
       return;
     }
-    await activateHeat(heat.derby_id, heat.id);
+    const confirmed = window.confirm(
+      `Are you sure you want to activate heat ${heatNumber}?`
+    );
+    if (!confirmed) {
+      return;
+    }
+    try {
+      setIsActivating(true);
+      await activateHeat(heat.derby_id, heat.id);
+      setStatus('active');
+    } finally {
+      setIsActivating(false);
+    }
   }
 
   return (
     <div
-      className={`${heat.status === 'active' ? 'active-heat' : ''}`}
+      className={`${status === 'active' ? 'active-heat' : ''}`}
       style={{ padding: '0.75rem' }}
     >
-      <h2
-        className="text-2xl font-bold mb-2 mt-4"
-        onClick={(e) => handleActivateHeatClick(e)}
-      >
-        Heat #{heatNumber}
-      </h2>
+      <div className="flex items-center gap-3 mb-2 mt-4">
+        <h2 className="text-2xl font-bold">Heat #{heatNumber}</h2>
+        {status !== 'active' && (
+          <button
+            type="button"
+            className="text-xl text-amber-500 hover:text-amber-600 transition-colors"
+            onClick={handleActivateHeatClick}
+            disabled={isActivating}
+            aria-label={`Activate heat ${heatNumber}`}
+            title={`Activate heat ${heatNumber}`}
+          >
+            {isActivating ? '⏳' : '⛔'}
+          </button>
+        )}
+      </div>
       {[1, 2, 3, 4, 5, 6].map((laneNumber) => (
         <ul className="list-none p-0 text-2xl" key={laneNumber}>
           <Lane
