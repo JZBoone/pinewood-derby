@@ -80,9 +80,9 @@ export default function Home() {
                 <button
                   id={`make-championship-${derby.id}`}
                   onClick={() => handleMakeChampionshipClick(derby.id)}
-                  className="mt-4 ml-4 px-4 py-2 bg-blue-500 text-white rounded"
+                  className="mt-4 ml-4 px-4 py-2 border-2 border-blue-500 text-blue-600 rounded font-semibold hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
                 >
-                  Make Championship
+                  Make Championship 🏁
                 </button>
               )}
               <button
