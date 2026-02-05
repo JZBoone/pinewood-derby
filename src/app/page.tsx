@@ -4,6 +4,7 @@ import { signIn, useSession } from '@/client-biz/auth';
 import { makeChampionship } from '@/client-biz/championship';
 import { fetchDerbies } from '@/client-biz/derby';
 import { postFakeTimes } from '@/client-biz/heat';
+import { isAdmin } from '@/lib/user';
 import { derby } from '@generated/client';
 import { get } from 'lodash';
 import Link from 'next/link';
@@ -14,6 +15,7 @@ export default function Home() {
   const [derbies, setDerbies] = useState<derby[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const isAdminUser = !!session && isAdmin(session.user.role);
 
   const handleLogin = async () =>
     signIn.social({ provider: 'google', callbackURL: '/' });
@@ -74,14 +76,15 @@ export default function Home() {
               <Link href={`/derby/${derby.id}`} className="text-2xl underline">
                 {formatDate(derby.time.toString())} {derby.location_name}
               </Link>
-              <button
-                id={`make-championship-${derby.id}`}
-                style={{ display: 'none' }}
-                onClick={() => handleMakeChampionshipClick(derby.id)}
-                className="mt-4 ml-4 px-4 py-2 bg-blue-500 text-white rounded"
-              >
-                Make Championship
-              </button>
+              {isAdminUser && (
+                <button
+                  id={`make-championship-${derby.id}`}
+                  onClick={() => handleMakeChampionshipClick(derby.id)}
+                  className="mt-4 ml-4 px-4 py-2 bg-blue-500 text-white rounded"
+                >
+                  Make Championship
+                </button>
+              )}
               <button
                 id={`fake-times-${derby.id}`}
                 style={{ display: 'none' }}
