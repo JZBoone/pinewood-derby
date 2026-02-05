@@ -123,6 +123,13 @@ function DensList({ dens, isAdminUser }: DensListProps) {
   const [regenerateError, setRegenerateError] = useState<string | null>(null);
 
   async function handleRegenerate(denId: number) {
+    const confirmed = window.confirm(
+      'Regenerate heats for this den? This will overwrite existing heats.'
+    );
+    if (!confirmed) {
+      return;
+    }
+
     setRegenerateError(null);
     setRegeneratingDenId(denId);
 
