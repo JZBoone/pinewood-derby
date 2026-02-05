@@ -84,6 +84,37 @@ interface DensListProps {
 }
 
 function DensList({ dens }: DensListProps) {
+  const [regeneratingDenId, setRegeneratingDenId] = useState<number | null>(
+    null
+  );
+  const [regenerateError, setRegenerateError] = useState<string | null>(null);
+
+  async function handleRegenerate(denId: number) {
+    setRegenerateError(null);
+    setRegeneratingDenId(denId);
+
+    try {
+      const response = await fetch('/api/den/heat/regenerate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ den_id: denId }),
+      });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        const message =
+          payload?.error || `Failed to regenerate heats (HTTP ${response.status})`;
+        throw new Error(message);
+      }
+    } catch (err: unknown) {
+      setRegenerateError(
+        get(err, 'message', 'Failed to regenerate heats. Please try again.')
+      );
+    } finally {
+      setRegeneratingDenId(null);
+    }
+  }
+
   return dens.map((den) => (
     <Fragment key={den.id}>
       <div key={den.id} className="mb-4">
@@ -97,7 +128,20 @@ function DensList({ dens }: DensListProps) {
         >
           Go to Heats
         </Link>
+        <button
+          className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-blue-600 text-white gap-2 hover:bg-blue-700 text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 disabled:opacity-60 disabled:cursor-not-allowed"
+          type="button"
+          onClick={() => handleRegenerate(den.id)}
+          disabled={regeneratingDenId === den.id}
+        >
+          {regeneratingDenId === den.id
+            ? 'Regenerating...'
+            : 'Regenerate Heats'}
+        </button>
       </div>
+      {regenerateError && (
+        <div className="text-red-500 text-sm mt-2">{regenerateError}</div>
+      )}
     </Fragment>
   ));
 }
