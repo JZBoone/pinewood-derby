@@ -20,6 +20,24 @@ export default function Derby({ params }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  function handleHeatActivated(heatId: number) {
+    setHeatsData((prev) => {
+      if (!prev) {
+        return prev;
+      }
+      return {
+        ...prev,
+        groups: prev.groups.map((group) => ({
+          ...group,
+          heats: group.heats.map((heat) => ({
+            ...heat,
+            status: heat.id === heatId ? 'active' : 'inactive',
+          })),
+        })),
+      };
+    });
+  }
+
   useEffect(() => {
     let mounted = true;
     let loadedOnce = false;
@@ -68,6 +86,7 @@ export default function Derby({ params }: Props) {
                 group={group}
                 groupNumber={i + 1}
                 carsById={keyBy(heatsData.cars, 'id')}
+                onHeatActivated={handleHeatActivated}
               />
             ))}
         </div>
@@ -81,9 +100,15 @@ interface HeatGroupProps {
   group: DenHeatsData['groups'][number];
   groupNumber: number;
   carsById: { [carId: number]: car };
+  onHeatActivated: (heatId: number) => void;
 }
 
-function HeatGroup({ group, groupNumber, carsById }: HeatGroupProps) {
+function HeatGroup({
+  group,
+  groupNumber,
+  carsById,
+  onHeatActivated,
+}: HeatGroupProps) {
   return (
     <React.Fragment>
       <div className="mb-4" style={{ padding: '0.75rem' }}>
@@ -96,6 +121,7 @@ function HeatGroup({ group, groupNumber, carsById }: HeatGroupProps) {
           heat={heat}
           carsById={carsById}
           heatNumber={heatIndex + 1}
+          onActivated={onHeatActivated}
         />
       ))}
     </React.Fragment>

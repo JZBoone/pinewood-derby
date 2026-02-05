@@ -10,6 +10,7 @@ interface HeatProps {
   heat: heat;
   heatNumber: number;
   carsById: { [carId: number]: car };
+  onActivated?: (heatId: heat['id']) => void;
 }
 
 interface LaneProps {
@@ -42,7 +43,7 @@ const Lane: React.FC<LaneProps> = ({
   </li>
 );
 
-export function Heat({ heat, carsById, heatNumber }: HeatProps) {
+export function Heat({ heat, carsById, heatNumber, onActivated }: HeatProps) {
   const [status, setStatus] = React.useState(heat.status);
   const [isActivating, setIsActivating] = React.useState(false);
 
@@ -81,6 +82,7 @@ export function Heat({ heat, carsById, heatNumber }: HeatProps) {
       setIsActivating(true);
       await activateHeat(heat.derby_id, heat.id);
       setStatus('active');
+      onActivated?.(heat.id);
     } finally {
       setIsActivating(false);
     }
