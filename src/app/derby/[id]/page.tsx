@@ -103,7 +103,9 @@ export default function Derby({ params }: Props) {
             )}
           </div>
         )}
-        {!loading && derbyData && <DensList dens={derbyData.dens} />}
+        {!loading && derbyData && (
+          <DensList dens={derbyData.dens} isAdminUser={isAdminUser} />
+        )}
       </main>
     </div>
   );
@@ -111,9 +113,10 @@ export default function Derby({ params }: Props) {
 
 interface DensListProps {
   dens: DerbyData['dens'];
+  isAdminUser: boolean;
 }
 
-function DensList({ dens }: DensListProps) {
+function DensList({ dens, isAdminUser }: DensListProps) {
   const [regeneratingDenId, setRegeneratingDenId] = useState<number | null>(
     null
   );
@@ -159,16 +162,18 @@ function DensList({ dens }: DensListProps) {
         >
           Go to Heats
         </Link>
-        <button
-          className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-blue-600 text-white gap-2 hover:bg-blue-700 text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 disabled:opacity-60 disabled:cursor-not-allowed"
-          type="button"
-          onClick={() => handleRegenerate(den.id)}
-          disabled={regeneratingDenId === den.id}
-        >
-          {regeneratingDenId === den.id
-            ? 'Regenerating...'
-            : 'Regenerate Heats'}
-        </button>
+        {isAdminUser && (
+          <button
+            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-blue-600 text-white gap-2 hover:bg-blue-700 text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 disabled:opacity-60 disabled:cursor-not-allowed"
+            type="button"
+            onClick={() => handleRegenerate(den.id)}
+            disabled={regeneratingDenId === den.id}
+          >
+            {regeneratingDenId === den.id
+              ? 'Regenerating...'
+              : 'Regenerate Heats'}
+          </button>
+        )}
       </div>
       {regenerateError && (
         <div className="text-red-500 text-sm mt-2">{regenerateError}</div>
