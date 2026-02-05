@@ -1,45 +1,17 @@
 import { db } from '@/api-biz/db';
 import { getDerbyById } from '@/api-biz/derby';
 import { postTimes } from '@/api-biz/heat';
-import { auth } from '@/lib/auth';
-import { isAdmin } from '@/lib/user';
+import { authorizeApiKeyOrAdminSession } from '@/lib/api-auth';
 import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 
 type Time = number | null;
 
-type Headers = Awaited<ReturnType<typeof headers>>;
-
-async function isValidApiKey(reqHeaders: Headers): Promise<boolean> {
-  const authHeader = reqHeaders.get('authorization');
-  const key = authHeader?.startsWith('Bearer ')
-    ? authHeader.split(' ')[1]
-    : null;
-  if (!key) {
-    return false;
-  }
-  const apiKeyData = await auth.api.verifyApiKey({
-    body: { key },
-  });
-  return apiKeyData.valid;
-}
-
-async function isValidAdminSession(reqHeaders: Headers): Promise<boolean> {
-  const session = await auth.api.getSession({
-    headers: reqHeaders,
-  });
-  return !!session && isAdmin(session.user.role);
-}
-
 export async function POST(req: Request) {
   const reqHeaders = await headers();
 
-  const [validatedApiKey, validatedAdminSession] = await Promise.all([
-    isValidApiKey(reqHeaders),
-    isValidAdminSession(reqHeaders),
-  ]);
-
-  if (!validatedApiKey && !validatedAdminSession) {
+  const authResult = await authorizeApiKeyOrAdminSession(reqHeaders);
+  if (!authResult.authorized) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
