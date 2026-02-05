@@ -1,8 +1,16 @@
 import { getDerbyById } from '@/api-biz/derby';
 import { activate, getHeatById } from '@/api-biz/heat';
+import { authorizeApiKeyOrAdminSession } from '@/lib/api-auth';
+import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
+  const reqHeaders = await headers();
+  const authResult = await authorizeApiKeyOrAdminSession(reqHeaders);
+  if (!authResult.authorized) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   const body = await req.json();
 
   if (typeof body.id !== 'number' || typeof body.derby_id !== 'number') {

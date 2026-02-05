@@ -1,9 +1,11 @@
 'use client';
 
 import { DenHeatsData, fetchDenHeatsData } from '@/client-biz/heat';
+import { useSession } from '@/client-biz/auth';
 import BackButton from '@/components/back-button';
 import { Cars } from '@/components/cars';
 import { Heat } from '@/components/heat';
+import { isAdmin } from '@/lib/user';
 import { car } from '@generated/client';
 import { get, keyBy } from 'lodash';
 import React, { use, useEffect, useState } from 'react';
@@ -19,6 +21,8 @@ export default function Derby({ params }: Props) {
   const [heatsData, setHeatsData] = useState<DenHeatsData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const { data: session } = useSession();
+  const isAdminUser = !!session && isAdmin(session.user.role);
 
   function handleHeatActivated(heatId: number) {
     setHeatsData((prev) => {
@@ -87,6 +91,7 @@ export default function Derby({ params }: Props) {
                 groupNumber={i + 1}
                 carsById={keyBy(heatsData.cars, 'id')}
                 onHeatActivated={handleHeatActivated}
+                isAdminUser={isAdminUser}
               />
             ))}
         </div>
@@ -101,6 +106,7 @@ interface HeatGroupProps {
   groupNumber: number;
   carsById: { [carId: number]: car };
   onHeatActivated: (heatId: number) => void;
+  isAdminUser: boolean;
 }
 
 function HeatGroup({
@@ -108,6 +114,7 @@ function HeatGroup({
   groupNumber,
   carsById,
   onHeatActivated,
+  isAdminUser,
 }: HeatGroupProps) {
   return (
     <React.Fragment>
@@ -122,6 +129,7 @@ function HeatGroup({
           carsById={carsById}
           heatNumber={heatIndex + 1}
           onActivated={onHeatActivated}
+          isAdminUser={isAdminUser}
         />
       ))}
     </React.Fragment>

@@ -11,6 +11,7 @@ interface HeatProps {
   heatNumber: number;
   carsById: { [carId: number]: car };
   onActivated?: (heatId: heat['id']) => void;
+  isAdminUser?: boolean;
 }
 
 interface LaneProps {
@@ -43,7 +44,13 @@ const Lane: React.FC<LaneProps> = ({
   </li>
 );
 
-export function Heat({ heat, carsById, heatNumber, onActivated }: HeatProps) {
+export function Heat({
+  heat,
+  carsById,
+  heatNumber,
+  onActivated,
+  isAdminUser = false,
+}: HeatProps) {
   const [status, setStatus] = React.useState(heat.status);
   const [isActivating, setIsActivating] = React.useState(false);
 
@@ -95,7 +102,7 @@ export function Heat({ heat, carsById, heatNumber, onActivated }: HeatProps) {
     >
       <div className="flex items-center gap-3 mb-2 mt-4">
         <h2 className="text-2xl font-bold">Heat #{heatNumber}</h2>
-        {status !== 'active' && (
+        {isAdminUser && status !== 'active' && (
           <button
             type="button"
             className="text-xl text-amber-500 hover:text-amber-600 transition-colors"
