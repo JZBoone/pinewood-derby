@@ -1,9 +1,9 @@
 'use client';
 
+import { useSession } from '@/client-biz/auth';
+import { makeChampionship } from '@/client-biz/championship';
 import BackButton from '@/components/back-button';
 import { Cars } from '@/components/cars';
-import { makeChampionship } from '@/client-biz/championship';
-import { useSession } from '@/client-biz/auth';
 import { isAdmin } from '@/lib/user';
 import { get } from 'lodash';
 import Image from 'next/image';
@@ -26,6 +26,13 @@ export default function Derby({ params }: Props) {
   const isAdminUser = !!session && isAdmin(session.user.role);
 
   function handleMakeChampionshipClick(derbyId: number) {
+    const confirmed = window.confirm(
+      'Create the championship now? This wipes out the championship heats if they already exist.'
+    );
+    if (!confirmed) {
+      return;
+    }
+
     makeChampionship(derbyId)
       .then(() => {
         alert('Let the championship begin!');
@@ -93,9 +100,7 @@ export default function Derby({ params }: Props) {
             {isAdminUser && (
               <button
                 id={`make-championship-${derbyData.derby.id}`}
-                onClick={() =>
-                  handleMakeChampionshipClick(derbyData.derby.id)
-                }
+                onClick={() => handleMakeChampionshipClick(derbyData.derby.id)}
                 className="mt-4 sm:mt-0 px-4 py-2 border-2 border-blue-500 text-blue-600 rounded font-semibold hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
               >
                 Make Championship 🏁
