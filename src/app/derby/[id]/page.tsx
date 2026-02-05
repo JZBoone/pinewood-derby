@@ -1,12 +1,15 @@
 'use client';
 
+import BackButton from '@/components/back-button';
+import { Cars } from '@/components/cars';
+import { makeChampionship } from '@/client-biz/championship';
+import { useSession } from '@/client-biz/auth';
+import { isAdmin } from '@/lib/user';
+import { get } from 'lodash';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState, use, Fragment } from 'react';
-import { get } from 'lodash';
-import { fetchDerbyData, DerbyData } from './derby-data';
-import { Cars } from '@/components/cars';
-import BackButton from '@/components/back-button';
+import { Fragment, use, useEffect, useState } from 'react';
+import { DerbyData, fetchDerbyData } from './derby-data';
 
 interface Props {
   params: Promise<{
@@ -19,6 +22,18 @@ export default function Derby({ params }: Props) {
   const [derbyData, setDerbyData] = useState<DerbyData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const { data: session } = useSession();
+  const isAdminUser = !!session && isAdmin(session.user.role);
+
+  function handleMakeChampionshipClick(derbyId: number) {
+    makeChampionship(derbyId)
+      .then(() => {
+        alert('Let the championship begin!');
+      })
+      .catch((err: unknown) => {
+        alert(`Error creating championship: ${get(err, 'message')}`);
+      });
+  }
 
   useEffect(() => {
     let mounted = true;
@@ -65,13 +80,28 @@ export default function Derby({ params }: Props) {
             priority
           />
         )}
-        {!loading && derbyData?.championshipCreated && (
-          <Link
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-red-500 text-white gap-2 hover:bg-red-700 text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href={`/derby/${resolvedParams.id}/championship`}
-          >
-            Championship
-          </Link>
+        {!loading && derbyData && (
+          <div className="flex flex-col items-center gap-4 sm:flex-row">
+            {derbyData.championshipCreated && (
+              <Link
+                className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-red-500 text-white gap-2 hover:bg-red-700 text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
+                href={`/derby/${resolvedParams.id}/championship`}
+              >
+                Championship
+              </Link>
+            )}
+            {isAdminUser && (
+              <button
+                id={`make-championship-${derbyData.derby.id}`}
+                onClick={() =>
+                  handleMakeChampionshipClick(derbyData.derby.id)
+                }
+                className="mt-4 sm:mt-0 px-4 py-2 border-2 border-blue-500 text-blue-600 rounded font-semibold hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+              >
+                Make Championship 🏁
+              </button>
+            )}
+          </div>
         )}
         {!loading && derbyData && <DensList dens={derbyData.dens} />}
       </main>
@@ -103,7 +133,8 @@ function DensList({ dens }: DensListProps) {
       if (!response.ok) {
         const payload = await response.json().catch(() => null);
         const message =
-          payload?.error || `Failed to regenerate heats (HTTP ${response.status})`;
+          payload?.error ||
+          `Failed to regenerate heats (HTTP ${response.status})`;
         throw new Error(message);
       }
     } catch (err: unknown) {

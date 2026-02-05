@@ -1,10 +1,8 @@
 'use client';
 
 import { signIn, useSession } from '@/client-biz/auth';
-import { makeChampionship } from '@/client-biz/championship';
 import { fetchDerbies } from '@/client-biz/derby';
 import { postFakeTimes } from '@/client-biz/heat';
-import { isAdmin } from '@/lib/user';
 import { derby } from '@generated/client';
 import { get } from 'lodash';
 import Link from 'next/link';
@@ -15,7 +13,6 @@ export default function Home() {
   const [derbies, setDerbies] = useState<derby[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const isAdminUser = !!session && isAdmin(session.user.role);
 
   const handleLogin = async () =>
     signIn.social({ provider: 'google', callbackURL: '/' });
@@ -27,16 +24,6 @@ export default function Home() {
       })
       .catch((err: unknown) => {
         alert(`Error creating fake times: ${get(err, 'message')}`);
-      });
-  }
-
-  function handleMakeChampionshipClick(derbyId: derby['id']) {
-    makeChampionship(derbyId)
-      .then(() => {
-        alert('Let the championship begin!');
-      })
-      .catch((err: unknown) => {
-        alert(`Error creating championship: ${get(err, 'message')}`);
       });
   }
 
@@ -76,15 +63,6 @@ export default function Home() {
               <Link href={`/derby/${derby.id}`} className="text-2xl underline">
                 {formatDate(derby.time.toString())} {derby.location_name}
               </Link>
-              {isAdminUser && (
-                <button
-                  id={`make-championship-${derby.id}`}
-                  onClick={() => handleMakeChampionshipClick(derby.id)}
-                  className="mt-4 ml-4 px-4 py-2 border-2 border-blue-500 text-blue-600 rounded font-semibold hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-                >
-                  Make Championship 🏁
-                </button>
-              )}
               <button
                 id={`fake-times-${derby.id}`}
                 style={{ display: 'none' }}
