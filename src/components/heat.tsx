@@ -102,7 +102,7 @@ export function Heat({ heat, carsById, heatNumber }: HeatProps) {
             aria-label={`Activate heat ${heatNumber}`}
             title={`Activate heat ${heatNumber}`}
           >
-            {isActivating ? '⏳' : '⛔'}
+            {isActivating ? '⏳' : '🚦'}
           </button>
         )}
       </div>
