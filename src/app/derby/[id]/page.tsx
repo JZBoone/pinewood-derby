@@ -1,6 +1,7 @@
 'use client';
 
 import { useSession } from '@/client-biz/auth';
+import { buildAuthHeaders } from '@/client-biz/auth-headers';
 import { makeChampionship } from '@/client-biz/championship';
 import { deleteDerby } from '@/client-biz/derby';
 import BackButton from '@/components/back-button';
@@ -165,7 +166,11 @@ export default function Derby({ params }: Props) {
           <div className="text-red-500 text-sm mt-2">{deleteError}</div>
         )}
         {!loading && derbyData && (
-          <DensList dens={derbyData.dens} isAdminUser={isAdminUser} />
+          <DensList
+            dens={derbyData.dens}
+            isAdminUser={isAdminUser}
+            authToken={authToken}
+          />
         )}
       </main>
     </div>
@@ -175,13 +180,17 @@ export default function Derby({ params }: Props) {
 interface DensListProps {
   dens: DerbyData['dens'];
   isAdminUser: boolean;
+  authToken?: string;
 }
 
-function DensList({ dens, isAdminUser }: DensListProps) {
+function DensList({ dens, isAdminUser, authToken }: DensListProps) {
   const [regeneratingDenId, setRegeneratingDenId] = useState<number | null>(
     null
   );
   const [regenerateError, setRegenerateError] = useState<string | null>(null);
+  const [creatingDenId, setCreatingDenId] = useState<number | null>(null);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [createErrorDenId, setCreateErrorDenId] = useState<number | null>(null);
 
   async function handleRegenerate(denId: number) {
     const confirmed = window.confirm(
@@ -217,6 +226,76 @@ function DensList({ dens, isAdminUser }: DensListProps) {
     }
   }
 
+  async function handleCreateCar(denId: number, denName: string) {
+    if (!authToken) {
+      setCreateError('Missing authorization token. Please sign in again.');
+      setCreateErrorDenId(denId);
+      return;
+    }
+
+    const carNumberRaw = window.prompt(`Enter car number for Den ${denName}`);
+    if (carNumberRaw === null) {
+      return;
+    }
+    const carNumber = Number.parseInt(carNumberRaw.trim(), 10);
+    if (!Number.isFinite(carNumber)) {
+      alert('Car number must be a valid number.');
+      return;
+    }
+
+    const ownerRaw = window.prompt(`Enter scout name for Den ${denName}`);
+    if (ownerRaw === null) {
+      return;
+    }
+    const owner = ownerRaw.trim();
+    if (!owner) {
+      alert('Scout name is required.');
+      return;
+    }
+
+    const carNameRaw = window.prompt(
+      `Optional: Enter car name for Den ${denName}`
+    );
+    if (carNameRaw === null) {
+      return;
+    }
+    const carName = carNameRaw.trim();
+
+    setCreateError(null);
+    setCreateErrorDenId(null);
+    setCreatingDenId(denId);
+
+    try {
+      const response = await fetch('/api/car', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...buildAuthHeaders(authToken),
+        },
+        body: JSON.stringify({
+          denId,
+          carNumber,
+          carName: carName ? carName : undefined,
+          owner,
+        }),
+      });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        const message =
+          payload?.error || `Failed to create car (HTTP ${response.status})`;
+        throw new Error(message);
+      }
+    } catch (err: unknown) {
+      setCreateError(
+        get(err, 'message', 'Failed to create car. Please try again.')
+      );
+      setCreateErrorDenId(denId);
+    } finally {
+      setCreatingDenId(null);
+    }
+  }
+
   return dens.map((den) => (
     <Fragment key={den.id}>
       <div key={den.id} className="mb-4">
@@ -231,20 +310,33 @@ function DensList({ dens, isAdminUser }: DensListProps) {
           Go to Heats
         </Link>
         {isAdminUser && (
-          <button
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-blue-600 text-white gap-2 hover:bg-blue-700 text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 disabled:opacity-60 disabled:cursor-not-allowed"
-            type="button"
-            onClick={() => handleRegenerate(den.id)}
-            disabled={regeneratingDenId === den.id}
-          >
-            {regeneratingDenId === den.id
-              ? 'Regenerating...'
-              : 'Regenerate Heats'}
-          </button>
+          <>
+            <button
+              className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-emerald-600 text-white gap-2 hover:bg-emerald-700 text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 disabled:opacity-60 disabled:cursor-not-allowed"
+              type="button"
+              onClick={() => handleCreateCar(den.id, den.name)}
+              disabled={creatingDenId === den.id}
+            >
+              {creatingDenId === den.id ? 'Adding...' : 'Add Car'}
+            </button>
+            <button
+              className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-blue-600 text-white gap-2 hover:bg-blue-700 text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 disabled:opacity-60 disabled:cursor-not-allowed"
+              type="button"
+              onClick={() => handleRegenerate(den.id)}
+              disabled={regeneratingDenId === den.id}
+            >
+              {regeneratingDenId === den.id
+                ? 'Regenerating...'
+                : 'Regenerate Heats'}
+            </button>
+          </>
         )}
       </div>
       {regenerateError && (
         <div className="text-red-500 text-sm mt-2">{regenerateError}</div>
+      )}
+      {createError && createErrorDenId === den.id && (
+        <div className="text-red-500 text-sm mt-2">{createError}</div>
       )}
     </Fragment>
   ));

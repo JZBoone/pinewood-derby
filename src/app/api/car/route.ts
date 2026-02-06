@@ -1,7 +1,9 @@
 import { createCar, deleteCar, getDerbyCars } from '@/api-biz/car';
 import { getDerbyById } from '@/api-biz/derby';
+import { authorizeApiKeyOrAdminSession } from '@/lib/api-auth';
 import { GetCarsResponse } from '@/lib/car';
 import { NextResponse } from 'next/server';
+import { headers } from 'next/headers';
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
@@ -31,6 +33,12 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  const reqHeaders = await headers();
+  const authResult = await authorizeApiKeyOrAdminSession(reqHeaders);
+  if (!authResult.authorized || authResult.method !== 'admin_session') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   const { denId, carNumber, carName, owner } = await req.json();
 
   if (!denId || !carNumber || !owner) {
@@ -55,6 +63,12 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+  const reqHeaders = await headers();
+  const authResult = await authorizeApiKeyOrAdminSession(reqHeaders);
+  if (!authResult.authorized || authResult.method !== 'admin_session') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   const url = new URL(req.url);
   const carIdRaw = url.searchParams.get('id');
 
