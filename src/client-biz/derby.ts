@@ -55,3 +55,21 @@ export async function uploadDerbyCsv(
 
   return response.json();
 }
+
+export async function deleteDerby(
+  derbyId: number,
+  token: string
+): Promise<{
+  ok: true;
+  deletedHeats: number;
+  deletedCars: number;
+  deletedDens: number;
+}> {
+  const response = await axiosClient.delete(
+    `/api/derby/${derbyId}`,
+    {
+      headers: buildAuthHeaders(token),
+    }
+  );
+  return response.data;
+}

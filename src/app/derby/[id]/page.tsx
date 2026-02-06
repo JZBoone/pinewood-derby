@@ -2,12 +2,14 @@
 
 import { useSession } from '@/client-biz/auth';
 import { makeChampionship } from '@/client-biz/championship';
+import { deleteDerby } from '@/client-biz/derby';
 import BackButton from '@/components/back-button';
 import { Cars } from '@/components/cars';
 import { isAdmin } from '@/lib/user';
 import { get } from 'lodash';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Fragment, use, useEffect, useState } from 'react';
 import { DerbyData, fetchDerbyData } from './derby-data';
 
@@ -22,9 +24,12 @@ export default function Derby({ params }: Props) {
   const [derbyData, setDerbyData] = useState<DerbyData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const { data: session } = useSession();
   const isAdminUser = !!session && isAdmin(session.user.role);
   const authToken = session?.session?.token;
+  const router = useRouter();
 
   function handleMakeChampionshipClick(derbyId: number) {
     const confirmed = window.confirm(
@@ -45,6 +50,36 @@ export default function Derby({ params }: Props) {
       })
       .catch((err: unknown) => {
         alert(`Error creating championship: ${get(err, 'message')}`);
+      });
+  }
+
+  function handleDeleteDerbyClick(derbyId: number) {
+    const confirmed = window.confirm(
+      'Delete this derby? This will remove all dens, cars, and heats for this derby.'
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    if (!authToken) {
+      alert('Missing authorization token. Please sign in again.');
+      return;
+    }
+
+    setDeleting(true);
+    setDeleteError(null);
+
+    deleteDerby(derbyId, authToken)
+      .then(() => {
+        router.push('/');
+      })
+      .catch((err: unknown) => {
+        setDeleteError(
+          get(err, 'message', 'Failed to delete derby. Please try again.')
+        );
+      })
+      .finally(() => {
+        setDeleting(false);
       });
   }
 
@@ -104,15 +139,30 @@ export default function Derby({ params }: Props) {
               </Link>
             )}
             {isAdminUser && (
-              <button
-                id={`make-championship-${derbyData.derby.id}`}
-                onClick={() => handleMakeChampionshipClick(derbyData.derby.id)}
-                className="mt-4 sm:mt-0 px-4 py-2 border-2 border-blue-500 text-blue-600 rounded font-semibold hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-              >
-                Make Championship 🏁
-              </button>
+              <>
+                <button
+                  id={`make-championship-${derbyData.derby.id}`}
+                  onClick={() =>
+                    handleMakeChampionshipClick(derbyData.derby.id)
+                  }
+                  className="mt-4 sm:mt-0 px-4 py-2 border-2 border-blue-500 text-blue-600 rounded font-semibold hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+                >
+                  Make Championship 🏁
+                </button>
+                <button
+                  id={`delete-derby-${derbyData.derby.id}`}
+                  onClick={() => handleDeleteDerbyClick(derbyData.derby.id)}
+                  className="mt-4 sm:mt-0 px-4 py-2 border-2 border-red-500 text-red-600 rounded font-semibold hover:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400 disabled:opacity-60 disabled:cursor-not-allowed"
+                  disabled={deleting}
+                >
+                  {deleting ? 'Deleting...' : 'Delete Derby ☠️'}
+                </button>
+              </>
             )}
           </div>
+        )}
+        {deleteError && (
+          <div className="text-red-500 text-sm mt-2">{deleteError}</div>
         )}
         {!loading && derbyData && (
           <DensList dens={derbyData.dens} isAdminUser={isAdminUser} />
