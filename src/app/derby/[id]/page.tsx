@@ -24,6 +24,7 @@ export default function Derby({ params }: Props) {
   const [loading, setLoading] = useState(true);
   const { data: session } = useSession();
   const isAdminUser = !!session && isAdmin(session.user.role);
+  const authToken = session?.session?.token;
 
   function handleMakeChampionshipClick(derbyId: number) {
     const confirmed = window.confirm(
@@ -33,7 +34,12 @@ export default function Derby({ params }: Props) {
       return;
     }
 
-    makeChampionship(derbyId)
+    if (!authToken) {
+      alert('Missing authorization token. Please sign in again.');
+      return;
+    }
+
+    makeChampionship(derbyId, authToken)
       .then(() => {
         alert('Let the championship begin!');
       })

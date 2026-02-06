@@ -1,13 +1,18 @@
 import { ChampionshipData, MakeChampionShipBody } from '@/lib/championship';
 import axiosClient from './axios';
+import { buildAuthHeaders } from './auth-headers';
 
 export async function makeChampionship(
-  derbyId: number | string
+  derbyId: number | string,
+  token: string
 ): Promise<ChampionshipData> {
   const body: MakeChampionShipBody = { derby_id: Number(derbyId) };
   const response = await axiosClient.post<ChampionshipData>(
     `/api/derby/championship`,
-    body
+    body,
+    {
+      headers: buildAuthHeaders(token),
+    }
   );
   return response.data;
 }

@@ -1,10 +1,18 @@
 import { getChampionship, makeChampionship } from '@/api-biz/championship';
 import { getDerbyById } from '@/api-biz/derby';
+import { authorizeApiKeyOrAdminSession } from '@/lib/api-auth';
 import { ChampionshipData } from '@/lib/championship';
+import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   const body = await req.json();
+
+  const reqHeaders = await headers();
+  const authResult = await authorizeApiKeyOrAdminSession(reqHeaders);
+  if (!authResult.authorized) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
 
   if (typeof body.derby_id !== 'number') {
     return NextResponse.json(
