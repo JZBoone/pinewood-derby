@@ -105,13 +105,14 @@ export function Heat({
         {isAdminUser && status !== 'active' && (
           <button
             type="button"
-            className="text-xl text-amber-500 hover:text-amber-600 transition-colors"
+            className="inline-flex items-center gap-2 text-xl text-amber-500 hover:text-amber-600 transition-colors"
             onClick={handleActivateHeatClick}
             disabled={isActivating}
             aria-label={`Activate heat ${heatNumber}`}
             title={`Activate heat ${heatNumber}`}
           >
-            {isActivating ? '⏳' : '🚦'}
+            <span aria-hidden="true">{isActivating ? '⏳' : '🚦'}</span>
+            <span>{isActivating ? 'Activating...' : 'Activate Heat'}</span>
           </button>
         )}
       </div>
