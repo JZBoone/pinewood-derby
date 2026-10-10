@@ -14,6 +14,7 @@ import ResultsTable from '@/components/results-table';
 import SiteHeader from '@/components/site-header';
 import SiteQrCode from '@/components/site-qr-code';
 import { useToast } from '@/components/toast';
+import WilliamsWhale from '@/components/williams-whale';
 import { formatRaceDay } from '@/lib/derby';
 import { isAdmin } from '@/lib/user';
 import { get } from 'lodash';
@@ -190,6 +191,7 @@ function Derby({ id }: { id: string }) {
           </p>
           <p className="mt-3 text-base text-ink/72">
             {formatRaceDay(derby.time)} · {derby.location_name}
+            <WilliamsWhale venue={derby.location_name} />
           </p>
           <RankBand size={14} className="mt-7" />
           <SiteQrCode path={`/derby/${derby.id}`} className="mt-8" />
