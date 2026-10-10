@@ -5,7 +5,9 @@ import { createDerby, fetchDerbies, uploadDerbyCsv } from '@/client-biz/derby';
 import { postFakeTimes } from '@/client-biz/heat';
 import SiteHeader from '@/components/site-header';
 import SiteQrCode from '@/components/site-qr-code';
-import { RANKS } from '@/lib/ranks';
+import ErrorMessage from '@/components/error-message';
+import RankBand from '@/components/rank-band';
+import { formatRaceDay } from '@/lib/derby';
 import { isAdmin } from '@/lib/user';
 import { derby } from '@generated/client';
 import { get, orderBy } from 'lodash';
@@ -125,14 +127,6 @@ export default function Home() {
     }
   }
 
-  function formatRaceDay(date: Date) {
-    return new Date(date).toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'long',
-      day: 'numeric',
-    });
-  }
-
   const sortedDerbies = orderBy(
     derbies,
     (derby) => new Date(derby.time).getTime(),
@@ -152,22 +146,11 @@ export default function Home() {
         <h1 className="mt-3 mb-[22px] text-[clamp(40px,9vw,64px)] leading-none font-bold tracking-[-.025em] font-stretch-118%">
           Pack 272
         </h1>
-        <div className="mb-[52px] flex flex-wrap items-center gap-3.5">
-          {RANKS.map((rank) => (
-            <span
-              key={rank.name}
-              title={rank.name}
-              className="size-[22px] rotate-45 rounded-[2px]"
-              style={{
-                background: rank.fill,
-                boxShadow: `0 0 0 2px var(--bg), 0 0 0 3px ${rank.edge}`,
-              }}
-            />
-          ))}
-          <span className="text-[13px] text-ink/65">
-            Lions through Arrow of Light, every den races
-          </span>
-        </div>
+        <RankBand
+          size={22}
+          caption="Lions through Arrow of Light, every den races"
+          className="mb-[52px]"
+        />
         {isAdminUser && (
           <div className="mb-8 flex flex-col gap-4">
             <button
@@ -306,15 +289,6 @@ export default function Home() {
         )}
         <SiteQrCode />
       </main>
-    </div>
-  );
-}
-
-// Red sits in the stripe, not the text, so it reads on both themes.
-function ErrorMessage({ children }: { children: React.ReactNode }) {
-  return (
-    <div role="alert" className="border-l-4 border-cs-red pl-3">
-      {children}
     </div>
   );
 }

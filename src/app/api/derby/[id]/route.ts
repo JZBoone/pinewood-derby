@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { deleteDerby, getDerbyById } from '@/api-biz/derby';
+import { getDerbyArt } from '@/api-biz/derby-art';
+import { toFeaturedArt } from '@/lib/derby-art';
 import { GetDerbyByIdResponse } from '@/lib/derby';
 import { authorizeApiKeyOrAdminSession } from '@/lib/api-auth';
 import { headers } from 'next/headers';
@@ -12,8 +14,11 @@ export async function GET(
   if (isNaN(id)) {
     return NextResponse.json({ error: 'Invalid id' }, { status: 400 });
   }
-  const derby = await getDerbyById(id);
-  const response: GetDerbyByIdResponse = { derby: derby };
+  const [derby, art] = await Promise.all([getDerbyById(id), getDerbyArt(id)]);
+  const response: GetDerbyByIdResponse = {
+    derby: derby,
+    featured_art: art && toFeaturedArt(art),
+  };
   return NextResponse.json(response);
 }
 

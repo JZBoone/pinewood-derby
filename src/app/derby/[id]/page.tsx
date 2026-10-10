@@ -4,14 +4,20 @@ import { useSession } from '@/client-biz/auth';
 import { buildAuthHeaders } from '@/client-biz/auth-headers';
 import { makeChampionship } from '@/client-biz/championship';
 import { deleteDerby } from '@/client-biz/derby';
-import BackButton from '@/components/back-button';
-import { Cars } from '@/components/cars';
+import BackLink from '@/components/back-link';
+import ErrorMessage from '@/components/error-message';
+import FeaturedArt from '@/components/featured-art';
+import FeaturedArtForm from '@/components/featured-art-form';
+import RankBand from '@/components/rank-band';
+import ResultsTable from '@/components/results-table';
+import SiteHeader from '@/components/site-header';
+import { formatRaceDay } from '@/lib/derby';
 import { isAdmin } from '@/lib/user';
 import { get } from 'lodash';
-import Image from 'next/image';
+import { ImagePlus, Pencil } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { Fragment, use, useEffect, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, use, useEffect, useState } from 'react';
 import { DerbyData, fetchDerbyData } from './derby-data';
 
 interface Props {
@@ -20,17 +26,37 @@ interface Props {
   }>;
 }
 
-export default function Derby({ params }: Props) {
-  const resolvedParams = use(params);
+const CHAMPIONSHIP_TAB = 'championship';
+
+export default function DerbyPage({ params }: Props) {
+  const { id } = use(params);
+  return (
+    <div className="min-h-screen">
+      <SiteHeader />
+      <main className="mx-auto max-w-[1040px] px-[clamp(20px,4vw,40px)] pt-7 pb-24">
+        <BackLink href="/">All derbies</BackLink>
+        {/* useSearchParams needs a Suspense boundary. */}
+        <Suspense>
+          <Derby id={id} />
+        </Suspense>
+      </main>
+    </div>
+  );
+}
+
+function Derby({ id }: { id: string }) {
   const [derbyData, setDerbyData] = useState<DerbyData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [editingArt, setEditingArt] = useState(false);
   const { data: session } = useSession();
   const isAdminUser = !!session && isAdmin(session.user.role);
   const authToken = session?.session?.token;
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   function handleMakeChampionshipClick(derbyId: number) {
     const confirmed = window.confirm(
@@ -90,7 +116,7 @@ export default function Derby({ params }: Props) {
     async function loadDerby() {
       while (mounted) {
         try {
-          const data = await fetchDerbyData(resolvedParams.id);
+          const data = await fetchDerbyData(id);
           setDerbyData(data);
         } catch (err: unknown) {
           if (!loadedOnce) {
@@ -109,88 +135,195 @@ export default function Derby({ params }: Props) {
     return () => {
       mounted = false;
     };
-  }, [resolvedParams.id]);
+  }, [id]);
+
+  if (loading) {
+    return <div className="text-ink/65">Loading...</div>;
+  }
+  if (error) {
+    return <ErrorMessage>{error}</ErrorMessage>;
+  }
+  if (!derbyData) {
+    return <div>Derby not found</div>;
+  }
+
+  const { derby, dens, featuredArt, championship } = derbyData;
+  const year = new Date(derby.time).getFullYear();
+  const tabs = [
+    ...dens.map((den) => ({ key: den.name, label: `Den ${den.name}` })),
+    ...(championship ? [{ key: CHAMPIONSHIP_TAB, label: 'Championship' }] : []),
+  ];
+  const requestedTab = searchParams.get('den');
+  const selectedTab =
+    tabs.find((tab) => tab.key === requestedTab)?.key ?? tabs[0]?.key;
+  const selectedDen = dens.find((den) => den.name === selectedTab);
+
+  function selectTab(key: string) {
+    const next = new URLSearchParams(searchParams);
+    next.set('den', key);
+    router.replace(`${pathname}?${next}`, { scroll: false });
+  }
+
+  const showArtColumn = !!featuredArt || isAdminUser;
 
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <BackButton></BackButton>
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:center">
-        <h1 className="text-2xl font-bold text-center sm:text-left">
-          {loading && 'Loading...'}
-          {!loading && !error && !derbyData && 'Derby not found'}
-          {error && <div className="text-red-500">{error}</div>}
-        </h1>
-        {!loading && derbyData && (
-          <Image
-            src={`/logo-${derbyData.derby.id}.png`}
-            alt="Derby logo"
-            width={332}
-            height={272}
-            priority
-          />
-        )}
-        {!loading && derbyData && (
-          <div className="flex flex-col items-center gap-4 sm:flex-row">
-            {derbyData.championshipCreated && (
-              <Link
-                className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-red-500 text-white gap-2 hover:bg-red-700 text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-                href={`/derby/${resolvedParams.id}/championship`}
+    <>
+      <section
+        className={`grid items-center gap-12 ${
+          showArtColumn
+            ? 'min-[800px]:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]'
+            : ''
+        }`}
+      >
+        <div>
+          <div className="text-xs font-bold tracking-[.14em] text-accent uppercase">
+            Cub Scout Pack 272
+          </div>
+          <h1 className="mt-2 text-[clamp(72px,12vw,128px)] leading-[.9] font-bold tracking-[-.03em] tabular-nums font-stretch-118%">
+            {year}
+          </h1>
+          <p className="mt-3 font-(family-name:--font-heading) text-[28px] leading-tight font-semibold font-stretch-112%">
+            Pinewood Derby
+          </p>
+          <p className="mt-3 text-base text-ink/72">
+            {formatRaceDay(derby.time)} · {derby.location_name}
+          </p>
+          <RankBand size={14} className="mt-7" />
+        </div>
+        {showArtColumn && (
+          <div className="order-first min-[800px]:order-none">
+            {featuredArt ? (
+              <FeaturedArt art={featuredArt} year={year} />
+            ) : (
+              <a
+                href="#featured-art-form"
+                onClick={() => setEditingArt(true)}
+                className="flex aspect-[16/10] flex-col items-center justify-center gap-2 rounded-[18px] border-2 border-dashed border-divider text-accent no-underline transition-colors hover:bg-[color-mix(in_srgb,var(--accent)_8%,transparent)]"
               >
-                Championship
-              </Link>
+                <ImagePlus size={28} strokeWidth={1.75} />
+                Add this year&apos;s featured artwork
+              </a>
             )}
-            {isAdminUser && (
-              <>
-                <button
-                  id={`make-championship-${derbyData.derby.id}`}
-                  onClick={() =>
-                    handleMakeChampionshipClick(derbyData.derby.id)
-                  }
-                  className="mt-4 sm:mt-0 px-4 py-2 border-2 border-blue-500 text-blue-600 rounded-sm font-semibold hover:bg-blue-50 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-400"
-                >
-                  Make Championship 🏁
-                </button>
-                <button
-                  id={`delete-derby-${derbyData.derby.id}`}
-                  onClick={() => handleDeleteDerbyClick(derbyData.derby.id)}
-                  className="mt-4 sm:mt-0 px-4 py-2 border-2 border-red-500 text-red-600 rounded-sm font-semibold hover:bg-red-50 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-red-400 disabled:opacity-60 disabled:cursor-not-allowed"
-                  disabled={deleting}
-                >
-                  {deleting ? 'Deleting...' : 'Delete Derby ☠️'}
-                </button>
-              </>
+            {featuredArt && isAdminUser && !editingArt && (
+              <button
+                type="button"
+                className="btn-outline mt-3"
+                onClick={() => setEditingArt(true)}
+              >
+                <Pencil size={16} strokeWidth={1.75} />
+                Edit artwork
+              </button>
             )}
           </div>
         )}
-        {deleteError && (
-          <div className="text-red-500 text-sm mt-2">{deleteError}</div>
-        )}
-        {!loading && derbyData && (
-          <DensList
-            dens={derbyData.dens}
+      </section>
+      {isAdminUser && editingArt && (
+        <FeaturedArtForm
+          derbyId={derby.id}
+          art={featuredArt}
+          authToken={authToken}
+          onSaved={(art) => {
+            setDerbyData({ ...derbyData, featuredArt: art });
+            setEditingArt(false);
+          }}
+          onCancel={() => setEditingArt(false)}
+        />
+      )}
+      <hr className="mt-14 mb-7 border-divider" />
+      {isAdminUser && (
+        <div className="mb-6 flex flex-wrap items-center gap-3">
+          <button
+            id={`make-championship-${derby.id}`}
+            type="button"
+            className="btn-outline"
+            onClick={() => handleMakeChampionshipClick(derby.id)}
+          >
+            Make championship
+          </button>
+          <button
+            id={`delete-derby-${derby.id}`}
+            type="button"
+            className="btn-outline"
+            onClick={() => handleDeleteDerbyClick(derby.id)}
+            disabled={deleting}
+          >
+            {deleting ? 'Deleting...' : 'Delete derby'}
+          </button>
+        </div>
+      )}
+      {deleteError && (
+        <div className="mb-6">
+          <ErrorMessage>{deleteError}</ErrorMessage>
+        </div>
+      )}
+      <div role="tablist" aria-label="Dens" className="flex flex-wrap gap-2">
+        {tabs.map((tab) => {
+          const selected = tab.key === selectedTab;
+          return (
+            <button
+              key={tab.key}
+              type="button"
+              role="tab"
+              id={`tab-${tab.key}`}
+              aria-selected={selected}
+              aria-controls="den-panel"
+              onClick={() => selectTab(tab.key)}
+              className={`rounded-(--radius) border px-3.5 py-2 text-sm font-semibold transition-colors ${
+                selected
+                  ? 'border-accent text-accent shadow-[inset_0_-3px_0_var(--cs-yellow)]'
+                  : 'border-divider text-ink hover:bg-[color-mix(in_srgb,var(--accent)_12%,transparent)]'
+              }`}
+            >
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+      <div
+        id="den-panel"
+        role="tabpanel"
+        aria-labelledby={selectedTab ? `tab-${selectedTab}` : undefined}
+      >
+        {selectedDen && (
+          <DenResults
+            den={selectedDen}
             isAdminUser={isAdminUser}
             authToken={authToken}
           />
         )}
-      </main>
-    </div>
+        {selectedTab === CHAMPIONSHIP_TAB && championship && (
+          <>
+            <div className="mt-7 mb-3 flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-[28px] font-semibold">Championship</h2>
+              <Link
+                className="btn-outline no-underline"
+                href={`/derby/${derby.id}/championship`}
+              >
+                Go to heats
+              </Link>
+            </div>
+            <ResultsTable cars={championship.cars} dens={championship.dens} />
+          </>
+        )}
+        {tabs.length === 0 && (
+          <p className="mt-7 text-ink/65">No dens have been added yet.</p>
+        )}
+      </div>
+    </>
   );
 }
 
-interface DensListProps {
-  dens: DerbyData['dens'];
+interface DenResultsProps {
+  den: DerbyData['dens'][number];
   isAdminUser: boolean;
   authToken?: string;
 }
 
-function DensList({ dens, isAdminUser, authToken }: DensListProps) {
-  const [regeneratingDenId, setRegeneratingDenId] = useState<number | null>(
-    null
-  );
+function DenResults({ den, isAdminUser, authToken }: DenResultsProps) {
+  const [regenerating, setRegenerating] = useState(false);
   const [regenerateError, setRegenerateError] = useState<string | null>(null);
-  const [creatingDenId, setCreatingDenId] = useState<number | null>(null);
+  const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
-  const [createErrorDenId, setCreateErrorDenId] = useState<number | null>(null);
 
   async function handleRegenerate(denId: number) {
     const confirmed = window.confirm(
@@ -201,7 +334,7 @@ function DensList({ dens, isAdminUser, authToken }: DensListProps) {
     }
 
     setRegenerateError(null);
-    setRegeneratingDenId(denId);
+    setRegenerating(true);
 
     try {
       const response = await fetch('/api/den/heat/regenerate', {
@@ -222,14 +355,13 @@ function DensList({ dens, isAdminUser, authToken }: DensListProps) {
         get(err, 'message', 'Failed to regenerate heats. Please try again.')
       );
     } finally {
-      setRegeneratingDenId(null);
+      setRegenerating(false);
     }
   }
 
   async function handleCreateCar(denId: number, denName: string) {
     if (!authToken) {
       setCreateError('Missing authorization token. Please sign in again.');
-      setCreateErrorDenId(denId);
       return;
     }
 
@@ -262,8 +394,7 @@ function DensList({ dens, isAdminUser, authToken }: DensListProps) {
     const carName = carNameRaw.trim();
 
     setCreateError(null);
-    setCreateErrorDenId(null);
-    setCreatingDenId(denId);
+    setCreating(true);
 
     try {
       const response = await fetch('/api/car', {
@@ -290,54 +421,55 @@ function DensList({ dens, isAdminUser, authToken }: DensListProps) {
       setCreateError(
         get(err, 'message', 'Failed to create car. Please try again.')
       );
-      setCreateErrorDenId(denId);
     } finally {
-      setCreatingDenId(null);
+      setCreating(false);
     }
   }
 
-  return dens.map((den) => (
-    <Fragment key={den.id}>
-      <div key={den.id} className="mb-4">
-        <h2 className="text-2xl font-bold mb-2 mt-4">Den {den.name}</h2>
-        {<Cars cars={den.cars} />}
-      </div>
-      <div className="flex gap-4 items-center flex-col sm:flex-row">
-        <Link
-          className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-          href={`/derby/den/${den.id}/heats`}
-        >
-          Go to Heats
-        </Link>
-        {isAdminUser && (
-          <>
-            <button
-              className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-emerald-600 text-white gap-2 hover:bg-emerald-700 text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 disabled:opacity-60 disabled:cursor-not-allowed"
-              type="button"
-              onClick={() => handleCreateCar(den.id, den.name)}
-              disabled={creatingDenId === den.id}
-            >
-              {creatingDenId === den.id ? 'Adding...' : 'Add Car'}
-            </button>
-            <button
-              className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-blue-600 text-white gap-2 hover:bg-blue-700 text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 disabled:opacity-60 disabled:cursor-not-allowed"
-              type="button"
-              onClick={() => handleRegenerate(den.id)}
-              disabled={regeneratingDenId === den.id}
-            >
-              {regeneratingDenId === den.id
-                ? 'Regenerating...'
-                : 'Regenerate Heats'}
-            </button>
-          </>
-        )}
+  return (
+    <>
+      <div className="mt-7 mb-3 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-[28px] font-semibold">Den {den.name}</h2>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            className="btn-outline no-underline"
+            href={`/derby/den/${den.id}/heats`}
+          >
+            Go to heats
+          </Link>
+          {isAdminUser && (
+            <>
+              <button
+                className="btn-outline"
+                type="button"
+                onClick={() => handleCreateCar(den.id, den.name)}
+                disabled={creating}
+              >
+                {creating ? 'Adding...' : 'Add car'}
+              </button>
+              <button
+                className="btn-outline"
+                type="button"
+                onClick={() => handleRegenerate(den.id)}
+                disabled={regenerating}
+              >
+                {regenerating ? 'Regenerating...' : 'Regenerate heats'}
+              </button>
+            </>
+          )}
+        </div>
       </div>
       {regenerateError && (
-        <div className="text-red-500 text-sm mt-2">{regenerateError}</div>
+        <div className="mb-3">
+          <ErrorMessage>{regenerateError}</ErrorMessage>
+        </div>
       )}
-      {createError && createErrorDenId === den.id && (
-        <div className="text-red-500 text-sm mt-2">{createError}</div>
+      {createError && (
+        <div className="mb-3">
+          <ErrorMessage>{createError}</ErrorMessage>
+        </div>
       )}
-    </Fragment>
-  ));
+      <ResultsTable cars={den.cars} />
+    </>
+  );
 }
