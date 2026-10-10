@@ -2,8 +2,14 @@ import { NextResponse } from 'next/server';
 import { parse } from 'csv-parse/sync';
 import { processCsv, validateCsv } from '@/api-biz/csv';
 import { db } from '@/api-biz/db';
+import { authorizeApiKeyOrAdminSession } from '@/lib/api-auth';
 
 export async function POST(req: Request) {
+  const authResult = await authorizeApiKeyOrAdminSession(req.headers);
+  if (!authResult.authorized) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   const text = await req.text();
   const url = new URL(req.url);
   const derbyId = Number(url.searchParams.get('derby_id'));

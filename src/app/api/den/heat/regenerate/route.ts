@@ -1,8 +1,14 @@
 import { getDenById } from '@/api-biz/den';
 import { regenerateHeatsForDen } from '@/api-biz/heat';
+import { authorizeApiKeyOrAdminSession } from '@/lib/api-auth';
 import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
+  const authResult = await authorizeApiKeyOrAdminSession(req.headers);
+  if (!authResult.authorized) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   const body = await req.json();
 
   if (typeof body.den_id !== 'number') {
