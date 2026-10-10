@@ -43,6 +43,6 @@
     "supabase": "^2.120.0",
     "tailwindcss": "^4.3.3",
     "ts-jest": "^29.4.14",
-    "typescript": "^5.9.3"
+    "typescript": "~6.0.3"
   }
 }
