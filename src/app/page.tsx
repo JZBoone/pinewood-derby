@@ -8,6 +8,7 @@ import Button from '@/components/button';
 import ErrorMessage from '@/components/error-message';
 import TrackScene from '@/components/art/track-scene';
 import RankBand from '@/components/rank-band';
+import { DerbyListSkeleton } from '@/components/skeleton';
 import { formatRaceDay } from '@/lib/derby';
 import { isAdmin } from '@/lib/user';
 import { derby } from '@generated/client';
@@ -284,8 +285,8 @@ export default function Home() {
               </button>
             </li>
           ))}
-          {loading && <li className="py-[22px] text-ink/65">Loading...</li>}
         </ul>
+        {loading && <DerbyListSkeleton />}
         {error && (
           <div className="mt-6">
             <ErrorMessage>{error}</ErrorMessage>
