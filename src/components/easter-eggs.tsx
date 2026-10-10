@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import PinewoodCar from './art/pinewood-car';
+import Whale from './art/whale';
 import { useToast } from './toast';
 
 const KONAMI = [
@@ -17,6 +18,23 @@ const KONAMI = [
   'a',
 ];
 
+const WHALE_WORD = 'whale';
+
+export const WHALE_EVENT = 'pack272:whale';
+
+/** Sends the Williams Whales whale across the screen. */
+export function summonWhale() {
+  window.dispatchEvent(new Event(WHALE_EVENT));
+}
+
+function isTypingTarget(target: EventTarget | null) {
+  return (
+    target instanceof HTMLElement &&
+    (target.isContentEditable ||
+      ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))
+  );
+}
+
 const PARADE = [
   '#c62232',
   '#f5b919',
@@ -29,11 +47,13 @@ const PARADE = [
 ];
 
 /**
- * Site-wide easter eggs: the Konami code sends a parade of pinewood cars
- * across the screen.
+ * Site-wide easter eggs. The Konami code sends a parade of pinewood cars
+ * across the screen, and typing "whale" (or summonWhale) sends the Williams
+ * Whales whale swimming by.
  */
 export default function EasterEggs() {
   const [parade, setParade] = useState(0);
+  const [whale, setWhale] = useState(0);
   const showToast = useToast();
 
   useEffect(() => {
@@ -44,8 +64,23 @@ export default function EasterEggs() {
     );
 
     let progress = 0;
+    let typed = '';
+    function handleWhale() {
+      setWhale((n) => n + 1);
+      showToast('Go Williams Whales!');
+    }
     function handleKeyDown(event: KeyboardEvent) {
+      if (isTypingTarget(event.target)) {
+        return;
+      }
       const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
+      typed = (typed + (key.length === 1 ? key : ' ')).slice(
+        -WHALE_WORD.length
+      );
+      if (typed === WHALE_WORD) {
+        typed = '';
+        handleWhale();
+      }
       progress =
         key === KONAMI[progress] ? progress + 1 : key === KONAMI[0] ? 1 : 0;
       if (progress === KONAMI.length) {
@@ -55,7 +90,11 @@ export default function EasterEggs() {
       }
     }
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener(WHALE_EVENT, handleWhale);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener(WHALE_EVENT, handleWhale);
+    };
   }, [showToast]);
 
   useEffect(() => {
@@ -66,9 +105,36 @@ export default function EasterEggs() {
     return () => clearTimeout(timeout);
   }, [parade]);
 
-  if (parade === 0) {
-    return null;
-  }
+  useEffect(() => {
+    if (whale === 0) {
+      return;
+    }
+    const timeout = setTimeout(() => setWhale(0), 7_000);
+    return () => clearTimeout(timeout);
+  }, [whale]);
+
+  return (
+    <>
+      {parade > 0 && <Parade run={parade} />}
+      {whale > 0 && (
+        <div
+          aria-hidden
+          className="pointer-events-none fixed inset-x-0 bottom-20 z-40 h-36 overflow-hidden motion-reduce:hidden"
+        >
+          <div
+            key={whale}
+            className="absolute bottom-2 left-0 animate-[whale-swim_6s_ease-in-out_forwards]"
+            style={{ transform: 'translateX(-260px)' }}
+          >
+            <Whale spouting className="h-[130px] w-[208px]" />
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+function Parade({ run }: { run: number }) {
   return (
     <div
       aria-hidden
@@ -76,7 +142,7 @@ export default function EasterEggs() {
     >
       {PARADE.map((color, i) => (
         <div
-          key={`${parade}-${color}`}
+          key={`${run}-${color}`}
           className="absolute bottom-0 left-0 animate-[parade-drive_3.2s_linear_forwards]"
           style={{
             animationDelay: `${i * 0.28}s`,
