@@ -1,7 +1,7 @@
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { inferAdditionalFields } from 'better-auth/client/plugins';
-import { apiKey } from 'better-auth/plugins';
+import { apiKey } from '@better-auth/api-key';
 import { db } from '../api-biz/db';
 
 export const auth = betterAuth({

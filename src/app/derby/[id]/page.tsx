@@ -112,7 +112,7 @@ export default function Derby({ params }: Props) {
   }, [resolvedParams.id]);
 
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-(family-name:--font-geist-sans)">
       <BackButton></BackButton>
       <main className="flex flex-col gap-8 row-start-2 items-center sm:center">
         <h1 className="text-2xl font-bold text-center sm:text-left">
@@ -146,14 +146,14 @@ export default function Derby({ params }: Props) {
                   onClick={() =>
                     handleMakeChampionshipClick(derbyData.derby.id)
                   }
-                  className="mt-4 sm:mt-0 px-4 py-2 border-2 border-blue-500 text-blue-600 rounded font-semibold hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+                  className="mt-4 sm:mt-0 px-4 py-2 border-2 border-blue-500 text-blue-600 rounded-sm font-semibold hover:bg-blue-50 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-400"
                 >
                   Make Championship 🏁
                 </button>
                 <button
                   id={`delete-derby-${derbyData.derby.id}`}
                   onClick={() => handleDeleteDerbyClick(derbyData.derby.id)}
-                  className="mt-4 sm:mt-0 px-4 py-2 border-2 border-red-500 text-red-600 rounded font-semibold hover:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="mt-4 sm:mt-0 px-4 py-2 border-2 border-red-500 text-red-600 rounded-sm font-semibold hover:bg-red-50 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-red-400 disabled:opacity-60 disabled:cursor-not-allowed"
                   disabled={deleting}
                 >
                   {deleting ? 'Deleting...' : 'Delete Derby ☠️'}
