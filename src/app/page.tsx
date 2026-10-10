@@ -147,10 +147,10 @@ export default function Home() {
       <SiteHeader />
       <main className="mx-auto max-w-[760px] px-4 pt-12 sm:px-10 sm:pt-16">
         <div className="text-xs font-bold tracking-[.14em] text-accent uppercase">
-          Cub Scout Pack 272
+          Cub Scouts
         </div>
         <h1 className="mt-3 mb-[22px] text-[clamp(40px,9vw,64px)] leading-none font-bold tracking-[-.025em] font-stretch-118%">
-          Pinewood Derbies
+          Pack 272
         </h1>
         <div className="mb-[52px] flex flex-wrap items-center gap-3.5">
           {RANKS.map((rank) => (
