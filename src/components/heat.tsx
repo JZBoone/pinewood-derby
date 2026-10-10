@@ -52,11 +52,13 @@ export function Heat({
   isAdminUser = false,
 }: HeatProps) {
   const [status, setStatus] = React.useState(heat.status);
+  const [prevHeatStatus, setPrevHeatStatus] = React.useState(heat.status);
   const [isActivating, setIsActivating] = React.useState(false);
 
-  React.useEffect(() => {
+  if (heat.status !== prevHeatStatus) {
+    setPrevHeatStatus(heat.status);
     setStatus(heat.status);
-  }, [heat.status]);
+  }
 
   const getWinnerEmoji = (time: number | null) => {
     return time ===
