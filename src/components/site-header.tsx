@@ -13,10 +13,10 @@ export default function SiteHeader() {
   return (
     <header>
       <div className="h-2 bg-cs-yellow" />
-      <nav className="flex items-center gap-3 border-b border-divider px-4 py-4 sm:gap-[18px] sm:px-10">
-        <div className="mr-auto flex items-center gap-3">
+      <nav className="flex items-center gap-2 border-b border-divider px-4 py-4 sm:gap-[18px] sm:px-10">
+        <div className="mr-auto flex min-w-0 items-center gap-2 sm:gap-3">
           <PackPatch />
-          <span className="font-(family-name:--font-heading) text-lg font-semibold whitespace-nowrap font-stretch-112%">
+          <span className="truncate font-(family-name:--font-heading) text-base font-semibold font-stretch-112% sm:text-lg">
             Pinewood Derby
           </span>
         </div>
