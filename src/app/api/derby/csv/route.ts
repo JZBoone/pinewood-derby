@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invalid derby_id' }, { status: 400 });
   }
 
-  const records = parse(text, {
+  const records = parse<Record<string, string>>(text, {
     columns: true, // Treat the first row as column headers
     skip_empty_lines: true,
   });
