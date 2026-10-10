@@ -129,7 +129,7 @@ export default function Home() {
   }
 
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-(family-name:--font-geist-sans)">
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
         {session ? (
           <div className="flex flex-wrap items-center gap-3">
@@ -175,7 +175,7 @@ export default function Home() {
                     type="text"
                     value={derbyName}
                     onChange={(event) => setDerbyName(event.target.value)}
-                    className="border border-gray-300 rounded px-3 py-2 bg-white text-gray-900 placeholder:text-gray-400 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500"
+                    className="border border-gray-300 rounded-sm px-3 py-2 bg-white text-gray-900 placeholder:text-gray-400 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500"
                     placeholder="Pack 123 Pinewood"
                   />
                 </div>
@@ -189,14 +189,14 @@ export default function Home() {
                     type="date"
                     value={derbyDate}
                     onChange={(event) => setDerbyDate(event.target.value)}
-                    className="border border-gray-300 rounded px-3 py-2 bg-white text-gray-900 placeholder:text-gray-400 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 dark:[color-scheme:dark]"
+                    className="border border-gray-300 rounded-sm px-3 py-2 bg-white text-gray-900 placeholder:text-gray-400 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 dark:scheme-dark"
                   />
                 </div>
                 {createError && <div className="text-red-500">{createError}</div>}
                 <button
                   type="submit"
                   disabled={creating}
-                  className="self-start px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-60"
+                  className="self-start px-4 py-2 bg-blue-600 text-white rounded-sm disabled:opacity-60"
                 >
                   {creating ? 'Creating...' : 'Create derby'}
                 </button>
@@ -216,7 +216,7 @@ export default function Home() {
                 <button
                   type="submit"
                   disabled={uploading}
-                  className="self-start px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-60"
+                  className="self-start px-4 py-2 bg-blue-600 text-white rounded-sm disabled:opacity-60"
                 >
                   {uploading ? 'Uploading...' : 'Upload CSV'}
                 </button>
@@ -224,7 +224,7 @@ export default function Home() {
             )}
           </div>
         )}
-        <ul className="list-inside text-lg text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
+        <ul className="list-inside text-lg text-center sm:text-left font-(family-name:--font-geist-mono)">
           {derbies.map((derby) => (
             <li key={derby.id}>
               <Link href={`/derby/${derby.id}`} className="text-2xl underline">
@@ -234,7 +234,7 @@ export default function Home() {
                 id={`fake-times-${derby.id}`}
                 style={{ display: 'none' }}
                 onClick={() => handleMakeFakeTimesClick(derby.id)}
-                className="mt-4 ml-4 px-4 py-2 bg-blue-500 text-white rounded"
+                className="mt-4 ml-4 px-4 py-2 bg-blue-500 text-white rounded-sm"
               >
                 Fake Times
               </button>
