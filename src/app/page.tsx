@@ -1,11 +1,14 @@
 'use client';
 
-import { signIn, signOut, useSession } from '@/client-biz/auth';
+import { useSession } from '@/client-biz/auth';
 import { createDerby, fetchDerbies, uploadDerbyCsv } from '@/client-biz/derby';
 import { postFakeTimes } from '@/client-biz/heat';
+import SiteHeader from '@/components/site-header';
+import { RANKS } from '@/lib/ranks';
 import { isAdmin } from '@/lib/user';
 import { derby } from '@generated/client';
-import { get } from 'lodash';
+import { get, orderBy } from 'lodash';
+import { ArrowRight, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { type FormEvent, useEffect, useState } from 'react';
 
@@ -24,9 +27,6 @@ export default function Home() {
   const [createdDerbyId, setCreatedDerbyId] = useState<number | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-
-  const handleLogin = async () =>
-    signIn.social({ provider: 'google', callbackURL: '/' });
 
   function handleMakeFakeTimesClick(derbyId: derby['id']) {
     postFakeTimes(derbyId)
@@ -124,28 +124,51 @@ export default function Home() {
     }
   }
 
-  function formatDate(date: string) {
-    return new Date(date).toLocaleDateString();
+  function formatRaceDay(date: Date) {
+    return new Date(date).toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'long',
+      day: 'numeric',
+    });
   }
 
+  const sortedDerbies = orderBy(
+    derbies,
+    (derby) => new Date(derby.time).getTime(),
+    'desc'
+  );
+
+  const inputClassName =
+    'rounded-sm border border-divider bg-bg px-3 py-2 text-ink placeholder:text-ink/50';
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-(family-name:--font-geist-sans)">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        {session ? (
-          <div className="flex flex-wrap items-center gap-3">
-            <div>Welcome {session.user.name}</div>
-            <button type="button" onClick={() => signOut()} className="text-sm underline">
-              Sign out
-            </button>
-          </div>
-        ) : (
-          <button onClick={handleLogin}>Sign in with Google</button>
-        )}
-        <h1 className="text-4xl font-bold text-center sm:text-left">
+    <div className="min-h-screen pb-20">
+      <SiteHeader />
+      <main className="mx-auto max-w-[760px] px-4 pt-12 sm:px-10 sm:pt-16">
+        <div className="text-xs font-bold tracking-[.14em] text-accent uppercase">
+          Cub Scout Pack 272
+        </div>
+        <h1 className="mt-3 mb-[22px] text-[clamp(40px,9vw,64px)] leading-none font-bold tracking-[-.025em] font-stretch-118%">
           Pinewood Derbies
         </h1>
+        <div className="mb-[52px] flex flex-wrap items-center gap-3.5">
+          {RANKS.map((rank) => (
+            <span
+              key={rank.name}
+              title={rank.name}
+              className="size-[22px] rotate-45 rounded-[2px]"
+              style={{
+                background: rank.fill,
+                boxShadow: `0 0 0 2px var(--bg), 0 0 0 3px ${rank.edge}`,
+              }}
+            />
+          ))}
+          <span className="text-[13px] text-ink/65">
+            Lions through Arrow of Light, every den races
+          </span>
+        </div>
         {isAdminUser && (
-          <div className="flex items-center gap-3">
+          <div className="mb-8 flex flex-col gap-4">
             <button
               type="button"
               onClick={() => {
@@ -153,97 +176,143 @@ export default function Home() {
                 setCreateError(null);
                 setUploadError(null);
               }}
-              className="h-10 w-10 rounded-full border border-blue-500 text-blue-600 text-2xl leading-none flex items-center justify-center hover:bg-blue-50"
-              aria-label="Create a new derby"
+              className="btn-outline self-start"
+              aria-expanded={showCreateForm}
             >
-              +
+              <Plus size={16} strokeWidth={2} />
+              New derby
             </button>
-            <span className="text-sm text-gray-600">Create a new derby</span>
-          </div>
-        )}
-        {isAdminUser && showCreateForm && (
-          <div className="w-full max-w-xl border border-gray-200 rounded-lg p-4">
-            {!createdDerbyId ? (
-              <form className="flex flex-col gap-4" onSubmit={handleCreateDerbySubmit}>
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-semibold" htmlFor="derby-name">
-                    Derby name
-                  </label>
-                  <input
-                    id="derby-name"
-                    name="derby-name"
-                    type="text"
-                    value={derbyName}
-                    onChange={(event) => setDerbyName(event.target.value)}
-                    className="border border-gray-300 rounded-sm px-3 py-2 bg-white text-gray-900 placeholder:text-gray-400 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500"
-                    placeholder="Pack 123 Pinewood"
-                  />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-semibold" htmlFor="derby-date">
-                    Derby date
-                  </label>
-                  <input
-                    id="derby-date"
-                    name="derby-date"
-                    type="date"
-                    value={derbyDate}
-                    onChange={(event) => setDerbyDate(event.target.value)}
-                    className="border border-gray-300 rounded-sm px-3 py-2 bg-white text-gray-900 placeholder:text-gray-400 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 dark:scheme-dark"
-                  />
-                </div>
-                {createError && <div className="text-red-500">{createError}</div>}
-                <button
-                  type="submit"
-                  disabled={creating}
-                  className="self-start px-4 py-2 bg-blue-600 text-white rounded-sm disabled:opacity-60"
-                >
-                  {creating ? 'Creating...' : 'Create derby'}
-                </button>
-              </form>
-            ) : (
-              <form className="flex flex-col gap-4" onSubmit={handleCsvUpload}>
-                <div className="text-sm text-gray-700">
-                  Upload the CSV for this derby.
-                </div>
-                <input
-                  type="file"
-                  name="csv"
-                  accept=".csv,text/csv"
-                  className="text-sm"
-                />
-                {uploadError && <div className="text-red-500">{uploadError}</div>}
-                <button
-                  type="submit"
-                  disabled={uploading}
-                  className="self-start px-4 py-2 bg-blue-600 text-white rounded-sm disabled:opacity-60"
-                >
-                  {uploading ? 'Uploading...' : 'Upload CSV'}
-                </button>
-              </form>
+            {showCreateForm && (
+              <div className="rounded-(--radius) border border-divider bg-surface p-5">
+                {!createdDerbyId ? (
+                  <form
+                    className="flex flex-col gap-4"
+                    onSubmit={handleCreateDerbySubmit}
+                  >
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-bold" htmlFor="derby-name">
+                        Derby name
+                      </label>
+                      <input
+                        id="derby-name"
+                        name="derby-name"
+                        type="text"
+                        value={derbyName}
+                        onChange={(event) => setDerbyName(event.target.value)}
+                        className={inputClassName}
+                        placeholder="Pack 123 Pinewood"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-bold" htmlFor="derby-date">
+                        Derby date
+                      </label>
+                      <input
+                        id="derby-date"
+                        name="derby-date"
+                        type="date"
+                        value={derbyDate}
+                        onChange={(event) => setDerbyDate(event.target.value)}
+                        className={inputClassName}
+                      />
+                    </div>
+                    {createError && <ErrorMessage>{createError}</ErrorMessage>}
+                    <button
+                      type="submit"
+                      disabled={creating}
+                      className="btn-outline self-start"
+                    >
+                      {creating ? 'Creating...' : 'Create derby'}
+                    </button>
+                  </form>
+                ) : (
+                  <form
+                    className="flex flex-col gap-4"
+                    onSubmit={handleCsvUpload}
+                  >
+                    <div className="text-sm">
+                      Upload the CSV for this derby.
+                    </div>
+                    <input
+                      type="file"
+                      name="csv"
+                      accept=".csv,text/csv"
+                      className="text-sm"
+                    />
+                    {uploadError && <ErrorMessage>{uploadError}</ErrorMessage>}
+                    <button
+                      type="submit"
+                      disabled={uploading}
+                      className="btn-outline self-start"
+                    >
+                      {uploading ? 'Uploading...' : 'Upload CSV'}
+                    </button>
+                  </form>
+                )}
+              </div>
             )}
           </div>
         )}
-        <ul className="list-inside text-lg text-center sm:text-left font-(family-name:--font-geist-mono)">
-          {derbies.map((derby) => (
+        <div className="hidden grid-cols-[140px_1fr_1fr_20px] gap-6 border-b-2 border-ink pb-2.5 text-[11px] font-bold tracking-[.1em] text-ink/65 uppercase sm:grid">
+          <div>Year</div>
+          <div>Race day</div>
+          <div>Venue</div>
+        </div>
+        <ul>
+          {sortedDerbies.map((derby) => (
             <li key={derby.id}>
-              <Link href={`/derby/${derby.id}`} className="text-2xl underline">
-                {formatDate(derby.time.toString())} {derby.location_name}
+              <Link
+                href={`/derby/${derby.id}`}
+                className="grid grid-cols-1 gap-1 border-b border-divider py-[22px] text-inherit no-underline transition-colors hover:bg-[color-mix(in_srgb,var(--cs-yellow)_14%,transparent)] hover:text-inherit sm:grid-cols-[140px_1fr_1fr_20px] sm:items-center sm:gap-6"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="h-9 w-1 bg-cs-yellow" />
+                  <span className="font-(family-name:--font-heading) text-[40px] leading-none font-semibold tabular-nums font-stretch-110%">
+                    {new Date(derby.time).getFullYear()}
+                  </span>
+                </div>
+                <div className="text-sm sm:hidden">
+                  {formatRaceDay(derby.time)}
+                  <span className="text-ink/72"> · {derby.location_name}</span>
+                </div>
+                <div className="hidden text-base sm:block">
+                  {formatRaceDay(derby.time)}
+                </div>
+                <div className="hidden text-base text-ink/72 sm:block">
+                  {derby.location_name}
+                </div>
+                <ArrowRight
+                  size={18}
+                  strokeWidth={2}
+                  className="hidden text-accent sm:block"
+                />
               </Link>
               <button
                 id={`fake-times-${derby.id}`}
                 style={{ display: 'none' }}
                 onClick={() => handleMakeFakeTimesClick(derby.id)}
-                className="mt-4 ml-4 px-4 py-2 bg-blue-500 text-white rounded-sm"
               >
                 Fake Times
               </button>
             </li>
           ))}
-          {loading && <li>Loading...</li>}
-          {error && <div className="text-red-500">{error}</div>}
+          {loading && <li className="py-[22px] text-ink/65">Loading...</li>}
         </ul>
+        {error && (
+          <div className="mt-6">
+            <ErrorMessage>{error}</ErrorMessage>
+          </div>
+        )}
       </main>
+    </div>
+  );
+}
+
+// Red sits in the stripe, not the text, so it reads on both themes.
+function ErrorMessage({ children }: { children: React.ReactNode }) {
+  return (
+    <div role="alert" className="border-l-4 border-cs-red pl-3">
+      {children}
     </div>
   );
 }

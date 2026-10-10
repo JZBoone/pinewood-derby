@@ -1,25 +1,58 @@
 @import 'tailwindcss';
 
-@theme {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+/* The theme follows data-theme on <html> (set by next-themes), not the OS media query. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+@theme inline {
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--text);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-divider: var(--divider);
+  --color-cs-yellow: var(--cs-yellow);
+  --color-cs-red: var(--cs-red);
+  --color-cs-navy: var(--cs-navy);
+  --color-cs-mark: var(--cs-mark);
 }
 
-/*
-  The default border color has changed to `currentcolor` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
+:root,
+[data-theme='light'] {
+  --bg: #f4efe2; /* handbook paper */
+  --surface: #ebe3cf;
+  --text: #15214a; /* navy ink */
+  --accent: #1f3a80; /* navy: links, outlined buttons, icons */
+  --accent-hover: #162c63;
+  --divider: color-mix(in srgb, #15214a 18%, transparent);
+  --cs-yellow: #f5b919; /* cap yellow: stripes and marks only, never text on light */
+  --cs-red: #c62232; /* pack-number patch red */
+  --cs-navy: #1a2b5c; /* shirt navy */
+  --cs-mark: #1a2b5c;
+  --shadow-md: 0 3px 10px color-mix(in srgb, #15214a 16%, transparent);
+  --radius: 4px;
+}
 
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
-*/
+[data-theme='dark'] {
+  --bg: #132150; /* scout-shirt navy */
+  --surface: #1b2c60;
+  --text: #f3efe4;
+  --accent: #f5b919; /* yellow becomes the accent on navy */
+  --accent-hover: #ffd04d;
+  --divider: color-mix(in srgb, #f3efe4 18%, transparent);
+  --cs-navy: #0c1638;
+  --cs-mark: #f5b919;
+  color-scheme: dark;
+}
+
 @layer base {
   *,
   ::after,
   ::before,
   ::backdrop,
   ::file-selector-button {
-    border-color: var(--color-gray-200, currentcolor);
+    border-color: var(--divider);
   }
 
   /* Tailwind CSS v4 dropped the v3 `cursor: pointer` default on buttons. */
@@ -27,24 +60,91 @@
   [role='button']:not(:disabled) {
     cursor: pointer;
   }
-}
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.55;
+    margin: 0;
+    transition:
+      background 0.25s,
+      color 0.25s;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  button {
+    font-family: var(--font-heading);
+    font-stretch: 112%;
+  }
+
+  a {
+    color: var(--accent);
+    text-underline-offset: 3px;
+  }
+
+  a:hover {
+    color: var(--accent-hover);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--cs-yellow) 35%, transparent);
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  /* Buttons are outlined, never solid-filled. */
+  .btn-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--accent);
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    transition: background 0.15s;
+  }
+
+  .btn-outline:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+  }
+
+  .btn-outline:disabled {
+    opacity: 0.6;
+  }
+
+  .btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--divider);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--accent);
+    transition: background 0.15s;
+  }
+
+  .btn-icon:hover {
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+  }
 }
 
 .name {
