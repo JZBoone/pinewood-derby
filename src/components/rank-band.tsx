@@ -53,7 +53,9 @@ export default function RankBand({ size, caption, className }: RankBandProps) {
           />
         </span>
       ))}
-      {caption && <span className="text-[13px] text-ink/65">{caption}</span>}
+      {caption && (
+        <span className="text-[13px] text-balance text-ink/65">{caption}</span>
+      )}
       {arrows > 0 && (
         <svg
           key={arrows}
