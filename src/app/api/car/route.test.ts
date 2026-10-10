@@ -1,4 +1,5 @@
 import { db } from '@/api-biz/db';
+import { createTestApiKeyAuth, createTestSessionAuth } from '@/test-utils/auth';
 import { car, den, derby } from '@generated/client';
 import { NextRequest } from 'next/server';
 import { DELETE, GET, POST } from './route';
@@ -90,8 +91,10 @@ describe('POST /api/car', () => {
       carName: 'Speedy',
     };
 
+    const { headers } = await createTestSessionAuth();
     const request = new NextRequest('http://localhost/api/car', {
       method: 'POST',
+      headers,
       body: JSON.stringify(carData),
     });
 
@@ -118,8 +121,10 @@ describe('POST /api/car', () => {
       owner: 'Another Owner',
     };
 
+    const { headers } = await createTestSessionAuth();
     const request = new NextRequest('http://localhost/api/car', {
       method: 'POST',
+      headers,
       body: JSON.stringify(carData),
     });
 
@@ -128,13 +133,39 @@ describe('POST /api/car', () => {
   });
 
   test('it returns a 400 for an invalid payload', async () => {
+    const { headers } = await createTestSessionAuth();
     const request = new NextRequest('http://localhost/api/car', {
       method: 'POST',
+      headers,
       body: JSON.stringify({ carNumber: 4 }),
     });
 
     const res = await POST(request);
     expect(res.status).toBe(400);
+  });
+
+  test('it returns a 403 without an admin session', async () => {
+    const { headers } = await createTestSessionAuth({ role: 'user' });
+    const request = new NextRequest('http://localhost/api/car', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ denId: testDen.id, carNumber: 5, owner: 'X' }),
+    });
+
+    const res = await POST(request);
+    expect(res.status).toBe(403);
+  });
+
+  test('it returns a 403 for an api key', async () => {
+    const { headers } = await createTestApiKeyAuth();
+    const request = new NextRequest('http://localhost/api/car', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ denId: testDen.id, carNumber: 5, owner: 'X' }),
+    });
+
+    const res = await POST(request);
+    expect(res.status).toBe(403);
   });
 });
 
@@ -171,7 +202,11 @@ describe('DELETE /api/car', () => {
   test('it deletes a car', async () => {
     const url = new URL('http://localhost/api/car');
     url.searchParams.set('id', testCar.id.toString());
-    const request = new NextRequest(url.toString(), { method: 'DELETE' });
+    const { headers } = await createTestSessionAuth();
+    const request = new NextRequest(url.toString(), {
+      method: 'DELETE',
+      headers,
+    });
 
     const res = await DELETE(request);
     expect(res.status).toBe(204);
@@ -181,8 +216,10 @@ describe('DELETE /api/car', () => {
   });
 
   test('it returns a 400 if id is missing', async () => {
+    const { headers } = await createTestSessionAuth();
     const request = new NextRequest('http://localhost/api/car', {
       method: 'DELETE',
+      headers,
     });
     const res = await DELETE(request);
     expect(res.status).toBe(400);
@@ -191,9 +228,25 @@ describe('DELETE /api/car', () => {
   test('it returns a 400 if id is not a number', async () => {
     const url = new URL('http://localhost/api/car');
     url.searchParams.set('id', 'abc');
-    const request = new NextRequest(url.toString(), { method: 'DELETE' });
+    const { headers } = await createTestSessionAuth();
+    const request = new NextRequest(url.toString(), {
+      method: 'DELETE',
+      headers,
+    });
 
     const res = await DELETE(request);
     expect(res.status).toBe(400);
+  });
+
+  test('it returns a 403 without auth', async () => {
+    const url = new URL('http://localhost/api/car');
+    url.searchParams.set('id', testCar.id.toString());
+    const request = new NextRequest(url.toString(), { method: 'DELETE' });
+
+    const res = await DELETE(request);
+    expect(res.status).toBe(403);
+
+    const existingCar = await db.car.findUnique({ where: { id: testCar.id } });
+    expect(existingCar).not.toBeNull();
   });
 });

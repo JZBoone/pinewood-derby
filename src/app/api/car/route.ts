@@ -3,7 +3,6 @@ import { getDerbyById } from '@/api-biz/derby';
 import { authorizeApiKeyOrAdminSession } from '@/lib/api-auth';
 import { GetCarsResponse } from '@/lib/car';
 import { NextResponse } from 'next/server';
-import { headers } from 'next/headers';
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
@@ -33,8 +32,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const reqHeaders = await headers();
-  const authResult = await authorizeApiKeyOrAdminSession(reqHeaders);
+  const authResult = await authorizeApiKeyOrAdminSession(req.headers);
   if (!authResult.authorized || authResult.method !== 'admin_session') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
@@ -63,8 +61,7 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-  const reqHeaders = await headers();
-  const authResult = await authorizeApiKeyOrAdminSession(reqHeaders);
+  const authResult = await authorizeApiKeyOrAdminSession(req.headers);
   if (!authResult.authorized || authResult.method !== 'admin_session') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
