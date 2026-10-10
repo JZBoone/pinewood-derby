@@ -48,6 +48,28 @@ export function heatHasTimes(heat: heat): boolean {
   ].some((time) => time !== null);
 }
 
+export type HeatProgress = 'final' | 'next' | 'scheduled';
+
+/**
+ * Labels each heat, in race order. A heat with recorded times is final. The
+ * active heat is up next, or failing that the first heat without times.
+ */
+export function heatProgress(heats: heat[]): HeatProgress[] {
+  const finals = heats.map(heatHasTimes);
+  let nextIndex = heats.findIndex(
+    (heat, index) => heat.status === 'active' && !finals[index]
+  );
+  if (nextIndex === -1) {
+    nextIndex = finals.indexOf(false);
+  }
+  return heats.map((_, index) => {
+    if (finals[index]) {
+      return 'final';
+    }
+    return index === nextIndex ? 'next' : 'scheduled';
+  });
+}
+
 export function bestTimeForCar(carId: number, heats: heat[]): number | null {
   const carTimes = heats
     .map((heat) => carTime(heat, carId))

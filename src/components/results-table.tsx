@@ -22,7 +22,9 @@ export default function ResultsTable({ cars, dens }: ResultsTableProps) {
           <th className={headerCell}>Place</th>
           <th className={headerCell}>Car</th>
           <th className={headerCell}>Scout</th>
-          {dens && <th className={headerCell}>Den</th>}
+          {dens && (
+            <th className={`${headerCell} hidden sm:table-cell`}>Den</th>
+          )}
           <th className={`${headerCell} text-right`}>Time</th>
           <th className={`${headerCell} hidden text-right sm:table-cell`}>
             Speed
@@ -50,6 +52,11 @@ export default function ResultsTable({ cars, dens }: ResultsTableProps) {
               </td>
               <td className="px-3 py-3.5 text-[17px]">
                 {car.owner}
+                {dens && (
+                  <div className="text-[13px] text-ink/72 sm:hidden">
+                    Den {denName(car)}
+                  </div>
+                )}
                 {car.name && (
                   <div className="text-sm font-semibold italic sm:hidden">
                     {car.name}
@@ -57,7 +64,7 @@ export default function ResultsTable({ cars, dens }: ResultsTableProps) {
                 )}
               </td>
               {dens && (
-                <td className="px-3 py-3.5 text-sm text-ink/72">
+                <td className="hidden px-3 py-3.5 text-sm text-ink/72 sm:table-cell">
                   Den {denName(car)}
                 </td>
               )}

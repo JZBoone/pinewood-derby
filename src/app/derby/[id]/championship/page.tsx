@@ -1,11 +1,13 @@
 'use client';
 
-import BackButton from '@/components/back-button';
-import { Cars } from '@/components/cars';
+import { useSession } from '@/client-biz/auth';
 import { fetchChampionshipData } from '@/client-biz/championship';
-import { Heat } from '@/components/heat';
+import ErrorMessage from '@/components/error-message';
+import HeatsView from '@/components/heats-view';
+import SiteHeader from '@/components/site-header';
 import { ChampionshipData } from '@/lib/championship';
-import { get, keyBy } from 'lodash';
+import { isAdmin } from '@/lib/user';
+import { get } from 'lodash';
 import { use, useEffect, useState } from 'react';
 
 interface Props {
@@ -14,21 +16,34 @@ interface Props {
   }>;
 }
 
-export default function Derby({ params }: Props) {
-  const resolvedParams = use(params);
-  const [championshipData, setChampionshipData] =
-    useState<ChampionshipData | null>(null);
+export default function Championship({ params }: Props) {
+  const { id } = use(params);
+  const [data, setData] = useState<ChampionshipData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const { data: session } = useSession();
+  const isAdminUser = !!session && isAdmin(session.user.role);
+
+  function handleHeatActivated(heatId: number) {
+    setData(
+      (prev) =>
+        prev && {
+          ...prev,
+          heats: prev.heats.map((heat) => ({
+            ...heat,
+            status: heat.id === heatId ? 'active' : 'inactive',
+          })),
+        }
+    );
+  }
 
   useEffect(() => {
     let mounted = true;
     let loadedOnce = false;
-    async function loadDerby() {
+    async function loadData() {
       while (mounted) {
         try {
-          const data = await fetchChampionshipData(resolvedParams.id);
-          setChampionshipData(data);
+          setData(await fetchChampionshipData(id));
         } catch (err: unknown) {
           if (!loadedOnce) {
             setError(
@@ -43,60 +58,33 @@ export default function Derby({ params }: Props) {
       }
     }
 
-    loadDerby();
+    loadData();
 
     return () => {
       mounted = false;
     };
-  }, [resolvedParams.id]);
-
-  function formatDate(date: string) {
-    return new Date(date).toLocaleDateString();
-  }
+  }, [id]);
 
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <BackButton></BackButton>
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:center">
-        <h1 className="text-2xl font-bold text-center sm:text-left">
-          {loading && 'Loading...'}
-          {!loading && !error && !championshipData && 'Derby not found'}
-          {error && <div className="text-red-500">{error}</div>}
-          {!loading &&
-            championshipData &&
-            `${formatDate(championshipData.derby.time.toString())} ${championshipData.derby.location_name}`}
-        </h1>
-        {!loading && championshipData && (
-          <DenChampions
-            cars={championshipData.cars}
-            dens={championshipData.dens}
+    <div className="min-h-screen">
+      <SiteHeader />
+      <main className="mx-auto max-w-[1040px] px-[clamp(20px,4vw,40px)] pt-7 pb-24">
+        {loading && <div className="text-ink/65">Loading...</div>}
+        {error && <ErrorMessage>{error}</ErrorMessage>}
+        {data && (
+          <HeatsView
+            derby={data.derby}
+            title="Championship"
+            backHref={`/derby/${data.derby.id}?den=championship`}
+            standings={data.cars}
+            dens={data.dens}
+            heats={data.heats}
+            cars={data.cars}
+            isAdminUser={isAdminUser}
+            onHeatActivated={handleHeatActivated}
           />
         )}
-        {!loading &&
-          championshipData &&
-          championshipData.heats.map((heat, heatIndex) => (
-            <Heat
-              key={heat.id}
-              heat={heat}
-              carsById={keyBy(championshipData.cars, 'id')}
-              heatNumber={heatIndex + 1}
-            />
-          ))}
       </main>
-    </div>
-  );
-}
-
-interface DenChampionsProps {
-  cars: ChampionshipData['cars'];
-  dens: ChampionshipData['dens'];
-}
-
-function DenChampions({ cars, dens }: DenChampionsProps) {
-  return (
-    <div className="mb-4">
-      <h2 className="text-2xl font-bold mb-2 mt-4">Den Champions</h2>
-      {<Cars cars={cars} dens={dens} />}
     </div>
   );
 }
