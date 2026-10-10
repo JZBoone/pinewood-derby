@@ -244,3 +244,87 @@
     background: color-mix(in srgb, var(--accent) 12%, transparent);
   }
 }
+
+/* Pack 272 imagery and easter eggs. Each animation is applied with Tailwind's
+   motion-safe variant, so reduced-motion visitors get still pictures. */
+@keyframes wheel-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes flame-flicker {
+  0%,
+  100% {
+    transform: scaleY(1) skewX(0deg);
+  }
+  33% {
+    transform: scaleY(1.12) skewX(-3deg);
+  }
+  66% {
+    transform: scaleY(0.92) skewX(3deg);
+  }
+}
+
+@keyframes spark-rise {
+  from {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(var(--spark-x), -70px) scale(0.3);
+  }
+}
+
+@keyframes parade-drive {
+  from {
+    transform: translateX(-220px);
+  }
+  to {
+    transform: translateX(calc(100vw + 40px));
+  }
+}
+
+@keyframes arrow-fly {
+  0% {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(var(--arrow-distance));
+  }
+}
+
+@keyframes patch-spin {
+  to {
+    transform: rotateY(720deg);
+  }
+}
+
+@keyframes car-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-1.5px);
+  }
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}

@@ -85,9 +85,9 @@ export default function DenHeats({ params }: Props) {
   }, [id]);
 
   return (
-    <div className="min-h-screen">
+    <div>
       <SiteHeader />
-      <main className="mx-auto max-w-[1040px] px-[clamp(20px,4vw,40px)] pt-7 pb-24">
+      <main className="mx-auto max-w-[1040px] px-[clamp(20px,4vw,40px)] pt-7 pb-4">
         {loading && <div className="text-ink/65">Loading...</div>}
         {error && <ErrorMessage>{error}</ErrorMessage>}
         {data && (

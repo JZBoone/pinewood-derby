@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { ThemeProvider } from 'next-themes';
+import EasterEggs from '@/components/easter-eggs';
+import SiteFooter from '@/components/site-footer';
 import { ToastProvider } from '@/components/toast';
 import { body, heading } from './fonts';
 import './globals.css';
@@ -30,13 +32,17 @@ export default function RootLayout({
       className={`${heading.variable} ${body.variable}`}
       suppressHydrationWarning
     >
-      <body className="antialiased">
+      <body className="flex min-h-screen flex-col antialiased">
         <ThemeProvider
           attribute="data-theme"
           defaultTheme="system"
           enableSystem
         >
-          <ToastProvider>{children}</ToastProvider>
+          <ToastProvider>
+            <div className="flex-1">{children}</div>
+            <SiteFooter />
+            <EasterEggs />
+          </ToastProvider>
         </ThemeProvider>
       </body>
     </html>
