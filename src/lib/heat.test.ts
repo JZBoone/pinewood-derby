@@ -34,11 +34,7 @@ describe('heatHasTimes', () => {
 
 describe('heatProgress', () => {
   test('it marks the first unrun heat as next when none is active', () => {
-    const heats = [
-      makeHeat({ lane_1_car_time: 2500 }),
-      makeHeat(),
-      makeHeat(),
-    ];
+    const heats = [makeHeat({ lane_1_car_time: 2500 }), makeHeat(), makeHeat()];
     expect(heatProgress(heats)).toEqual(['final', 'next', 'scheduled']);
   });
 
