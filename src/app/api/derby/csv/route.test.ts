@@ -1,6 +1,7 @@
 import { validateCsv } from '@/api-biz/csv';
 import { db } from '@/api-biz/db';
 import { nowIsoString } from '@/lib/util';
+import { createTestApiKeyAuth } from '@/test-utils/auth';
 import { derby } from '@generated/client';
 import { readFileSync } from 'fs';
 import { DateTime } from 'luxon';
@@ -22,17 +23,23 @@ describe('validateCsv', () => {
 
 describe('POST /api/derby/csv', () => {
   let derby: derby;
-  async function makeRequest(params: { derbyId?: number; csv: string }) {
-    const { derbyId, csv } = params;
+  async function makeRequest(params: {
+    derbyId?: number;
+    csv: string;
+    authorized?: boolean;
+  }) {
+    const { derbyId, csv, authorized = true } = params;
     let url = `http://localhost/api/derby/csv`;
     if (derbyId) {
       url += `?derby_id=${derbyId}`;
     }
+    const headers = authorized
+      ? (await createTestApiKeyAuth()).headers
+      : new Headers();
+    headers.set('Content-Type', 'text/csv');
     const req = new Request(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'text/csv',
-      },
+      headers,
       body: csv,
     });
     return POST(req);
@@ -45,6 +52,17 @@ describe('POST /api/derby/csv', () => {
         location_name: 'Williams Elmentary',
       },
     });
+  });
+  test('it returns a 403 when unauthorized', async () => {
+    const csv =
+      "Car Number,Car Name,Scout,Den,Superlative\n1,,Kelan Brandt,1,Cubmaster's Choice";
+    const res = await makeRequest({
+      csv,
+      derbyId: derby.id,
+      authorized: false,
+    });
+    expect(res.status).toBe(403);
+    expect(await db.car.count()).toBe(0);
   });
   describe('validation', () => {
     test('missing derby id', async () => {
