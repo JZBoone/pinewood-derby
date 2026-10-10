@@ -1,21 +1,19 @@
 'use client';
 
-import { useState } from 'react';
 import Compass from './art/compass';
 import { useToast } from './toast';
 
-const SPARKS = [-34, -18, -6, 8, 20, 36];
-
-// Stars in the night sky. The first eight trace a pinewood car.
+// Stars in the night sky. The car constellation sits in open sky between
+// the campfire and the blue tent.
 const CAR_CONSTELLATION = [
-  [880, 34],
-  [902, 22],
-  [930, 20],
-  [946, 32],
-  [976, 36],
-  [972, 46],
-  [886, 46],
-  [880, 34],
+  [680, -10],
+  [702, -22],
+  [730, -24],
+  [746, -12],
+  [776, -8],
+  [772, 2],
+  [686, 2],
+  [680, -10],
 ];
 const STARS = [
   [120, 30],
@@ -40,20 +38,19 @@ function Pine({ x, height }: { x: number; height: number }) {
 
 /**
  * The campsite at the bottom of every page: a rope with a square knot,
- * tents, pines and a campfire that throws sparks when clicked.
+ * pines, two tents and an animated campfire that offers a s'mores tip when
+ * clicked.
  */
 export default function SiteFooter() {
-  const [sparking, setSparking] = useState(0);
   const showToast = useToast();
 
   function stokeFire() {
-    setSparking((n) => n + 1);
     showToast('S’mores time! Toast your marshmallow golden, not black.');
   }
 
   return (
     <footer className="mt-16" aria-label="Pack 272 campsite">
-      <div className="relative flex items-center">
+      <div className="relative z-10 flex items-center">
         <div className="h-2.5 flex-1 rounded-full bg-[repeating-linear-gradient(-55deg,#c9a46a_0_6px,#a9824a_6px_9px)]" />
         <svg
           viewBox="0 0 64 28"
@@ -77,170 +74,95 @@ export default function SiteFooter() {
         </svg>
       </div>
 
-      <svg
-        viewBox="0 0 1200 140"
-        preserveAspectRatio="xMidYMax slice"
-        className="block h-[140px] w-full"
-        role="img"
-        aria-label="A campsite with tents, pine trees and a campfire"
-      >
-        <g className="hidden dark:inline">
-          {STARS.map(([cx, cy], i) => (
-            <circle
-              key={i}
-              cx={cx}
-              cy={cy}
-              r={1.5}
-              fill="#f3efe4"
-              className="motion-safe:animate-[twinkle_4s_ease-in-out_infinite]"
-              style={{ animationDelay: `${i * 0.5}s` }}
-            />
-          ))}
-          <polyline
-            points={CAR_CONSTELLATION.map((p) => p.join(',')).join(' ')}
-            fill="none"
-            stroke="#f3efe4"
-            strokeOpacity={0.18}
-            strokeDasharray="2 3"
-          />
-          {CAR_CONSTELLATION.slice(0, 7).map(([cx, cy], i) => (
-            <circle key={i} cx={cx} cy={cy} r={1.8} fill="#f3efe4" />
-          ))}
-          <circle cx={896} cy={50} r={2.2} fill="#f5b919" />
-          <circle cx={962} cy={50} r={2.2} fill="#f5b919" />
-        </g>
-
-        <g className="text-ink/14">
-          <Pine x={70} height={96} />
-          <Pine x={130} height={70} />
-          <Pine x={240} height={110} />
-          <Pine x={830} height={84} />
-          <Pine x={1010} height={118} />
-          <Pine x={1090} height={78} />
-          <Pine x={1160} height={100} />
-        </g>
-
-        {/* Tents. */}
-        <g>
-          <path
-            d="M330 138 L388 62 L446 138 Z"
-            fill="#e8671c"
-            stroke="#15214a"
-            strokeWidth={2}
-            strokeLinejoin="round"
-          />
-          <path
-            d="M388 62 L370 138 L406 138 Z"
-            fill="#15214a"
-            fillOpacity={0.85}
-          />
-          <line
-            x1={388}
-            y1={62}
-            x2={388}
-            y2={52}
-            stroke="#15214a"
-            strokeWidth={2}
-          />
-          <path d="M388 52 L402 56 L388 60 Z" fill="var(--cs-yellow)" />
-        </g>
-        <g>
-          <path
-            d="M740 138 L786 78 L832 138 Z"
-            fill="#1f3a80"
-            stroke="#15214a"
-            strokeWidth={2}
-            strokeLinejoin="round"
-          />
-          <path
-            d="M786 78 L772 138 L800 138 Z"
-            fill="var(--cs-yellow)"
-            fillOpacity={0.9}
-          />
-        </g>
-
-        {/* Campfire. */}
-        <g
-          role="button"
-          tabIndex={0}
-          aria-label="Stoke the campfire"
-          className="cursor-pointer outline-none [&:focus-visible]:drop-shadow-[0_0_4px_var(--accent)]"
-          onClick={stokeFire}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter' || event.key === ' ') {
-              event.preventDefault();
-              stokeFire();
-            }
-          }}
+      {/* The scene is taller than the tents so the orange tent's pennant
+          tucks under the rope. The ground line sits at y=139. */}
+      <div className="relative h-[168px]">
+        <svg
+          viewBox="0 -28 1200 168"
+          preserveAspectRatio="xMidYMax slice"
+          className="absolute inset-0 block h-full w-full"
+          role="img"
+          aria-label="A campsite with tents, pine trees and a campfire"
         >
-          <ellipse
-            cx={590}
-            cy={130}
-            rx={44}
-            ry={8}
-            fill="var(--cs-yellow)"
-            fillOpacity={0.18}
-          />
-          <g
-            className="motion-safe:animate-[flame-flicker_1.2s_ease-in-out_infinite]"
-            style={{ transformOrigin: '590px 128px', transformBox: 'view-box' }}
-          >
-            <path
-              d="M590 72 C606 92 612 104 606 118 C602 128 578 128 574 118 C568 104 576 94 590 72 Z"
-              fill="#e8671c"
-            />
-            <path
-              d="M590 90 C600 102 602 110 598 120 C594 126 586 126 582 120 C578 110 582 102 590 90 Z"
-              fill="var(--cs-yellow)"
-            />
-          </g>
-          <rect
-            x={556}
-            y={122}
-            width={68}
-            height={9}
-            rx={4.5}
-            fill="#7a5230"
-            transform="rotate(-10 590 126)"
-          />
-          <rect
-            x={556}
-            y={122}
-            width={68}
-            height={9}
-            rx={4.5}
-            fill="#a86d36"
-            transform="rotate(10 590 126)"
-          />
-          {sparking > 0 &&
-            SPARKS.map((x, i) => (
+          <g className="hidden dark:inline">
+            {STARS.map(([cx, cy], i) => (
               <circle
-                key={`${sparking}-${i}`}
-                cx={590}
-                cy={96}
-                r={2.5}
-                fill="var(--cs-yellow)"
-                className="motion-safe:animate-[spark-rise_1.1s_ease-out_forwards] motion-reduce:hidden"
-                style={
-                  {
-                    '--spark-x': `${x}px`,
-                    animationDelay: `${i * 0.06}s`,
-                    transformBox: 'view-box',
-                  } as React.CSSProperties
-                }
+                key={i}
+                cx={cx}
+                cy={cy}
+                r={1.5}
+                fill="#f3efe4"
+                className="motion-safe:animate-[twinkle_4s_ease-in-out_infinite]"
+                style={{ animationDelay: `${i * 0.5}s` }}
               />
             ))}
-        </g>
+            <polyline
+              points={CAR_CONSTELLATION.map((p) => p.join(',')).join(' ')}
+              fill="none"
+              stroke="#f3efe4"
+              strokeOpacity={0.18}
+              strokeDasharray="2 3"
+            />
+            {CAR_CONSTELLATION.slice(0, 7).map(([cx, cy], i) => (
+              <circle key={i} cx={cx} cy={cy} r={1.8} fill="#f3efe4" />
+            ))}
+            <circle cx={696} cy={6} r={2.2} fill="#f5b919" />
+            <circle cx={762} cy={6} r={2.2} fill="#f5b919" />
+          </g>
 
-        <line
-          x1={0}
-          y1={139}
-          x2={1200}
-          y2={139}
-          stroke="var(--divider)"
-          strokeWidth={2}
-        />
-      </svg>
+          <g className="text-ink/14">
+            <Pine x={70} height={96} />
+            <Pine x={130} height={70} />
+            <Pine x={240} height={110} />
+            <Pine x={830} height={84} />
+            <Pine x={1010} height={118} />
+            <Pine x={1090} height={78} />
+            <Pine x={1160} height={100} />
+          </g>
+        </svg>
+        {/* Plain <img> keeps the campfire's built-in CSS animation running,
+            which next/image's optimizer could rasterize away. */}
+        <div className="absolute inset-x-0 bottom-px flex items-end justify-center gap-[clamp(12px,7vw,110px)]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/campsite/tent-orange.svg"
+            alt=""
+            width={240}
+            height={171}
+            className="h-auto w-[240px] max-w-[28vw]"
+          />
+          <button
+            type="button"
+            aria-label="Stoke the campfire"
+            onClick={stokeFire}
+            className="-mb-3.5 w-[220px] max-w-[26vw] rounded-full"
+          >
+            {/* The SVG's own reduced-motion query doesn't reach inside an
+                <img>, so the page picks a still copy instead. */}
+            <picture>
+              <source
+                media="(prefers-reduced-motion: reduce)"
+                srcSet="/campsite/campfire-still.svg"
+              />
+              <img
+                src="/campsite/campfire.svg"
+                alt=""
+                width={220}
+                height={180}
+                className="h-auto w-full"
+              />
+            </picture>
+          </button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/campsite/tent-blue.svg"
+            alt=""
+            width={190}
+            height={129}
+            className="h-auto w-[190px] max-w-[22vw] max-[480px]:hidden"
+          />
+        </div>
+      </div>
 
       <div className="mx-auto flex max-w-[1040px] flex-wrap items-center gap-4 px-[clamp(20px,4vw,40px)] pt-5 pb-10">
         <Compass className="size-12 shrink-0" />
