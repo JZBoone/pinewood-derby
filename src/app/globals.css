@@ -208,16 +208,22 @@
   }
 
   .btn-ghost {
-    color: var(--text);
+    color: var(--accent);
   }
 
   .btn-ghost:hover:not(:disabled, [aria-disabled='true']) {
-    background: color-mix(in srgb, var(--text) 8%, transparent);
-    color: var(--text);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    color: var(--accent-hover);
   }
 
   .btn-ghost:active:not(:disabled, [aria-disabled='true']) {
-    background: color-mix(in srgb, var(--text) 14%, transparent);
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+  }
+
+  /* A modal's confirm button skips the cap stripe, which marks the page's
+     main action. */
+  dialog .btn-primary {
+    box-shadow: none;
   }
 
   .btn-icon {

@@ -4,13 +4,14 @@ import { useSession } from '@/client-biz/auth';
 import { createDerby, fetchDerbies, uploadDerbyCsv } from '@/client-biz/derby';
 import { postFakeTimes } from '@/client-biz/heat';
 import SiteHeader from '@/components/site-header';
+import Button from '@/components/button';
 import ErrorMessage from '@/components/error-message';
 import RankBand from '@/components/rank-band';
 import { formatRaceDay } from '@/lib/derby';
 import { isAdmin } from '@/lib/user';
 import { derby } from '@generated/client';
 import { get, orderBy } from 'lodash';
-import { ArrowRight, Plus } from 'lucide-react';
+import { ArrowRight, Plus, Upload } from 'lucide-react';
 import Link from 'next/link';
 import { type FormEvent, useEffect, useState } from 'react';
 
@@ -152,19 +153,19 @@ export default function Home() {
         />
         {isAdminUser && (
           <div className="mb-8 flex flex-col gap-4">
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              icon={Plus}
               onClick={() => {
                 setShowCreateForm((prev) => !prev);
                 setCreateError(null);
                 setUploadError(null);
               }}
-              className="btn-outline self-start"
+              className="self-start"
               aria-expanded={showCreateForm}
             >
-              <Plus size={16} strokeWidth={2} />
               New derby
-            </button>
+            </Button>
             {showCreateForm && (
               <div className="rounded-(--radius) border border-divider bg-surface p-5">
                 {!createdDerbyId ? (
@@ -200,13 +201,14 @@ export default function Home() {
                       />
                     </div>
                     {createError && <ErrorMessage>{createError}</ErrorMessage>}
-                    <button
+                    <Button
                       type="submit"
+                      variant="primary"
                       disabled={creating}
-                      className="btn-outline self-start"
+                      className="self-start"
                     >
-                      {creating ? 'Creating...' : 'Create derby'}
-                    </button>
+                      {creating ? 'Creating…' : 'Create derby'}
+                    </Button>
                   </form>
                 ) : (
                   <form
@@ -223,13 +225,15 @@ export default function Home() {
                       className="text-sm"
                     />
                     {uploadError && <ErrorMessage>{uploadError}</ErrorMessage>}
-                    <button
+                    <Button
                       type="submit"
+                      variant="primary"
+                      icon={Upload}
                       disabled={uploading}
-                      className="btn-outline self-start"
+                      className="self-start"
                     >
-                      {uploading ? 'Uploading...' : 'Upload CSV'}
-                    </button>
+                      {uploading ? 'Uploading…' : 'Upload CSV'}
+                    </Button>
                   </form>
                 )}
               </div>

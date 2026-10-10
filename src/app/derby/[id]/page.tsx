@@ -212,14 +212,14 @@ function Derby({ id }: { id: string }) {
               </a>
             )}
             {featuredArt && isAdminUser && !editingArt && (
-              <button
-                type="button"
-                className="btn-outline mt-3"
+              <Button
+                variant="secondary"
+                icon={Pencil}
+                className="mt-3"
                 onClick={() => setEditingArt(true)}
               >
-                <Pencil size={16} strokeWidth={1.75} />
                 Edit artwork
-              </button>
+              </Button>
             )}
           </div>
         )}
