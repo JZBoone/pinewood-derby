@@ -17,11 +17,20 @@ import { useToast } from '@/components/toast';
 import { formatRaceDay } from '@/lib/derby';
 import { isAdmin } from '@/lib/user';
 import { get } from 'lodash';
-import { Flag, ImagePlus, Pencil, Trash2, Trophy } from 'lucide-react';
-import Link from 'next/link';
+import {
+  ArrowRight,
+  Flag,
+  ImagePlus,
+  Pencil,
+  Plus,
+  RefreshCw,
+  Trash2,
+  Trophy,
+} from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, use, useEffect, useState } from 'react';
 import DeleteDerbyModal from './delete-derby-modal';
+import RegenerateHeatsModal from './regenerate-heats-modal';
 import { DerbyData, fetchDerbyData } from './derby-data';
 
 interface Props {
@@ -316,12 +325,13 @@ function Derby({ id }: { id: string }) {
           <>
             <div className="mt-7 mb-3 flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-[28px] font-semibold">Championship</h2>
-              <Link
-                className="btn-outline no-underline"
+              <ButtonLink
                 href={`/derby/${derby.id}/championship`}
+                icon={ArrowRight}
+                iconPosition="end"
               >
                 Go to heats
-              </Link>
+              </ButtonLink>
             </div>
             <ResultsTable cars={championship.cars} dens={championship.dens} />
           </>
@@ -342,26 +352,24 @@ interface DenResultsProps {
 
 function DenResults({ den, isAdminUser, authToken }: DenResultsProps) {
   const [regenerating, setRegenerating] = useState(false);
+  const [regenerateOpen, setRegenerateOpen] = useState(false);
   const [regenerateError, setRegenerateError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+  const showToast = useToast();
 
-  async function handleRegenerate(denId: number) {
-    const confirmed = window.confirm(
-      'Regenerate heats for this den? This will overwrite existing heats.'
-    );
-    if (!confirmed) {
-      return;
-    }
-
+  async function regenerate() {
     setRegenerateError(null);
     setRegenerating(true);
 
     try {
       const response = await fetch('/api/den/heat/regenerate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ den_id: denId }),
+        headers: {
+          'Content-Type': 'application/json',
+          ...(authToken && buildAuthHeaders(authToken)),
+        },
+        body: JSON.stringify({ den_id: den.id }),
       });
 
       if (!response.ok) {
@@ -371,6 +379,8 @@ function DenResults({ den, isAdminUser, authToken }: DenResultsProps) {
           `Failed to regenerate heats (HTTP ${response.status})`;
         throw new Error(message);
       }
+      setRegenerateOpen(false);
+      showToast('Heats regenerated');
     } catch (err: unknown) {
       setRegenerateError(
         get(err, 'message', 'Failed to regenerate heats. Please try again.')
@@ -380,13 +390,23 @@ function DenResults({ den, isAdminUser, authToken }: DenResultsProps) {
     }
   }
 
-  async function handleCreateCar(denId: number, denName: string) {
+  // Recorded times are only wiped after the admin confirms.
+  function requestRegenerate() {
+    setRegenerateError(null);
+    if (den.timedHeatCount > 0) {
+      setRegenerateOpen(true);
+    } else {
+      regenerate();
+    }
+  }
+
+  async function handleCreateCar() {
     if (!authToken) {
       setCreateError('Missing authorization token. Please sign in again.');
       return;
     }
 
-    const carNumberRaw = window.prompt(`Enter car number for Den ${denName}`);
+    const carNumberRaw = window.prompt(`Enter car number for Den ${den.name}`);
     if (carNumberRaw === null) {
       return;
     }
@@ -396,7 +416,7 @@ function DenResults({ den, isAdminUser, authToken }: DenResultsProps) {
       return;
     }
 
-    const ownerRaw = window.prompt(`Enter scout name for Den ${denName}`);
+    const ownerRaw = window.prompt(`Enter scout name for Den ${den.name}`);
     if (ownerRaw === null) {
       return;
     }
@@ -407,7 +427,7 @@ function DenResults({ den, isAdminUser, authToken }: DenResultsProps) {
     }
 
     const carNameRaw = window.prompt(
-      `Optional: Enter car name for Den ${denName}`
+      `Optional: Enter car name for Den ${den.name}`
     );
     if (carNameRaw === null) {
       return;
@@ -425,7 +445,7 @@ function DenResults({ den, isAdminUser, authToken }: DenResultsProps) {
           ...buildAuthHeaders(authToken),
         },
         body: JSON.stringify({
-          denId,
+          denId: den.id,
           carNumber,
           carName: carName ? carName : undefined,
           owner,
@@ -438,6 +458,12 @@ function DenResults({ den, isAdminUser, authToken }: DenResultsProps) {
           payload?.error || `Failed to create car (HTTP ${response.status})`;
         throw new Error(message);
       }
+      showToast(
+        `Car #${carNumber} added`,
+        den.heatCount > 0
+          ? { label: 'Regenerate heats', onClick: requestRegenerate }
+          : undefined
+      );
     } catch (err: unknown) {
       setCreateError(
         get(err, 'message', 'Failed to create car. Please try again.')
@@ -451,36 +477,50 @@ function DenResults({ den, isAdminUser, authToken }: DenResultsProps) {
     <>
       <div className="mt-7 mb-3 flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-[28px] font-semibold">Den {den.name}</h2>
-        <div className="flex flex-wrap gap-3">
-          <Link
-            className="btn-outline no-underline"
+        <div className="flex flex-wrap items-center gap-3">
+          {isAdminUser && (
+            <Button
+              variant="primary"
+              icon={Plus}
+              onClick={handleCreateCar}
+              disabled={creating}
+            >
+              {creating ? 'Adding…' : 'Add car'}
+            </Button>
+          )}
+          <ButtonLink
             href={`/derby/den/${den.id}/heats`}
+            icon={ArrowRight}
+            iconPosition="end"
+            disabled={den.heatCount === 0}
+            title={den.heatCount === 0 ? 'Heats not generated yet' : undefined}
           >
             Go to heats
-          </Link>
+          </ButtonLink>
           {isAdminUser && (
             <>
-              <button
-                className="btn-outline"
-                type="button"
-                onClick={() => handleCreateCar(den.id, den.name)}
-                disabled={creating}
-              >
-                {creating ? 'Adding...' : 'Add car'}
-              </button>
-              <button
-                className="btn-outline"
-                type="button"
-                onClick={() => handleRegenerate(den.id)}
+              <ButtonSeparator />
+              <Button
+                variant="ghost"
+                icon={RefreshCw}
+                onClick={requestRegenerate}
                 disabled={regenerating}
               >
-                {regenerating ? 'Regenerating...' : 'Regenerate heats'}
-              </button>
+                {regenerating ? 'Regenerating…' : 'Regenerate heats'}
+              </Button>
+              <RegenerateHeatsModal
+                open={regenerateOpen}
+                timedHeatCount={den.timedHeatCount}
+                regenerating={regenerating}
+                error={regenerateError}
+                onConfirm={regenerate}
+                onClose={() => setRegenerateOpen(false)}
+              />
             </>
           )}
         </div>
       </div>
-      {regenerateError && (
+      {regenerateError && !regenerateOpen && (
         <div className="mb-3">
           <ErrorMessage>{regenerateError}</ErrorMessage>
         </div>

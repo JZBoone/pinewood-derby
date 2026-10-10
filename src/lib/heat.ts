@@ -37,6 +37,17 @@ export function carTime(heat: heat, carId: car['id']): number | null {
   return null;
 }
 
+export function heatHasTimes(heat: heat): boolean {
+  return [
+    heat.lane_1_car_time,
+    heat.lane_2_car_time,
+    heat.lane_3_car_time,
+    heat.lane_4_car_time,
+    heat.lane_5_car_time,
+    heat.lane_6_car_time,
+  ].some((time) => time !== null);
+}
+
 export function bestTimeForCar(carId: number, heats: heat[]): number | null {
   const carTimes = heats
     .map((heat) => carTime(heat, carId))
