@@ -5,6 +5,7 @@ import { fetchChampionshipData } from '@/client-biz/championship';
 import ErrorMessage from '@/components/error-message';
 import HeatsView from '@/components/heats-view';
 import SiteHeader from '@/components/site-header';
+import { HeatsViewSkeleton } from '@/components/skeleton';
 import { ChampionshipData } from '@/lib/championship';
 import { isAdmin } from '@/lib/user';
 import { get } from 'lodash';
@@ -69,7 +70,7 @@ export default function Championship({ params }: Props) {
     <div>
       <SiteHeader />
       <main className="mx-auto max-w-[1040px] px-[clamp(20px,4vw,40px)] pt-7 pb-4">
-        {loading && <div className="text-ink/65">Loading...</div>}
+        {loading && <HeatsViewSkeleton />}
         {error && <ErrorMessage>{error}</ErrorMessage>}
         {data && (
           <HeatsView

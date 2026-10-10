@@ -12,6 +12,7 @@ import FeaturedArtForm from '@/components/featured-art-form';
 import RankBand from '@/components/rank-band';
 import ResultsTable from '@/components/results-table';
 import SiteHeader from '@/components/site-header';
+import { DerbyPageSkeleton } from '@/components/skeleton';
 import SiteQrCode from '@/components/site-qr-code';
 import { useToast } from '@/components/toast';
 import WilliamsWhale from '@/components/williams-whale';
@@ -148,7 +149,7 @@ function Derby({ id }: { id: string }) {
   }, [id]);
 
   if (loading) {
-    return <div className="text-ink/65">Loading...</div>;
+    return <DerbyPageSkeleton />;
   }
   if (error) {
     return <ErrorMessage>{error}</ErrorMessage>;

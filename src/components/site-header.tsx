@@ -3,10 +3,11 @@
 import { signIn, signOut, useSession } from '@/client-biz/auth';
 import Link from 'next/link';
 import PackPatch from './pack-patch';
+import Skeleton from './skeleton';
 import ThemeToggle from './theme-toggle';
 
 export default function SiteHeader() {
-  const { data: session } = useSession();
+  const { data: session, isPending } = useSession();
 
   const handleLogin = async () =>
     signIn.social({ provider: 'google', callbackURL: '/' });
@@ -25,7 +26,9 @@ export default function SiteHeader() {
           </span>
         </Link>
         <ThemeToggle />
-        {session ? (
+        {isPending ? (
+          <Skeleton className="h-[38px] w-[78px] sm:w-[178px]" />
+        ) : session ? (
           <>
             <span className="hidden sm:inline">{session.user.name}</span>
             <button
