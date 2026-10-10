@@ -1,4 +1,5 @@
 import { GetDerbiesResponse, GetDerbyByIdResponse } from '@/lib/derby';
+import { FeaturedArt } from '@/lib/derby-art';
 import { derby } from '@generated/client';
 import axiosClient from './axios';
 import { buildAuthHeaders } from './auth-headers';
@@ -10,11 +11,31 @@ export async function fetchDerbies(): Promise<derby[]> {
 
 export async function fetchDerbyById(
   id: number | string
-): Promise<derby | null> {
+): Promise<GetDerbyByIdResponse> {
   const response = await axiosClient.get<GetDerbyByIdResponse>(
     `/api/derby/${id}`
   );
-  return response.data.derby;
+  return response.data;
+}
+
+export async function uploadDerbyArt(
+  derbyId: number,
+  form: FormData,
+  token: string
+): Promise<FeaturedArt | null> {
+  const response = await fetch(`/api/derby/${derbyId}/art`, {
+    method: 'PUT',
+    headers: buildAuthHeaders(token),
+    body: form,
+  });
+
+  const payload = await response.json().catch(() => null);
+  if (!response.ok) {
+    throw new Error(
+      payload?.error || `Failed to save artwork (HTTP ${response.status})`
+    );
+  }
+  return payload.featured_art;
 }
 
 export async function createDerby(

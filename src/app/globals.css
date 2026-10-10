@@ -16,6 +16,8 @@
   --color-cs-red: var(--cs-red);
   --color-cs-navy: var(--cs-navy);
   --color-cs-mark: var(--cs-mark);
+  --color-cs-time: var(--cs-time);
+  --color-cs-mph: var(--cs-mph);
 }
 
 :root,
@@ -30,6 +32,8 @@
   --cs-red: #c62232; /* pack-number patch red */
   --cs-navy: #1a2b5c; /* shirt navy */
   --cs-mark: #1a2b5c;
+  --cs-time: #b01e2c; /* result figures */
+  --cs-mph: #1f3a80;
   --shadow-md: 0 3px 10px color-mix(in srgb, #15214a 16%, transparent);
   --radius: 4px;
 }
@@ -43,6 +47,8 @@
   --divider: color-mix(in srgb, #f3efe4 18%, transparent);
   --cs-navy: #0c1638;
   --cs-mark: #f5b919;
+  --cs-time: #ff8a8a;
+  --cs-mph: #9cc4ec;
   color-scheme: dark;
 }
 

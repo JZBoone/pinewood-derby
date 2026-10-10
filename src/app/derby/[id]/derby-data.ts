@@ -1,11 +1,12 @@
 import { fetchCars } from '@/client-biz/car';
+import { fetchChampionshipData } from '@/client-biz/championship';
 import { fetchDens } from '@/client-biz/den';
 import { fetchDerbyById } from '@/client-biz/derby';
 import { fetchDerbyHeats } from '@/client-biz/heat';
 import { carsWithTimes } from '@/lib/car';
 
 export async function fetchDerbyData(derbyId: string | number) {
-  const [derby, dens, cars, heats] = await Promise.all([
+  const [{ derby, featured_art }, dens, cars, heats] = await Promise.all([
     fetchDerbyById(derbyId),
     fetchDens(derbyId),
     fetchCars(derbyId),
@@ -14,9 +15,15 @@ export async function fetchDerbyData(derbyId: string | number) {
   if (!derby) {
     throw new Error('Derby not found');
   }
+  const championshipCreated = heats.some((heat) => heat.den_id === null);
+  const championship = championshipCreated
+    ? await fetchChampionshipData(derbyId)
+    : null;
   return {
-    championshipCreated: heats.some((heat) => heat.den_id === null),
+    championshipCreated,
+    championship,
     derby,
+    featuredArt: featured_art,
     dens: dens.map((den) => {
       return {
         ...den,
