@@ -1,6 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import {
+  isStopped,
+  Racer,
+  RacerState,
+  raceSummary,
+  randomRacer,
+  simulateRace,
+  stepRacer,
+} from '@/lib/derby-race';
+import { useEffect, useRef, useState } from 'react';
 import { useToast } from '../toast';
 import PinewoodCar from './pinewood-car';
 
@@ -11,11 +20,27 @@ const SLOPE = (TRACK_END.y - TRACK_START.y) / (TRACK_END.x - TRACK_START.x);
 const ANGLE = (Math.atan(SLOPE) * 180) / Math.PI;
 const FINISH_X = 652;
 
+const CAR_WIDTH = 86;
+// Cars are positioned by their back edge. A car finishes when its nose
+// reaches the finish line.
+const GATE_X = 44;
+const FINISH_POSITION = FINISH_X - CAR_WIDTH + 6;
+// The running surface is SURFACE deep with three staged, back to front. Each
+// car keeps its own lane, like a real derby track.
+const SURFACE = 16;
+const EDGE = 8;
+const LANE_DROP = 6;
+const LANE_BASE = 2;
+const COUNTDOWN_MS = 750;
+
 const CARS = [
   { x: 360, color: '#c62232', number: '27' },
   { x: 250, color: '#7fb5de', number: '2' },
   { x: 140, color: '#f5b919', number: '72' },
 ];
+const HOME = CARS.map((car) => car.x);
+
+type Phase = 'idle' | 'staging' | 'racing' | 'returning';
 
 function trackY(x: number) {
   return TRACK_START.y + (x - TRACK_START.x) * SLOPE;
@@ -36,23 +61,116 @@ function Pine({ x, height }: { x: number; height: number }) {
 }
 
 /**
- * A downhill derby track with three cars mid-race. Clicking a car sends it
- * to the finish line.
+ * A downhill derby track with three cars. Tapping a car stages it at the
+ * start gate and starts a countdown. Any car tapped before GO joins, and
+ * the staged cars race from the gate.
  */
 export default function TrackScene({ className }: { className?: string }) {
-  const [racing, setRacing] = useState<number | null>(null);
+  const [phase, setPhase] = useState<Phase>('idle');
+  const [positions, setPositions] = useState<number[]>(HOME);
+  const [staged, setStaged] = useState<number[]>([]);
+  const [countdown, setCountdown] = useState<string | null>(null);
   const showToast = useToast();
+  const stagedRef = useRef<number[]>([]);
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const frame = useRef(0);
 
-  function race(index: number) {
-    if (racing !== null) {
+  useEffect(
+    () => () => {
+      timers.current.forEach(clearTimeout);
+      cancelAnimationFrame(frame.current);
+    },
+    []
+  );
+
+  function later(ms: number, fn: () => void) {
+    timers.current.push(setTimeout(fn, ms));
+  }
+
+  function returnHome() {
+    setPhase('returning');
+    setPositions(HOME);
+    later(800, () => {
+      stagedRef.current = [];
+      setStaged([]);
+      setPhase('idle');
+    });
+  }
+
+  function startRace() {
+    // Read the ref, not state: this runs from the countdown timer.
+    const entrants = stagedRef.current;
+    const racers: Racer[] = entrants.map(() => randomRacer());
+    const numbers = entrants.map((index) => CARS[index].number);
+    const distance = FINISH_POSITION - GATE_X;
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      showToast(raceSummary(numbers, simulateRace(racers, distance)));
+      returnHome();
       return;
     }
-    setRacing(index);
-    setTimeout(() => {
-      showToast(`Car #${CARS[index].number} crosses the line first!`);
-    }, 900);
-    setTimeout(() => setRacing(null), 2600);
+
+    setPhase('racing');
+    let states: RacerState[] = entrants.map(() => ({
+      position: 0,
+      speed: 0,
+      finishedAt: null,
+    }));
+    let elapsed = 0;
+    let last: number | null = null;
+    function tick(now: number) {
+      const dt = last === null ? 0 : Math.min((now - last) / 1000, 1 / 30);
+      last = now;
+      states = states.map((state, i) =>
+        stepRacer(racers[i], state, dt, elapsed, distance)
+      );
+      elapsed += dt;
+      setPositions((current) => {
+        const next = [...current];
+        entrants.forEach((carIndex, i) => {
+          next[carIndex] = GATE_X + states[i].position;
+        });
+        return next;
+      });
+      if (states.every(isStopped)) {
+        showToast(
+          raceSummary(
+            numbers,
+            states.map((state) => state.finishedAt ?? Infinity)
+          )
+        );
+        later(1600, returnHome);
+        return;
+      }
+      frame.current = requestAnimationFrame(tick);
+    }
+    frame.current = requestAnimationFrame(tick);
   }
+
+  function stage(index: number) {
+    if (phase === 'racing' || phase === 'returning') {
+      return;
+    }
+    if (stagedRef.current.includes(index)) {
+      return;
+    }
+    stagedRef.current = [...stagedRef.current, index];
+    setStaged(stagedRef.current);
+    setPositions((current) =>
+      current.map((x, i) => (i === index ? GATE_X : x))
+    );
+    if (phase === 'idle') {
+      setPhase('staging');
+      showToast('Get ready! Tap more cars to join the race.');
+      ['3', '2', '1', 'GO!'].forEach((label, i) =>
+        later(i * COUNTDOWN_MS, () => setCountdown(label))
+      );
+      later(3 * COUNTDOWN_MS, startRace);
+      later(4 * COUNTDOWN_MS, () => setCountdown(null));
+    }
+  }
+
+  // Cars are listed back lane first, so nearer cars pass in front.
 
   return (
     <svg
@@ -113,30 +231,40 @@ export default function TrackScene({ className }: { className?: string }) {
         <Pine x={585} height={78} />
       </g>
 
-      {/* Track supports, board and lane line. */}
+      {/* Track supports, running surface with staged, and front edge. */}
       {[120, 300, 480, 660].map((x) => (
         <rect
           key={x}
           x={x - 3}
-          y={trackY(x) + 10}
+          y={trackY(x) + SURFACE + EDGE}
           width={6}
-          height={182 - trackY(x) - 10}
+          height={182 - trackY(x) - SURFACE - EDGE}
           fill="#a86d36"
         />
       ))}
       <path
-        d={`M${TRACK_START.x} ${TRACK_START.y} L${TRACK_END.x} ${TRACK_END.y} L${TRACK_END.x} ${TRACK_END.y + 12} L${TRACK_START.x} ${TRACK_START.y + 12} Z`}
-        fill="#c98a4b"
+        d={`M${TRACK_START.x} ${TRACK_START.y + SURFACE} L${TRACK_END.x} ${TRACK_END.y + SURFACE} L${TRACK_END.x} ${TRACK_END.y + SURFACE + EDGE} L${TRACK_START.x} ${TRACK_START.y + SURFACE + EDGE} Z`}
+        fill="#a86d36"
         stroke="#7a5230"
         strokeWidth={1.5}
         strokeLinejoin="round"
       />
       <path
-        d={`M${TRACK_START.x + 6} ${TRACK_START.y + 6} L${TRACK_END.x - 6} ${TRACK_END.y + 6}`}
+        d={`M${TRACK_START.x} ${TRACK_START.y} L${TRACK_END.x} ${TRACK_END.y} L${TRACK_END.x} ${TRACK_END.y + SURFACE} L${TRACK_START.x} ${TRACK_START.y + SURFACE} Z`}
+        fill="#d9a066"
         stroke="#7a5230"
-        strokeOpacity={0.5}
-        strokeDasharray="14 10"
+        strokeWidth={1.5}
+        strokeLinejoin="round"
       />
+      {[5.5, 10.5].map((offset) => (
+        <path
+          key={offset}
+          d={`M${TRACK_START.x + 4} ${TRACK_START.y + offset} L${TRACK_END.x - 4} ${TRACK_END.y + offset}`}
+          stroke="#7a5230"
+          strokeOpacity={0.45}
+          strokeDasharray="14 10"
+        />
+      ))}
       <line
         x1={12}
         y1={182}
@@ -163,9 +291,9 @@ export default function TrackScene({ className }: { className?: string }) {
 
       {/* Checkered finish line and flag. */}
       <g
-        transform={`translate(${FINISH_X} ${trackY(FINISH_X)}) rotate(${ANGLE})`}
+        transform={`translate(${FINISH_X} ${trackY(FINISH_X)}) skewY(${ANGLE})`}
       >
-        {Array.from({ length: 6 }, (_, i) => (
+        {Array.from({ length: 8 }, (_, i) => (
           <rect
             key={i}
             x={(i % 2) * 6}
@@ -197,55 +325,77 @@ export default function TrackScene({ className }: { className?: string }) {
         ))}
       </g>
 
+      {countdown && (
+        <text
+          key={countdown}
+          x={118}
+          y={40}
+          textAnchor="middle"
+          fontSize={countdown === 'GO!' ? 26 : 30}
+          fontWeight={800}
+          fontFamily="var(--font-heading), sans-serif"
+          fill={countdown === 'GO!' ? 'var(--cs-red)' : 'var(--accent)'}
+          className="motion-safe:animate-[countdown-pop_.75s_ease-out]"
+          style={{ transformOrigin: '118px 30px', transformBox: 'view-box' }}
+        >
+          {countdown}
+        </text>
+      )}
+
       {/* Cars. Each one sits on the board, tilted to the slope. */}
       {CARS.map((car, index) => {
-        const finished = racing === index;
-        const dx = finished ? FINISH_X + 20 - car.x : 0;
+        const x = positions[index];
+        const moving =
+          phase === 'racing'
+            ? staged.includes(index)
+            : x !== HOME[index] && phase !== 'idle';
+        const y = trackY(x) - 33 + LANE_BASE + index * LANE_DROP;
+        const tappable = phase === 'idle' || phase === 'staging';
         return (
           <g
             key={car.number}
-            transform={`translate(${car.x} ${trackY(car.x) - 33}) rotate(${ANGLE})`}
+            role="button"
+            tabIndex={tappable ? 0 : -1}
+            aria-label={`Race car ${car.number}`}
+            aria-pressed={staged.includes(index)}
+            className={`outline-none [&:focus-visible>svg]:drop-shadow-[0_0_3px_var(--accent)] ${
+              tappable ? 'cursor-pointer' : ''
+            }`}
+            style={{
+              transform: `translate(${x}px, ${y}px) rotate(${ANGLE}deg)`,
+              transition:
+                phase === 'staging' || phase === 'returning'
+                  ? 'transform .6s ease-in-out'
+                  : undefined,
+            }}
+            onClick={() => stage(index)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                stage(index);
+              }
+            }}
           >
-            <g
-              role="button"
-              tabIndex={0}
-              aria-label={`Race car ${car.number}`}
-              className="cursor-pointer outline-none [&:focus-visible>svg]:drop-shadow-[0_0_3px_var(--accent)]"
-              style={{
-                transform: `translateX(${dx}px)`,
-                transition: finished
-                  ? 'transform .9s cubic-bezier(.55,0,.75,.4)'
-                  : 'transform .6s ease-out',
-              }}
-              onClick={() => race(index)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' || event.key === ' ') {
-                  event.preventDefault();
-                  race(index);
-                }
-              }}
-            >
-              {finished && (
-                <g
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  className="text-ink/40"
-                >
-                  <line x1={-30} y1={14} x2={-8} y2={14} />
-                  <line x1={-40} y1={22} x2={-10} y2={22} />
-                  <line x1={-26} y1={30} x2={-6} y2={30} />
-                </g>
-              )}
-              <PinewoodCar
-                color={car.color}
-                number={car.number}
-                rolling={finished}
-                x={0}
-                y={0}
-                width={86}
-              />
-            </g>
+            {phase === 'racing' && staged.includes(index) && (
+              <g
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                className="text-ink/40"
+              >
+                <line x1={-30} y1={14} x2={-8} y2={14} />
+                <line x1={-40} y1={22} x2={-10} y2={22} />
+                <line x1={-26} y1={30} x2={-6} y2={30} />
+              </g>
+            )}
+            <PinewoodCar
+              color={car.color}
+              number={car.number}
+              rolling={moving}
+              x={0}
+              y={0}
+              width={CAR_WIDTH}
+            />
           </g>
         );
       })}
