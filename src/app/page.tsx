@@ -143,10 +143,10 @@ export default function Home() {
       <SiteHeader />
       <main className="mx-auto max-w-[760px] px-4 pt-12 sm:px-10 sm:pt-16">
         <div className="text-xs font-bold tracking-[.14em] text-accent uppercase">
-          Cub Scouts
+          Cub Scout Pack 272
         </div>
         <h1 className="mt-3 mb-[22px] text-[clamp(40px,9vw,64px)] leading-none font-bold tracking-[-.025em] font-stretch-118%">
-          Pack 272
+          Pinewood Derbies
         </h1>
         <RankBand
           size={22}
