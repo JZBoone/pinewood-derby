@@ -63,3 +63,24 @@ The primary development workflow is managed through `make`. Run `make` to see a 
 - **`src/client-biz/axios.ts`**: Exports the configured `axios` client for client-side API requests.
 - **`Makefile`**: Defines all the common development and testing tasks.
 - **`docker-compose.yaml`**: Defines the local database service.
+
+## Styling
+
+Pages use Tailwind CSS v4 with the Pack 272 theme defined in `src/app/globals.css`.
+
+- **Theme tokens**: Colors are CSS variables (`--bg`, `--surface`, `--text`, `--accent`, `--divider`, `--cs-yellow`, `--cs-red`, ...) that switch on `data-theme` on `<html>`, set by `next-themes`. They are mapped to Tailwind colors, so use `bg-surface`, `text-ink/65`, `text-accent` and `border-divider` instead of fixed colors like `text-gray-600`. The `dark:` variant follows `data-theme`, not the OS setting.
+- **Fonts**: Headings and buttons use Archivo (`--font-heading`). Body text uses Atkinson Hyperlegible (`--font-body`).
+- **Buttons**: Buttons are outlined, never solid-filled. Use the `btn-outline` and `btn-icon` classes.
+- **Color**: Yellow is for stripes and small marks only. Never put yellow text on the light background, or large yellow fills behind text.
+- **Icons**: Use `lucide-react`.
+- **Header**: `src/components/site-header.tsx` is the shared nav with the pack patch, theme toggle and sign in.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
