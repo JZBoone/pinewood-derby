@@ -1,10 +1,10 @@
 'use client';
 
 import { useSession } from '@/client-biz/auth';
-import { buildAuthHeaders } from '@/client-biz/auth-headers';
 import { makeChampionship } from '@/client-biz/championship';
 import { deleteDerby } from '@/client-biz/derby';
 import BackLink from '@/components/back-link';
+import DenActions from '@/components/den-actions';
 import Button, { ButtonLink, ButtonSeparator } from '@/components/button';
 import ErrorMessage from '@/components/error-message';
 import FeaturedArt from '@/components/featured-art';
@@ -22,15 +22,12 @@ import {
   Flag,
   ImagePlus,
   Pencil,
-  Plus,
-  RefreshCw,
   Trash2,
   Trophy,
 } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, use, useEffect, useState } from 'react';
 import DeleteDerbyModal from './delete-derby-modal';
-import RegenerateHeatsModal from './regenerate-heats-modal';
 import { DerbyData, fetchDerbyData } from './derby-data';
 
 interface Props {
@@ -351,185 +348,19 @@ interface DenResultsProps {
 }
 
 function DenResults({ den, isAdminUser, authToken }: DenResultsProps) {
-  const [regenerating, setRegenerating] = useState(false);
-  const [regenerateOpen, setRegenerateOpen] = useState(false);
-  const [regenerateError, setRegenerateError] = useState<string | null>(null);
-  const [creating, setCreating] = useState(false);
-  const [createError, setCreateError] = useState<string | null>(null);
-  const showToast = useToast();
-
-  async function regenerate() {
-    setRegenerateError(null);
-    setRegenerating(true);
-
-    try {
-      const response = await fetch('/api/den/heat/regenerate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(authToken && buildAuthHeaders(authToken)),
-        },
-        body: JSON.stringify({ den_id: den.id }),
-      });
-
-      if (!response.ok) {
-        const payload = await response.json().catch(() => null);
-        const message =
-          payload?.error ||
-          `Failed to regenerate heats (HTTP ${response.status})`;
-        throw new Error(message);
-      }
-      setRegenerateOpen(false);
-      showToast('Heats regenerated');
-    } catch (err: unknown) {
-      setRegenerateError(
-        get(err, 'message', 'Failed to regenerate heats. Please try again.')
-      );
-    } finally {
-      setRegenerating(false);
-    }
-  }
-
-  // Recorded times are only wiped after the admin confirms.
-  function requestRegenerate() {
-    setRegenerateError(null);
-    if (den.timedHeatCount > 0) {
-      setRegenerateOpen(true);
-    } else {
-      regenerate();
-    }
-  }
-
-  async function handleCreateCar() {
-    if (!authToken) {
-      setCreateError('Missing authorization token. Please sign in again.');
-      return;
-    }
-
-    const carNumberRaw = window.prompt(`Enter car number for Den ${den.name}`);
-    if (carNumberRaw === null) {
-      return;
-    }
-    const carNumber = Number.parseInt(carNumberRaw.trim(), 10);
-    if (!Number.isFinite(carNumber)) {
-      alert('Car number must be a valid number.');
-      return;
-    }
-
-    const ownerRaw = window.prompt(`Enter scout name for Den ${den.name}`);
-    if (ownerRaw === null) {
-      return;
-    }
-    const owner = ownerRaw.trim();
-    if (!owner) {
-      alert('Scout name is required.');
-      return;
-    }
-
-    const carNameRaw = window.prompt(
-      `Optional: Enter car name for Den ${den.name}`
-    );
-    if (carNameRaw === null) {
-      return;
-    }
-    const carName = carNameRaw.trim();
-
-    setCreateError(null);
-    setCreating(true);
-
-    try {
-      const response = await fetch('/api/car', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...buildAuthHeaders(authToken),
-        },
-        body: JSON.stringify({
-          denId: den.id,
-          carNumber,
-          carName: carName ? carName : undefined,
-          owner,
-        }),
-      });
-
-      if (!response.ok) {
-        const payload = await response.json().catch(() => null);
-        const message =
-          payload?.error || `Failed to create car (HTTP ${response.status})`;
-        throw new Error(message);
-      }
-      showToast(
-        `Car #${carNumber} added`,
-        den.heatCount > 0
-          ? { label: 'Regenerate heats', onClick: requestRegenerate }
-          : undefined
-      );
-    } catch (err: unknown) {
-      setCreateError(
-        get(err, 'message', 'Failed to create car. Please try again.')
-      );
-    } finally {
-      setCreating(false);
-    }
-  }
-
   return (
     <>
       <div className="mt-7 mb-3 flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-[28px] font-semibold">Den {den.name}</h2>
-        <div className="flex flex-wrap items-center gap-3">
-          {isAdminUser && (
-            <Button
-              variant="primary"
-              icon={Plus}
-              onClick={handleCreateCar}
-              disabled={creating}
-            >
-              {creating ? 'Adding…' : 'Add car'}
-            </Button>
-          )}
-          <ButtonLink
-            href={`/derby/den/${den.id}/heats`}
-            icon={ArrowRight}
-            iconPosition="end"
-            disabled={den.heatCount === 0}
-            title={den.heatCount === 0 ? 'Heats not generated yet' : undefined}
-          >
-            Go to heats
-          </ButtonLink>
-          {isAdminUser && (
-            <>
-              <ButtonSeparator />
-              <Button
-                variant="ghost"
-                icon={RefreshCw}
-                onClick={requestRegenerate}
-                disabled={regenerating}
-              >
-                {regenerating ? 'Regenerating…' : 'Regenerate heats'}
-              </Button>
-              <RegenerateHeatsModal
-                open={regenerateOpen}
-                timedHeatCount={den.timedHeatCount}
-                regenerating={regenerating}
-                error={regenerateError}
-                onConfirm={regenerate}
-                onClose={() => setRegenerateOpen(false)}
-              />
-            </>
-          )}
+        <div className="flex flex-col items-end gap-2">
+          <DenActions
+            den={den}
+            isAdminUser={isAdminUser}
+            authToken={authToken}
+            showGoToHeats
+          />
         </div>
       </div>
-      {regenerateError && !regenerateOpen && (
-        <div className="mb-3">
-          <ErrorMessage>{regenerateError}</ErrorMessage>
-        </div>
-      )}
-      {createError && (
-        <div className="mb-3">
-          <ErrorMessage>{createError}</ErrorMessage>
-        </div>
-      )}
       <ResultsTable cars={den.cars} />
     </>
   );

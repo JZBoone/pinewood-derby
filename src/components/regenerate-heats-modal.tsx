@@ -1,8 +1,8 @@
 'use client';
 
-import Button from '@/components/button';
-import ErrorMessage from '@/components/error-message';
-import Modal from '@/components/modal';
+import Button from './button';
+import ErrorMessage from './error-message';
+import Modal from './modal';
 import { RefreshCw } from 'lucide-react';
 
 interface RegenerateHeatsModalProps {
