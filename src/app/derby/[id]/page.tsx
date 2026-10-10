@@ -41,9 +41,9 @@ const CHAMPIONSHIP_TAB = 'championship';
 export default function DerbyPage({ params }: Props) {
   const { id } = use(params);
   return (
-    <div className="min-h-screen">
+    <div>
       <SiteHeader />
-      <main className="mx-auto max-w-[1040px] px-[clamp(20px,4vw,40px)] pt-7 pb-24">
+      <main className="mx-auto max-w-[1040px] px-[clamp(20px,4vw,40px)] pt-7 pb-4">
         <BackLink href="/">All derbies</BackLink>
         {/* useSearchParams needs a Suspense boundary. */}
         <Suspense>

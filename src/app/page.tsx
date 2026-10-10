@@ -6,6 +6,7 @@ import { postFakeTimes } from '@/client-biz/heat';
 import SiteHeader from '@/components/site-header';
 import Button from '@/components/button';
 import ErrorMessage from '@/components/error-message';
+import TrackScene from '@/components/art/track-scene';
 import RankBand from '@/components/rank-band';
 import { formatRaceDay } from '@/lib/derby';
 import { isAdmin } from '@/lib/user';
@@ -137,7 +138,7 @@ export default function Home() {
     'rounded-sm border border-divider bg-bg px-3 py-2 text-ink placeholder:text-ink/50';
 
   return (
-    <div className="min-h-screen pb-20">
+    <div>
       <SiteHeader />
       <main className="mx-auto max-w-[760px] px-4 pt-12 sm:px-10 sm:pt-16">
         <div className="text-xs font-bold tracking-[.14em] text-accent uppercase">
@@ -149,8 +150,8 @@ export default function Home() {
         <RankBand
           size={22}
           caption="Lions through Arrow of Light, every den races"
-          className="mb-[52px]"
         />
+        <TrackScene className="mt-6 mb-10 block w-full" />
         {isAdminUser && (
           <div className="mb-8 flex flex-col gap-4">
             <Button
