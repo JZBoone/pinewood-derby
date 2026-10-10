@@ -150,7 +150,7 @@ export default function Home() {
         </h1>
         <RankBand
           size={22}
-          caption={`Six ranks, one track. Every Cub\u00a0Scout builds a car and races it.`}
+          caption="Six ranks, one track. Let the fastest scout prevail!"
         />
         <TrackScene className="mt-6 mb-10 block w-full" />
         {isAdminUser && (
