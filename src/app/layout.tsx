@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { ThemeProvider } from 'next-themes';
+import { ToastProvider } from '@/components/toast';
 import { body, heading } from './fonts';
 import './globals.css';
 
@@ -25,7 +26,7 @@ export default function RootLayout({
           defaultTheme="system"
           enableSystem
         >
-          {children}
+          <ToastProvider>{children}</ToastProvider>
         </ThemeProvider>
       </body>
     </html>
