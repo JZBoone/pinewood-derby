@@ -11,6 +11,7 @@ import FeaturedArtForm from '@/components/featured-art-form';
 import RankBand from '@/components/rank-band';
 import ResultsTable from '@/components/results-table';
 import SiteHeader from '@/components/site-header';
+import SiteQrCode from '@/components/site-qr-code';
 import { formatRaceDay } from '@/lib/derby';
 import { isAdmin } from '@/lib/user';
 import { get } from 'lodash';
@@ -189,6 +190,7 @@ function Derby({ id }: { id: string }) {
             {formatRaceDay(derby.time)} · {derby.location_name}
           </p>
           <RankBand size={14} className="mt-7" />
+          <SiteQrCode path={`/derby/${derby.id}`} className="mt-8" />
         </div>
         {showArtColumn && (
           <div className="order-first min-[800px]:order-none">

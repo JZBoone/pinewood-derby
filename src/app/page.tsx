@@ -4,7 +4,6 @@ import { useSession } from '@/client-biz/auth';
 import { createDerby, fetchDerbies, uploadDerbyCsv } from '@/client-biz/derby';
 import { postFakeTimes } from '@/client-biz/heat';
 import SiteHeader from '@/components/site-header';
-import SiteQrCode from '@/components/site-qr-code';
 import ErrorMessage from '@/components/error-message';
 import RankBand from '@/components/rank-band';
 import { formatRaceDay } from '@/lib/derby';
@@ -287,7 +286,6 @@ export default function Home() {
             <ErrorMessage>{error}</ErrorMessage>
           </div>
         )}
-        <SiteQrCode />
       </main>
     </div>
   );
