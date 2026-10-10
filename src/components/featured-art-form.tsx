@@ -1,8 +1,10 @@
 'use client';
 
 import { uploadDerbyArt } from '@/client-biz/derby';
+import Button from '@/components/button';
 import { DERBY_ART_MAX_BYTES, FeaturedArt } from '@/lib/derby-art';
 import { get } from 'lodash';
+import { Save } from 'lucide-react';
 import Image from 'next/image';
 import { type FormEvent, useEffect, useState } from 'react';
 
@@ -159,13 +161,13 @@ export default function FeaturedArtForm({
           {error}
         </div>
       )}
-      <div className="flex gap-3">
-        <button type="submit" disabled={saving} className="btn-outline">
-          {saving ? 'Saving...' : 'Save artwork'}
-        </button>
-        <button type="button" onClick={onCancel} className="btn-outline">
+      <div className="flex gap-2.5">
+        <Button type="submit" variant="primary" icon={Save} disabled={saving}>
+          {saving ? 'Saving…' : 'Save artwork'}
+        </Button>
+        <Button variant="ghost" onClick={onCancel}>
           Cancel
-        </button>
+        </Button>
       </div>
     </form>
   );

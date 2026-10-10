@@ -59,7 +59,7 @@ export default function DeleteDerbyModal({
             autoComplete="off"
             value={confirmText}
             onChange={(event) => setConfirmText(event.target.value)}
-            className="rounded-sm border border-divider bg-bg px-3 py-2 text-ink tabular-nums"
+            className="rounded-sm border border-divider bg-bg px-3 py-2 font-(family-name:--font-heading) font-semibold text-ink tabular-nums"
           />
         </div>
         {error && <ErrorMessage>{error}</ErrorMessage>}
