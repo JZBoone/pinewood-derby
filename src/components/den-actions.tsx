@@ -4,6 +4,7 @@ import { buildAuthHeaders } from '@/client-biz/auth-headers';
 import { get } from 'lodash';
 import { ArrowRight, Plus, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
+import AddCarModal, { NewCar } from './add-car-modal';
 import Button, { ButtonLink, ButtonSeparator } from './button';
 import ErrorMessage from './error-message';
 import RegenerateHeatsModal from './regenerate-heats-modal';
@@ -38,6 +39,7 @@ export default function DenActions({
   const [regenerateError, setRegenerateError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+  const [addCarOpen, setAddCarOpen] = useState(false);
   const showToast = useToast();
 
   async function regenerate() {
@@ -82,39 +84,16 @@ export default function DenActions({
     }
   }
 
-  async function handleCreateCar() {
+  function openAddCar() {
+    setCreateError(null);
+    setAddCarOpen(true);
+  }
+
+  async function handleCreateCar({ carNumber, owner, carName }: NewCar) {
     if (!authToken) {
       setCreateError('Missing authorization token. Please sign in again.');
       return;
     }
-
-    const carNumberRaw = window.prompt(`Enter car number for Den ${den.name}`);
-    if (carNumberRaw === null) {
-      return;
-    }
-    const carNumber = Number.parseInt(carNumberRaw.trim(), 10);
-    if (!Number.isFinite(carNumber)) {
-      alert('Car number must be a valid number.');
-      return;
-    }
-
-    const ownerRaw = window.prompt(`Enter scout name for Den ${den.name}`);
-    if (ownerRaw === null) {
-      return;
-    }
-    const owner = ownerRaw.trim();
-    if (!owner) {
-      alert('Scout name is required.');
-      return;
-    }
-
-    const carNameRaw = window.prompt(
-      `Optional: Enter car name for Den ${den.name}`
-    );
-    if (carNameRaw === null) {
-      return;
-    }
-    const carName = carNameRaw.trim();
 
     setCreateError(null);
     setCreating(true);
@@ -126,12 +105,7 @@ export default function DenActions({
           'Content-Type': 'application/json',
           ...buildAuthHeaders(authToken),
         },
-        body: JSON.stringify({
-          denId: den.id,
-          carNumber,
-          carName: carName ? carName : undefined,
-          owner,
-        }),
+        body: JSON.stringify({ denId: den.id, carNumber, carName, owner }),
       });
 
       if (!response.ok) {
@@ -140,6 +114,7 @@ export default function DenActions({
           payload?.error || `Failed to create car (HTTP ${response.status})`;
         throw new Error(message);
       }
+      setAddCarOpen(false);
       showToast(
         `Car #${carNumber} added`,
         den.heatCount > 0
@@ -159,14 +134,19 @@ export default function DenActions({
     <>
       <div className="flex flex-wrap items-center gap-3">
         {isAdminUser && (
-          <Button
-            variant="primary"
-            icon={Plus}
-            onClick={handleCreateCar}
-            disabled={creating}
-          >
-            {creating ? 'Adding…' : 'Add car'}
-          </Button>
+          <>
+            <Button variant="primary" icon={Plus} onClick={openAddCar}>
+              Add car
+            </Button>
+            <AddCarModal
+              open={addCarOpen}
+              denName={den.name}
+              adding={creating}
+              error={createError}
+              onSubmit={handleCreateCar}
+              onClose={() => setAddCarOpen(false)}
+            />
+          </>
         )}
         {showGoToHeats && (
           <ButtonLink
@@ -204,7 +184,6 @@ export default function DenActions({
       {regenerateError && !regenerateOpen && (
         <ErrorMessage>{regenerateError}</ErrorMessage>
       )}
-      {createError && <ErrorMessage>{createError}</ErrorMessage>}
     </>
   );
 }
