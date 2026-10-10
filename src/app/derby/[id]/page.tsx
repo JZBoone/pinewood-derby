@@ -5,6 +5,7 @@ import { buildAuthHeaders } from '@/client-biz/auth-headers';
 import { makeChampionship } from '@/client-biz/championship';
 import { deleteDerby } from '@/client-biz/derby';
 import BackLink from '@/components/back-link';
+import Button, { ButtonLink, ButtonSeparator } from '@/components/button';
 import ErrorMessage from '@/components/error-message';
 import FeaturedArt from '@/components/featured-art';
 import FeaturedArtForm from '@/components/featured-art-form';
@@ -12,13 +13,15 @@ import RankBand from '@/components/rank-band';
 import ResultsTable from '@/components/results-table';
 import SiteHeader from '@/components/site-header';
 import SiteQrCode from '@/components/site-qr-code';
+import { useToast } from '@/components/toast';
 import { formatRaceDay } from '@/lib/derby';
 import { isAdmin } from '@/lib/user';
 import { get } from 'lodash';
-import { ImagePlus, Pencil } from 'lucide-react';
+import { Flag, ImagePlus, Pencil, Trash2, Trophy } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, use, useEffect, useState } from 'react';
+import DeleteDerbyModal from './delete-derby-modal';
 import { DerbyData, fetchDerbyData } from './derby-data';
 
 interface Props {
@@ -52,6 +55,9 @@ function Derby({ id }: { id: string }) {
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [editingArt, setEditingArt] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [makingChampionship, setMakingChampionship] = useState(false);
+  const showToast = useToast();
   const { data: session } = useSession();
   const isAdminUser = !!session && isAdmin(session.user.role);
   const authToken = session?.session?.token;
@@ -59,36 +65,26 @@ function Derby({ id }: { id: string }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  function handleMakeChampionshipClick(derbyId: number) {
-    const confirmed = window.confirm(
-      'Create the championship now? This wipes out the championship heats if they already exist.'
-    );
-    if (!confirmed) {
-      return;
-    }
-
+  async function handleMakeChampionshipClick(derbyId: number) {
     if (!authToken) {
       alert('Missing authorization token. Please sign in again.');
       return;
     }
 
-    makeChampionship(derbyId, authToken)
-      .then(() => {
-        alert('Let the championship begin!');
-      })
-      .catch((err: unknown) => {
-        alert(`Error creating championship: ${get(err, 'message')}`);
-      });
+    setMakingChampionship(true);
+    try {
+      await makeChampionship(derbyId, authToken);
+      setDerbyData(await fetchDerbyData(id));
+      showToast('Championship created');
+      selectTab(CHAMPIONSHIP_TAB);
+    } catch (err: unknown) {
+      alert(`Error creating championship: ${get(err, 'message')}`);
+    } finally {
+      setMakingChampionship(false);
+    }
   }
 
-  function handleDeleteDerbyClick(derbyId: number) {
-    const confirmed = window.confirm(
-      'Delete this derby? This will remove all dens, cars, and heats for this derby.'
-    );
-    if (!confirmed) {
-      return;
-    }
-
+  function handleDeleteDerby(derbyId: number) {
     if (!authToken) {
       alert('Missing authorization token. Please sign in again.');
       return;
@@ -109,6 +105,12 @@ function Derby({ id }: { id: string }) {
       .finally(() => {
         setDeleting(false);
       });
+  }
+
+  function selectTab(key: string) {
+    const next = new URLSearchParams(searchParams);
+    next.set('den', key);
+    router.replace(`${pathname}?${next}`, { scroll: false });
   }
 
   useEffect(() => {
@@ -158,12 +160,6 @@ function Derby({ id }: { id: string }) {
   const selectedTab =
     tabs.find((tab) => tab.key === requestedTab)?.key ?? tabs[0]?.key;
   const selectedDen = dens.find((den) => den.name === selectedTab);
-
-  function selectTab(key: string) {
-    const next = new URLSearchParams(searchParams);
-    next.set('den', key);
-    router.replace(`${pathname}?${next}`, { scroll: false });
-  }
 
   const showArtColumn = !!featuredArt || isAdminUser;
 
@@ -232,30 +228,53 @@ function Derby({ id }: { id: string }) {
         />
       )}
       <hr className="mt-14 mb-7 border-divider" />
-      {isAdminUser && (
+      {(championship || isAdminUser) && (
         <div className="mb-6 flex flex-wrap items-center gap-3">
-          <button
-            id={`make-championship-${derby.id}`}
-            type="button"
-            className="btn-outline"
-            onClick={() => handleMakeChampionshipClick(derby.id)}
-          >
-            Make championship
-          </button>
-          <button
-            id={`delete-derby-${derby.id}`}
-            type="button"
-            className="btn-outline"
-            onClick={() => handleDeleteDerbyClick(derby.id)}
-            disabled={deleting}
-          >
-            {deleting ? 'Deleting...' : 'Delete derby'}
-          </button>
-        </div>
-      )}
-      {deleteError && (
-        <div className="mb-6">
-          <ErrorMessage>{deleteError}</ErrorMessage>
+          {championship && (
+            <ButtonLink href={`/derby/${derby.id}/championship`} icon={Trophy}>
+              Championship
+            </ButtonLink>
+          )}
+          {isAdminUser && (
+            <>
+              {championship && <ButtonSeparator />}
+              {/* A disabled button shows no tooltip, so the wrapper carries it. */}
+              <span
+                title={
+                  championship ? 'Championship already created' : undefined
+                }
+              >
+                <Button
+                  id={`make-championship-${derby.id}`}
+                  variant="primary"
+                  icon={Flag}
+                  onClick={() => handleMakeChampionshipClick(derby.id)}
+                  disabled={!!championship || makingChampionship}
+                >
+                  {makingChampionship ? 'Creating…' : 'Make championship'}
+                </Button>
+              </span>
+              <Button
+                id={`delete-derby-${derby.id}`}
+                variant="danger"
+                icon={Trash2}
+                onClick={() => setDeleteOpen(true)}
+              >
+                Delete derby
+              </Button>
+              <DeleteDerbyModal
+                open={deleteOpen}
+                year={year}
+                deleting={deleting}
+                error={deleteError}
+                onConfirm={() => handleDeleteDerby(derby.id)}
+                onClose={() => {
+                  setDeleteOpen(false);
+                  setDeleteError(null);
+                }}
+              />
+            </>
+          )}
         </div>
       )}
       <div role="tablist" aria-label="Dens" className="flex flex-wrap gap-2">
