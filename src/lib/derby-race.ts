@@ -108,26 +108,46 @@ export function raceSpeeds(finishTimes: number[], distance: number): number[] {
   });
 }
 
-function isPhotoFinish(finishTimes: number[], order: number[]) {
+function isPhotoFinish(finishTimes: number[], finishers: number[]) {
   return (
-    order.length > 1 && finishTimes[order[1]] - finishTimes[order[0]] < 0.005
+    finishers.length > 1 &&
+    finishTimes[finishers[1]] - finishTimes[finishers[0]] < 0.005
   );
 }
 
+/** Splits finishing order into cars that finished and cars that crashed. */
+function splitResults(finishTimes: number[]) {
+  const order = finishingOrder(finishTimes);
+  return {
+    finishers: order.filter((i) => Number.isFinite(finishTimes[i])),
+    crashed: order.filter((i) => !Number.isFinite(finishTimes[i])),
+  };
+}
+
+/**
+ * The race result for the toast. A car that crashed has an infinite finish
+ * time.
+ */
 export function raceSummary(
   numbers: string[],
   finishTimes: number[],
   distance: number
 ): string {
-  const order = finishingOrder(finishTimes);
-  const winner = numbers[order[0]];
-  const mph = raceSpeeds(finishTimes, distance)[order[0]];
-  if (order.length === 1) {
+  const { finishers, crashed } = splitResults(finishTimes);
+  const dnf = crashed
+    .map((i) => ` Car #${numbers[i]} lost its wheels!`)
+    .join('');
+  if (finishers.length === 0) {
+    return `Wheels off! Car #${numbers[crashed[0]]} is out of the race.`;
+  }
+  const winner = numbers[finishers[0]];
+  const mph = raceSpeeds(finishTimes, distance)[finishers[0]];
+  if (numbers.length === 1) {
     return `Car #${winner} hits ${mph} mph! Tap two or more cars to race them!`;
   }
-  return isPhotoFinish(finishTimes, order)
-    ? `Photo finish! Car #${winner} wins at ${mph} mph.`
-    : `Car #${winner} wins at ${mph} mph!`;
+  return isPhotoFinish(finishTimes, finishers)
+    ? `Photo finish! Car #${winner} wins at ${mph} mph.${dnf}`
+    : `Car #${winner} wins at ${mph} mph!${dnf}`;
 }
 
 /**
@@ -139,13 +159,94 @@ export function raceAnnouncement(
   finishTimes: number[],
   distance: number
 ): string {
-  const order = finishingOrder(finishTimes);
-  const winner = numbers[order[0]];
-  const mph = raceSpeeds(finishTimes, distance)[order[0]];
-  if (order.length === 1) {
+  const { finishers, crashed } = splitResults(finishTimes);
+  const dnf = crashed
+    .map((i) => ` Car ${numbers[i]} lost its wheels!`)
+    .join('');
+  if (finishers.length === 0) {
+    return `Oh no! Car ${numbers[crashed[0]]} lost its wheels!`;
+  }
+  const winner = numbers[finishers[0]];
+  const mph = raceSpeeds(finishTimes, distance)[finishers[0]];
+  if (numbers.length === 1) {
     return `Car ${winner} hits a top speed of ${mph} miles per hour!`;
   }
-  return isPhotoFinish(finishTimes, order)
-    ? `Photo finish! Car ${winner} wins with a top speed of ${mph} miles per hour!`
-    : `Car ${winner} wins with a top speed of ${mph} miles per hour!`;
+  return isPhotoFinish(finishTimes, finishers)
+    ? `Photo finish! Car ${winner} wins with a top speed of ${mph} miles per hour!${dnf}`
+    : `Car ${winner} wins with a top speed of ${mph} miles per hour!${dnf}`;
+}
+
+export type Crash = {
+  // Index of the racer that loses its wheels.
+  racer: number;
+  // How far down the track the wheels pop off, always well before the finish.
+  popAt: number;
+  // How far the body skids after the wheels pop.
+  stopDistance: number;
+};
+
+/** One race in three, one random car loses its wheels. */
+export function rollCrash(
+  racers: number,
+  distance: number,
+  random: () => number = Math.random
+): Crash | null {
+  if (racers === 0 || random() >= 1 / 3) {
+    return null;
+  }
+  return {
+    racer: Math.floor(random() * racers),
+    popAt: distance * (0.3 + random() * 0.35),
+    stopDistance: 70 + random() * 70,
+  };
+}
+
+export type Wheel = {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  // Spin in degrees.
+  angle: number;
+  bounces: number;
+  age: number;
+};
+
+const WHEEL_GRAVITY = 720;
+const MAX_BOUNCES = 2;
+// Degrees of spin per unit traveled, for wheels on and off the car.
+export const WHEEL_SPIN = 11.5;
+export const WHEEL_FADE_AFTER = 1.2;
+export const WHEEL_FADE_TIME = 0.5;
+
+/**
+ * Advances a wheel that popped off a car. It falls under gravity, slows
+ * from air drag, and bounces off the ground at most twice.
+ */
+export function stepWheel(
+  wheel: Wheel,
+  dt: number,
+  groundAt: (x: number) => number
+): Wheel {
+  let { x, y, vx, vy, bounces } = wheel;
+  vy += WHEEL_GRAVITY * dt;
+  vx *= 1 - 0.5 * dt;
+  x += vx * dt;
+  y += vy * dt;
+  const ground = groundAt(x);
+  if (y >= ground && vy > 0 && bounces < MAX_BOUNCES) {
+    y = ground;
+    vy = -vy * 0.38;
+    vx *= 0.75;
+    bounces += 1;
+  }
+  return {
+    x,
+    y,
+    vx,
+    vy,
+    bounces,
+    angle: wheel.angle + vx * dt * WHEEL_SPIN,
+    age: wheel.age + dt,
+  };
 }

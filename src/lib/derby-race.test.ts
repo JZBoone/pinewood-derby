@@ -1,5 +1,7 @@
 import {
   finishingOrder,
+  rollCrash,
+  stepWheel,
   raceAnnouncement,
   raceSpeeds,
   raceSummary,
@@ -95,5 +97,53 @@ describe('raceAnnouncement', () => {
     expect(raceAnnouncement(['72'], [1.84], DISTANCE)).toMatch(
       /^Car 72 hits a top speed of \d{3} miles per hour!$/
     );
+  });
+});
+
+describe('crashes', () => {
+  test('a crashed car is a DNF and the others still win', () => {
+    expect(raceSummary(['27', '2'], [Infinity, 1.8], DISTANCE)).toMatch(
+      /^Car #2 wins at \d{3} mph! Car #27 lost its wheels!$/
+    );
+    expect(raceAnnouncement(['27', '2'], [Infinity, 1.8], DISTANCE)).toMatch(
+      /^Car 2 wins with a top speed of \d{3} miles per hour! Car 27 lost its wheels!$/
+    );
+  });
+
+  test('a lone car can crash out', () => {
+    expect(raceSummary(['72'], [Infinity], DISTANCE)).toBe(
+      'Wheels off! Car #72 is out of the race.'
+    );
+    expect(raceAnnouncement(['72'], [Infinity], DISTANCE)).toBe(
+      'Oh no! Car 72 lost its wheels!'
+    );
+  });
+
+  test('about one race in three has a crash, popping before the finish', () => {
+    let seed = 1;
+    const random = () => {
+      seed = (seed * 16807) % 2147483647;
+      return seed / 2147483647;
+    };
+    const crashes = Array.from({ length: 3000 }, () =>
+      rollCrash(3, DISTANCE, random)
+    ).filter((crash) => crash !== null);
+    expect(crashes.length / 3000).toBeGreaterThan(0.3);
+    expect(crashes.length / 3000).toBeLessThan(0.37);
+    for (const crash of crashes) {
+      expect(crash.racer).toBeGreaterThanOrEqual(0);
+      expect(crash.racer).toBeLessThan(3);
+      expect(crash.popAt).toBeLessThan(DISTANCE * 0.7);
+    }
+  });
+
+  test('a popped wheel bounces at most twice', () => {
+    let wheel = { x: 0, y: 0, vx: 200, vy: -200, angle: 0, bounces: 0, age: 0 };
+    for (let i = 0; i < 600; i++) {
+      wheel = stepWheel(wheel, 1 / 120, () => 20);
+    }
+    expect(wheel.bounces).toBe(2);
+    expect(wheel.y).toBeGreaterThan(20);
+    expect(wheel.angle).toBeGreaterThan(0);
   });
 });
