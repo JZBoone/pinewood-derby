@@ -7,18 +7,6 @@ import { useEffect, useRef } from 'react';
 // https://pixabay.com/sound-effects/search/boing/
 const BONK_SOUND = '/sounds/boing.mp3';
 
-declare module 'react' {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace JSX {
-    interface IntrinsicElements {
-      'tent-scout': React.DetailedHTMLProps<
-        React.HTMLAttributes<HTMLElement>,
-        HTMLElement
-      >;
-    }
-  }
-}
-
 /**
  * The blue footer tent. Knocking on its door brings out a Cub Scout with a
  * slingshot, and the pebble's BONK plays a boing. The custom element only loads in the browser, so the static
