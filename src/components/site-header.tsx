@@ -1,6 +1,7 @@
 'use client';
 
 import { signIn, signOut, useSession } from '@/client-biz/auth';
+import { LogOut } from 'lucide-react';
 import Link from 'next/link';
 import PackPatch from './pack-patch';
 import Skeleton from './skeleton';
@@ -39,16 +40,24 @@ export default function SiteHeader() {
             >
               {session.user.name.trim().charAt(0).toUpperCase()}
             </span>
+            {/* Phones get an icon so the brand name isn't cut off. */}
             <button
               type="button"
-              className="btn-outline"
+              className="btn-outline px-2 sm:px-4"
+              aria-label="Sign out"
+              title="Sign out"
               onClick={() => signOut()}
             >
-              Sign out
+              <LogOut size={18} className="sm:hidden" aria-hidden />
+              <span className="hidden sm:inline">Sign out</span>
             </button>
           </>
         ) : (
-          <button type="button" className="btn-outline" onClick={handleLogin}>
+          <button
+            type="button"
+            className="btn-outline px-3 sm:px-4"
+            onClick={handleLogin}
+          >
             <span>
               Sign in<span className="hidden sm:inline"> with Google</span>
             </span>
