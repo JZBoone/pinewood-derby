@@ -45,7 +45,7 @@ function Pine({ x, height }: { x: number; height: number }) {
 }
 
 /**
- * The campsite at the bottom of every page: a rope with a square knot,
+ * The campsite at the bottom of every page: a rope,
  * pines, two tents and an animated campfire. Tapping the fire starts and
  * stops a looping crackle.
  */
@@ -76,29 +76,9 @@ export default function SiteFooter() {
 
   return (
     <footer className="mt-16" aria-label="Pack 272 campsite">
-      <div className="relative z-10 flex items-center">
-        <div className="h-2.5 flex-1 rounded-full bg-[repeating-linear-gradient(-55deg,#c9a46a_0_6px,#a9824a_6px_9px)]" />
-        <svg
-          viewBox="0 0 64 28"
-          className="absolute left-1/2 h-7 w-16 -translate-x-1/2"
-          aria-hidden
-        >
-          <path
-            d="M2 14 C14 14 18 4 28 6 C36 8 34 20 42 22 C50 24 54 14 62 14"
-            fill="none"
-            stroke="#a9824a"
-            strokeWidth={7}
-            strokeLinecap="round"
-          />
-          <path
-            d="M2 14 C14 14 18 24 28 22 C36 20 34 8 42 6 C50 4 54 14 62 14"
-            fill="none"
-            stroke="#c9a46a"
-            strokeWidth={7}
-            strokeLinecap="round"
-          />
-        </svg>
-      </div>
+      {/* The rope runs above the tents, so the orange tent's pennant tucks
+          under it. */}
+      <div className="relative z-10 h-2.5 rounded-full bg-[repeating-linear-gradient(-55deg,#c9a46a_0_6px,#a9824a_6px_9px)]" />
 
       {/* The scene is taller than the tents so the orange tent's pennant
           tucks under the rope. The ground line sits at y=139. */}

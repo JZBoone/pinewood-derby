@@ -167,6 +167,8 @@ svg{width:100%;height:auto;display:block;overflow:visible}
       fly.onfinish = () => { peb.remove(); this.bonk(ov, cx, cy); };
     }
     bonk(ov, cx, cy) {
+      // Lets the page react to the hit, e.g. with a sound effect.
+      this.dispatchEvent(new CustomEvent('bonk', { bubbles: true, composed: true }));
       const b = document.createElement('div');
       b.style.cssText = `position:absolute;left:${cx}px;top:${cy}px;width:300px;height:300px;margin:-150px 0 0 -150px`;
       b.innerHTML = burstSVG();
