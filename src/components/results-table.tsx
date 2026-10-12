@@ -1,7 +1,8 @@
 import { formatRaceTime } from '@/client-biz/time';
-import { CarWithBestTime } from '@/lib/car';
+import { CarWithBestTime, scaleMphValue } from '@/lib/car';
 import { den } from '@generated/client';
 import PlaceMark from './place-mark';
+import SpeedBadge from './speed-badge';
 
 interface ResultsTableProps {
   cars: CarWithBestTime[];
@@ -9,7 +10,7 @@ interface ResultsTableProps {
   dens?: den[];
 }
 
-const headerCell = 'px-3 pb-2.5 font-bold';
+const headerCell = 'px-2 sm:px-3 pb-2.5 font-bold';
 
 export default function ResultsTable({ cars, dens }: ResultsTableProps) {
   const denName = (car: CarWithBestTime) =>
@@ -44,13 +45,13 @@ export default function ResultsTable({ cars, dens }: ResultsTableProps) {
                   : ''
               }`}
             >
-              <td className="px-3 py-3.5">
+              <td className="px-2 sm:px-3 py-3.5">
                 {place ? <PlaceMark place={place} /> : null}
               </td>
-              <td className="px-3 py-3.5 font-(family-name:--font-heading) font-semibold tabular-nums">
+              <td className="px-2 sm:px-3 py-3.5 font-(family-name:--font-heading) font-semibold tabular-nums">
                 #{car.number}
               </td>
-              <td className="px-3 py-3.5 text-[17px]">
+              <td className="px-2 sm:px-3 py-3.5 text-[17px]">
                 {car.owner}
                 {dens && (
                   <div className="text-[13px] text-ink/72 sm:hidden">
@@ -64,21 +65,35 @@ export default function ResultsTable({ cars, dens }: ResultsTableProps) {
                 )}
               </td>
               {dens && (
-                <td className="hidden px-3 py-3.5 text-sm text-ink/72 sm:table-cell">
+                <td className="hidden px-2 sm:px-3 py-3.5 text-sm text-ink/72 sm:table-cell">
                   Den {denName(car)}
                 </td>
               )}
-              <td className="px-3 py-3.5 text-right text-cs-time tabular-nums">
+              <td className="px-2 sm:px-3 py-3.5 text-right text-cs-time tabular-nums">
                 {car.best_time ? (
-                  formatRaceTime(car.best_time)
+                  <>
+                    {formatRaceTime(car.best_time)}
+                    {/* Phones have no Speed column, so speed rides under
+                        the time. */}
+                    <SpeedBadge
+                      mph={scaleMphValue(car.best_time)}
+                      fastest={place === 1}
+                      className="mt-1.5 flex justify-end text-[15px] sm:hidden"
+                    />
+                  </>
                 ) : (
                   <span className="text-ink/45">—</span>
                 )}
               </td>
-              <td className="hidden px-3 py-3.5 text-right text-cs-mph tabular-nums sm:table-cell">
-                {car.scale_mph}
+              <td className="hidden px-2 sm:px-3 py-3.5 text-right sm:table-cell">
+                {car.best_time && (
+                  <SpeedBadge
+                    mph={scaleMphValue(car.best_time)}
+                    fastest={place === 1}
+                  />
+                )}
               </td>
-              <td className="hidden px-3 py-3.5 font-semibold italic sm:table-cell">
+              <td className="hidden px-2 sm:px-3 py-3.5 font-semibold italic sm:table-cell">
                 {car.name}
               </td>
             </tr>

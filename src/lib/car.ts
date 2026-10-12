@@ -10,10 +10,13 @@ export type CarWithBestTime = car & {
   scale_mph?: string | null;
 };
 
-export function scaleMph(milliseconds: number): string {
+export function scaleMphValue(milliseconds: number): number {
   // I reverse engineered the math from a screenshot of the 2024 spreadsheet
-  const mph = 596576.4 / milliseconds;
-  return `${mph.toFixed(0)} mph`;
+  return 596576.4 / milliseconds;
+}
+
+export function scaleMph(milliseconds: number): string {
+  return `${scaleMphValue(milliseconds).toFixed(0)} mph`;
 }
 
 export function carsWithTimes(cars: car[], heats: heat[]): CarWithBestTime[] {

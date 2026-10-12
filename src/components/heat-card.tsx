@@ -2,12 +2,13 @@
 
 import { activateHeat } from '@/client-biz/heat';
 import { formatRaceTime } from '@/client-biz/time';
-import { scaleMph } from '@/lib/car';
+import { scaleMphValue } from '@/lib/car';
 import { HeatProgress } from '@/lib/heat';
 import { car, heat } from '@generated/client';
 import { Timer, Trophy } from 'lucide-react';
 import { useState } from 'react';
 import Button from './button';
+import SpeedBadge from './speed-badge';
 
 const LANES = [1, 2, 3, 4, 5, 6] as const;
 
@@ -102,7 +103,7 @@ export default function HeatCard({
             <th className="hidden px-2 pt-2.5 pb-1 text-right font-bold sm:table-cell">
               Speed
             </th>
-            <th className="w-6 pr-[18px]">
+            <th className="w-6 pr-3 sm:pr-[18px]">
               <span className="sr-only">Winner</span>
             </th>
           </tr>
@@ -120,32 +121,52 @@ export default function HeatCard({
                     : ''
                 }`}
               >
-                <td className="py-2.5 pr-2 pl-[18px]">
+                <td className="py-2.5 pr-2 pl-3 sm:pl-[18px]">
                   <span className="inline-flex size-[26px] items-center justify-center rounded-full border-[1.5px] border-divider font-(family-name:--font-heading) text-sm font-semibold tabular-nums">
                     {lane}
                   </span>
                 </td>
                 <td className="px-2 py-2.5">
-                  <span className="inline-block min-w-14 font-(family-name:--font-heading) font-semibold tabular-nums">
+                  <span className="block text-sm font-(family-name:--font-heading) font-semibold tabular-nums sm:inline-block sm:min-w-14 sm:text-base">
                     #{car?.number}
                   </span>
                   {car?.owner}
                 </td>
                 <td className="px-2 py-2.5 text-right tabular-nums">
                   {time !== null ? (
-                    <span className="text-cs-time">{formatRaceTime(time)}</span>
+                    <>
+                      <span className="text-cs-time">
+                        {formatRaceTime(time)}
+                      </span>
+                      {/* Phones have no Speed column, so speed rides under
+                          the time. */}
+                      <SpeedBadge
+                        mph={scaleMphValue(time)}
+                        fastest={winner}
+                        className="mt-1 flex justify-end text-sm sm:hidden"
+                      />
+                    </>
                   ) : (
-                    <span className="text-ink/45">—</span>
+                    <>
+                      <span className="text-ink/45">—</span>
+                      {progress === 'final' && (
+                        <span className="block text-[11px] text-ink/55 sm:hidden">
+                          No time
+                        </span>
+                      )}
+                    </>
                   )}
                 </td>
-                <td className="hidden px-2 py-2.5 text-right text-cs-mph tabular-nums sm:table-cell">
-                  {time !== null
-                    ? scaleMph(time)
-                    : progress === 'final' && (
-                        <span className="text-[11px] text-ink/55">No time</span>
-                      )}
+                <td className="hidden px-2 py-2.5 text-right sm:table-cell">
+                  {time !== null ? (
+                    <SpeedBadge mph={scaleMphValue(time)} fastest={winner} />
+                  ) : (
+                    progress === 'final' && (
+                      <span className="text-[11px] text-ink/55">No time</span>
+                    )
+                  )}
                 </td>
-                <td className="w-6 py-2.5 pr-[18px]">
+                <td className="w-6 py-2.5 pr-3 sm:pr-[18px]">
                   {winner && (
                     <Trophy
                       size={16}
