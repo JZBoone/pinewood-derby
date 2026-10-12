@@ -398,3 +398,21 @@
     transform: scale(1);
   }
 }
+
+@keyframes needle-sweep {
+  from {
+    transform: rotate(-90deg);
+  }
+}
+
+@keyframes speed-streak {
+  0%,
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  50% {
+    opacity: 0.35;
+    transform: translateX(-3px);
+  }
+}

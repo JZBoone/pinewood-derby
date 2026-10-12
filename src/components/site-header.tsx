@@ -31,6 +31,14 @@ export default function SiteHeader() {
         ) : session ? (
           <>
             <span className="hidden sm:inline">{session.user.name}</span>
+            {/* Phones have no room for the name, so show its initial. */}
+            <span
+              title={session.user.name}
+              aria-label={`Signed in as ${session.user.name}`}
+              className="flex size-8 shrink-0 items-center justify-center rounded-full border border-divider font-(family-name:--font-heading) text-sm font-semibold sm:hidden"
+            >
+              {session.user.name.trim().charAt(0).toUpperCase()}
+            </span>
             <button
               type="button"
               className="btn-outline"
