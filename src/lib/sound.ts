@@ -21,6 +21,7 @@ export function setSoundOn(on: boolean) {
   window.dispatchEvent(new Event(CHANGE_EVENT));
   if (!on) {
     playing.forEach((audio) => audio.pause());
+    window.speechSynthesis?.cancel();
   }
 }
 
@@ -85,4 +86,47 @@ export function playSound(src: string, volume = 0.7) {
   audio.currentTime = 0;
   // Browsers may still refuse; a silent failure is fine for an easter egg.
   audio.play().catch(() => {});
+}
+
+const FADE_MS = 700;
+
+function fade(audio: HTMLAudioElement, to: number, done?: () => void) {
+  const from = audio.volume;
+  const start = performance.now();
+  function step(now: number) {
+    const t = Math.min((now - start) / FADE_MS, 1);
+    audio.volume = from + (to - from) * t;
+    if (t < 1) {
+      requestAnimationFrame(step);
+    } else {
+      done?.();
+    }
+  }
+  requestAnimationFrame(step);
+}
+
+/**
+ * Starts a sound looping with a gentle fade-in. Returns false when sound is
+ * muted, so callers can leave their toggle off.
+ */
+export function startLoop(src: string, volume = 0.5): boolean {
+  if (!isSoundOn()) {
+    return false;
+  }
+  const audio = audioFor(src);
+  audio.loop = true;
+  audio.muted = false;
+  audio.volume = 0;
+  audio.play().catch(() => {});
+  fade(audio, volume);
+  return true;
+}
+
+/** Fades a looping sound out and stops it. */
+export function stopLoop(src: string) {
+  const audio = playing.get(src);
+  if (!audio || audio.paused) {
+    return;
+  }
+  fade(audio, 0, () => audio.pause());
 }

@@ -1,8 +1,14 @@
 'use client';
 
+import { isSoundOn, startLoop, stopLoop, subscribeToSound } from '@/lib/sound';
+import { useEffect, useState } from 'react';
 import Compass from './art/compass';
 import SoundToggle from './sound-toggle';
 import { useToast } from './toast';
+
+// "Fire Crackling Sound" by SoundReality, from Pixabay:
+// https://pixabay.com/sound-effects/search/fire/
+const CAMPFIRE_SOUND = '/sounds/campfire.mp3';
 
 // Stars in the night sky. The car constellation sits in open sky between
 // the campfire and the blue tent.
@@ -39,13 +45,31 @@ function Pine({ x, height }: { x: number; height: number }) {
 
 /**
  * The campsite at the bottom of every page: a rope with a square knot,
- * pines, two tents and an animated campfire that offers a s'mores tip when
- * clicked.
+ * pines, two tents and an animated campfire. Tapping the fire starts and
+ * stops a looping crackle.
  */
 export default function SiteFooter() {
   const showToast = useToast();
+  const [fireOn, setFireOn] = useState(false);
 
-  function stokeFire() {
+  // Muting from the footer toggle also puts the fire out.
+  useEffect(
+    () =>
+      subscribeToSound(() => {
+        if (!isSoundOn()) {
+          setFireOn(false);
+        }
+      }),
+    []
+  );
+
+  function toggleFire() {
+    if (fireOn) {
+      stopLoop(CAMPFIRE_SOUND);
+      setFireOn(false);
+      return;
+    }
+    setFireOn(startLoop(CAMPFIRE_SOUND));
     showToast('S’mores time! Toast your marshmallow golden, not black.');
   }
 
@@ -134,8 +158,9 @@ export default function SiteFooter() {
           />
           <button
             type="button"
-            aria-label="Stoke the campfire"
-            onClick={stokeFire}
+            aria-label="Campfire sound"
+            aria-pressed={fireOn}
+            onClick={toggleFire}
             className="-mb-3.5 w-[220px] max-w-[26vw] rounded-full"
           >
             {/* The SVG's own reduced-motion query doesn't reach inside an
