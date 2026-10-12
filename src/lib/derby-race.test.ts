@@ -1,5 +1,6 @@
 import {
   finishingOrder,
+  raceAnnouncement,
   raceSummary,
   simulateRace,
   stepRacer,
@@ -57,6 +58,20 @@ describe('raceSummary', () => {
   test('it calls a photo finish', () => {
     expect(raceSummary(['27', '2'], [1.8, 1.801])).toBe(
       'Photo finish! Car #27 wins by a nose.'
+    );
+  });
+});
+
+describe('raceAnnouncement', () => {
+  test('it spells out the result for the robot voice', () => {
+    expect(raceAnnouncement(['27', '2'], [1.75, 1.9])).toBe(
+      'Car 27 wins, by 0.15 seconds!'
+    );
+    expect(raceAnnouncement(['72'], [1.84])).toBe(
+      'Car 72 finishes in 1.84 seconds!'
+    );
+    expect(raceAnnouncement(['27', '2'], [1.8, 1.801])).toBe(
+      'Photo finish! Car 27 wins by a nose!'
     );
   });
 });

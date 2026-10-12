@@ -1,6 +1,9 @@
+'use client';
+
 import { formatRaceTime } from '@/client-biz/time';
 import { CarWithBestTime, scaleMphValue } from '@/lib/car';
 import { den } from '@generated/client';
+import { speak } from '@/lib/robot-voice';
 import PlaceMark from './place-mark';
 import SpeedBadge from './speed-badge';
 
@@ -8,6 +11,20 @@ interface ResultsTableProps {
   cars: CarWithBestTime[];
   // Adds a Den column, for results that span dens.
   dens?: den[];
+}
+
+// An easter egg: tapping a car name has the robot announcer say it.
+function CarName({ name, className }: { name: string; className?: string }) {
+  return (
+    <button
+      type="button"
+      onClick={() => speak(name)}
+      title="Say it!"
+      className={`cursor-pointer text-left font-semibold italic hover:text-accent ${className ?? ''}`}
+    >
+      {name}
+    </button>
+  );
 }
 
 const headerCell = 'px-2 sm:px-3 pb-2.5 font-bold';
@@ -59,8 +76,8 @@ export default function ResultsTable({ cars, dens }: ResultsTableProps) {
                   </div>
                 )}
                 {car.name && (
-                  <div className="text-sm font-semibold italic sm:hidden">
-                    {car.name}
+                  <div className="sm:hidden">
+                    <CarName name={car.name} className="text-sm" />
                   </div>
                 )}
               </td>
@@ -93,8 +110,8 @@ export default function ResultsTable({ cars, dens }: ResultsTableProps) {
                   />
                 )}
               </td>
-              <td className="hidden px-2 sm:px-3 py-3.5 font-semibold italic sm:table-cell">
-                {car.name}
+              <td className="hidden px-2 py-3.5 sm:table-cell sm:px-3">
+                {car.name && <CarName name={car.name} />}
               </td>
             </tr>
           );

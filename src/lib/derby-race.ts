@@ -93,3 +93,22 @@ export function raceSummary(numbers: string[], finishTimes: number[]): string {
     ? `Photo finish! Car #${winner} wins by a nose.`
     : `Car #${winner} wins by ${margin.toFixed(2)}s!`;
 }
+
+/**
+ * The race result as the robot announcer should say it: no "#" or "s"
+ * abbreviations, which speech engines read out literally.
+ */
+export function raceAnnouncement(
+  numbers: string[],
+  finishTimes: number[]
+): string {
+  const order = finishingOrder(finishTimes);
+  const winner = numbers[order[0]];
+  if (order.length === 1) {
+    return `Car ${winner} finishes in ${finishTimes[order[0]].toFixed(2)} seconds!`;
+  }
+  const margin = finishTimes[order[1]] - finishTimes[order[0]];
+  return margin < 0.005
+    ? `Photo finish! Car ${winner} wins by a nose!`
+    : `Car ${winner} wins, by ${margin.toFixed(2)} seconds!`;
+}

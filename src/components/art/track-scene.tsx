@@ -2,6 +2,7 @@
 
 import {
   isStopped,
+  raceAnnouncement,
   Racer,
   RacerState,
   raceSummary,
@@ -10,6 +11,7 @@ import {
   stepRacer,
 } from '@/lib/derby-race';
 import { useEffect, useRef, useState } from 'react';
+import { primeRobotVoice, speak } from '@/lib/robot-voice';
 import { playSound, primeSound } from '@/lib/sound';
 import { useToast } from '../toast';
 import PinewoodCar from './pinewood-car';
@@ -113,8 +115,10 @@ export default function TrackScene({ className }: { className?: string }) {
     const distance = FINISH_POSITION - GATE_X;
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const times = simulateRace(racers, distance);
       playSound(FINISH_SOUND);
-      showToast(raceSummary(numbers, simulateRace(racers, distance)));
+      showToast(raceSummary(numbers, times));
+      speak(raceAnnouncement(numbers, times));
       returnHome();
       return;
     }
@@ -147,12 +151,9 @@ export default function TrackScene({ className }: { className?: string }) {
         return next;
       });
       if (states.every(isStopped)) {
-        showToast(
-          raceSummary(
-            numbers,
-            states.map((state) => state.finishedAt ?? Infinity)
-          )
-        );
+        const times = states.map((state) => state.finishedAt ?? Infinity);
+        showToast(raceSummary(numbers, times));
+        speak(raceAnnouncement(numbers, times));
         later(1600, returnHome);
         return;
       }
@@ -177,6 +178,7 @@ export default function TrackScene({ className }: { className?: string }) {
       // The race sounds play from timers, so unlock them during this tap.
       primeSound(GATE_SOUND);
       primeSound(FINISH_SOUND);
+      primeRobotVoice();
       setPhase('staging');
       showToast('Get ready! Tap more cars to join the race.');
       ['3', '2', '1', 'GO!'].forEach((label, i) =>
