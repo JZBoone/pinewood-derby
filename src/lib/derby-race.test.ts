@@ -1,6 +1,7 @@
 import {
   finishingOrder,
   raceAnnouncement,
+  raceSpeeds,
   raceSummary,
   simulateRace,
   stepRacer,
@@ -44,34 +45,55 @@ describe('simulateRace', () => {
   });
 });
 
+// The homepage track's gate-to-finish distance.
+const DISTANCE = 528;
+
+describe('raceSpeeds', () => {
+  test('it maps race times onto real track speeds', () => {
+    const [fastest, slowest] = simulateRace(
+      [
+        { accel: 420, topSpeed: 540 },
+        { accel: 260, topSpeed: 400 },
+      ],
+      DISTANCE
+    );
+    // 2.38s and 2.55s on the real track.
+    expect(raceSpeeds([fastest, slowest], DISTANCE)).toEqual([251, 234]);
+  });
+
+  test('a faster race time is a higher speed', () => {
+    const [a, b] = raceSpeeds([1.7, 1.9], DISTANCE);
+    expect(a).toBeGreaterThan(b);
+  });
+});
+
 describe('raceSummary', () => {
-  test('it names the winner and the margin', () => {
-    expect(raceSummary(['27', '2'], [1.9, 1.75])).toBe('Car #2 wins by 0.15s!');
+  test('it names the winner and their speed', () => {
+    expect(raceSummary(['27', '2'], [1.9, 1.75], DISTANCE)).toMatch(
+      /^Car #2 wins at \d{3} mph!$/
+    );
   });
 
   test('it invites a lone car to race others', () => {
-    expect(raceSummary(['72'], [1.84])).toBe(
-      'Car #72 finishes in 1.84s. Tap two or more cars to race them!'
+    expect(raceSummary(['72'], [1.84], DISTANCE)).toMatch(
+      /^Car #72 hits \d{3} mph! Tap two or more cars to race them!$/
     );
   });
 
   test('it calls a photo finish', () => {
-    expect(raceSummary(['27', '2'], [1.8, 1.801])).toBe(
-      'Photo finish! Car #27 wins by a nose.'
+    expect(raceSummary(['27', '2'], [1.8, 1.801], DISTANCE)).toMatch(
+      /^Photo finish! Car #27 wins at \d{3} mph\.$/
     );
   });
 });
 
 describe('raceAnnouncement', () => {
-  test('it spells out the result for the robot voice', () => {
-    expect(raceAnnouncement(['27', '2'], [1.75, 1.9])).toBe(
-      'Car 27 wins, by 0.15 seconds!'
+  test('it says the top speed in words the robot voice reads well', () => {
+    expect(raceAnnouncement(['27', '2'], [1.75, 1.9], DISTANCE)).toMatch(
+      /^Car 27 wins with a top speed of \d{3} miles per hour!$/
     );
-    expect(raceAnnouncement(['72'], [1.84])).toBe(
-      'Car 72 finishes in 1.84 seconds!'
-    );
-    expect(raceAnnouncement(['27', '2'], [1.8, 1.801])).toBe(
-      'Photo finish! Car 27 wins by a nose!'
+    expect(raceAnnouncement(['72'], [1.84], DISTANCE)).toMatch(
+      /^Car 72 hits a top speed of \d{3} miles per hour!$/
     );
   });
 });

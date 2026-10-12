@@ -117,8 +117,8 @@ export default function TrackScene({ className }: { className?: string }) {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       const times = simulateRace(racers, distance);
       playSound(FINISH_SOUND);
-      showToast(raceSummary(numbers, times));
-      speak(raceAnnouncement(numbers, times));
+      showToast(raceSummary(numbers, times, distance));
+      speak(raceAnnouncement(numbers, times, distance));
       returnHome();
       return;
     }
@@ -152,8 +152,8 @@ export default function TrackScene({ className }: { className?: string }) {
       });
       if (states.every(isStopped)) {
         const times = states.map((state) => state.finishedAt ?? Infinity);
-        showToast(raceSummary(numbers, times));
-        speak(raceAnnouncement(numbers, times));
+        showToast(raceSummary(numbers, times, distance));
+        speak(raceAnnouncement(numbers, times, distance));
         later(1600, returnHome);
         return;
       }
