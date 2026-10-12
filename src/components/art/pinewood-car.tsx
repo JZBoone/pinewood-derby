@@ -7,6 +7,10 @@ interface PinewoodCarProps {
   number?: string;
   // Spin the wheels, for cars that are moving.
   rolling?: boolean;
+  // Turns the wheels to an exact angle in degrees, overriding rolling.
+  wheelAngle?: number;
+  // Hides the wheels, for a car that lost them.
+  wheels?: boolean;
   className?: string;
 }
 
@@ -17,6 +21,8 @@ export default function PinewoodCar({
   color,
   number,
   rolling,
+  wheelAngle,
+  wheels = true,
   className,
   x,
   y,
@@ -25,9 +31,16 @@ export default function PinewoodCar({
   const wheel = (cx: number) => (
     <g
       className={
-        rolling ? 'motion-safe:animate-[wheel-spin_.4s_linear_infinite]' : ''
+        rolling && wheelAngle === undefined
+          ? 'motion-safe:animate-[wheel-spin_.4s_linear_infinite]'
+          : ''
       }
-      style={{ transformOrigin: `${cx}px 38px`, transformBox: 'view-box' }}
+      style={{
+        transformOrigin: `${cx}px 38px`,
+        transformBox: 'view-box',
+        transform:
+          wheelAngle === undefined ? undefined : `rotate(${wheelAngle}deg)`,
+      }}
     >
       <circle cx={cx} cy={38} r={9} fill="#15214a" />
       <circle cx={cx} cy={38} r={4} fill="#c9ccd6" />
@@ -91,8 +104,8 @@ export default function PinewoodCar({
           </text>
         </g>
       )}
-      {wheel(24)}
-      {wheel(98)}
+      {wheels && wheel(24)}
+      {wheels && wheel(98)}
     </svg>
   );
 }
