@@ -10,6 +10,7 @@ import {
   stepRacer,
 } from '@/lib/derby-race';
 import { useEffect, useRef, useState } from 'react';
+import { playSound, primeSound } from '@/lib/sound';
 import { useToast } from '../toast';
 import PinewoodCar from './pinewood-car';
 
@@ -32,6 +33,11 @@ const EDGE = 8;
 const LANE_DROP = 6;
 const LANE_BASE = 2;
 const COUNTDOWN_MS = 750;
+// "Clack" and "Finished" by freesound_community, from Pixabay:
+// https://pixabay.com/sound-effects/search/clack/
+// https://pixabay.com/sound-effects/search/finished/
+const GATE_SOUND = '/sounds/gate-clack.mp3';
+const FINISH_SOUND = '/sounds/finish.mp3';
 
 const CARS = [
   { x: 360, color: '#c62232', number: '27' },
@@ -98,6 +104,8 @@ export default function TrackScene({ className }: { className?: string }) {
   }
 
   function startRace() {
+    playSound(GATE_SOUND, 0.8);
+
     // Read the ref, not state: this runs from the countdown timer.
     const entrants = stagedRef.current;
     const racers: Racer[] = entrants.map(() => randomRacer());
@@ -105,6 +113,7 @@ export default function TrackScene({ className }: { className?: string }) {
     const distance = FINISH_POSITION - GATE_X;
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      playSound(FINISH_SOUND);
       showToast(raceSummary(numbers, simulateRace(racers, distance)));
       returnHome();
       return;
@@ -117,6 +126,7 @@ export default function TrackScene({ className }: { className?: string }) {
       finishedAt: null,
     }));
     let elapsed = 0;
+    let winnerCrossed = false;
     let last: number | null = null;
     function tick(now: number) {
       const dt = last === null ? 0 : Math.min((now - last) / 1000, 1 / 30);
@@ -125,6 +135,10 @@ export default function TrackScene({ className }: { className?: string }) {
         stepRacer(racers[i], state, dt, elapsed, distance)
       );
       elapsed += dt;
+      if (!winnerCrossed && states.some((state) => state.finishedAt !== null)) {
+        winnerCrossed = true;
+        playSound(FINISH_SOUND);
+      }
       setPositions((current) => {
         const next = [...current];
         entrants.forEach((carIndex, i) => {
@@ -160,6 +174,9 @@ export default function TrackScene({ className }: { className?: string }) {
       current.map((x, i) => (i === index ? GATE_X : x))
     );
     if (phase === 'idle') {
+      // The race sounds play from timers, so unlock them during this tap.
+      primeSound(GATE_SOUND);
+      primeSound(FINISH_SOUND);
       setPhase('staging');
       showToast('Get ready! Tap more cars to join the race.');
       ['3', '2', '1', 'GO!'].forEach((label, i) =>

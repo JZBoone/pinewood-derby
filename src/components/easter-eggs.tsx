@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import PinewoodCar from './art/pinewood-car';
 import Whale from './art/whale';
+import { playSound } from '@/lib/sound';
 import { useToast } from './toast';
 
 const KONAMI = [
@@ -67,6 +68,9 @@ export default function EasterEggs() {
     let typed = '';
     function handleWhale() {
       setWhale((n) => n + 1);
+      // "Haunting Whale Song" by Dragon Studio, from Pixabay:
+      // https://pixabay.com/sound-effects/search/whale/
+      playSound('/sounds/whale-song.mp3');
       showToast('Go Williams Whales!');
     }
     function handleKeyDown(event: KeyboardEvent) {
@@ -109,7 +113,8 @@ export default function EasterEggs() {
     if (whale === 0) {
       return;
     }
-    const timeout = setTimeout(() => setWhale(0), 7_000);
+    // The swim lasts about as long as the whale song.
+    const timeout = setTimeout(() => setWhale(0), 8_500);
     return () => clearTimeout(timeout);
   }, [whale]);
 
@@ -123,7 +128,7 @@ export default function EasterEggs() {
         >
           <div
             key={whale}
-            className="absolute bottom-2 left-0 animate-[whale-swim_6s_ease-in-out_forwards]"
+            className="absolute bottom-2 left-0 animate-[whale-swim_7.5s_ease-in-out_forwards]"
             style={{ transform: 'translateX(-260px)' }}
           >
             <Whale spouting className="h-[130px] w-[208px]" />

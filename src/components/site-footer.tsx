@@ -1,6 +1,7 @@
 'use client';
 
 import Compass from './art/compass';
+import SoundToggle from './sound-toggle';
 import { useToast } from './toast';
 
 // Stars in the night sky. The car constellation sits in open sky between
@@ -166,7 +167,7 @@ export default function SiteFooter() {
 
       <div className="mx-auto flex max-w-[1040px] flex-wrap items-center gap-4 px-[clamp(20px,4vw,40px)] pt-5 pb-10">
         <Compass className="size-12 shrink-0" />
-        <div>
+        <div className="flex-1">
           <div className="font-(family-name:--font-heading) font-semibold font-stretch-112%">
             Pack 272 · Do your best
           </div>
@@ -174,6 +175,7 @@ export default function SiteFooter() {
             Built with sawdust, graphite and a little help from a grown-up.
           </div>
         </div>
+        <SoundToggle />
       </div>
     </footer>
   );
