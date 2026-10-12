@@ -169,7 +169,7 @@ export default function SiteFooter() {
         <Compass className="size-12 shrink-0" />
         <div className="flex-1">
           <div className="font-(family-name:--font-heading) font-semibold font-stretch-112%">
-            Pack 272 · Do your best
+            Pack 272 · Silicon Valley Monterey Bay Council
           </div>
           <div className="text-sm text-ink/65">
             Built with sawdust, graphite and a little help from a grown-up.
