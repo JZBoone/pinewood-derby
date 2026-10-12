@@ -42,6 +42,10 @@ const EDGE = 8;
 const LANE_DROP = 6;
 const LANE_BASE = 2;
 const COUNTDOWN_MS = 750;
+// Like the real gate, a lane whose car never arrives (say, it lost its
+// wheels) lights up anyway once the race times out. Every car that makes it
+// crosses well before this.
+const GATE_TIMEOUT_MS = 3500;
 // "Clack" and "Finished" by freesound_community, from Pixabay:
 // https://pixabay.com/sound-effects/search/clack/
 // https://pixabay.com/sound-effects/search/finished/
@@ -174,6 +178,8 @@ export default function TrackScene({ className }: { className?: string }) {
   const stagedRef = useRef<number[]>([]);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const frame = useRef(0);
+  // Bumped for each new race, so a stale timeout can't light the next one.
+  const raceId = useRef(0);
 
   useEffect(
     () => () => {
@@ -251,6 +257,19 @@ export default function TrackScene({ className }: { className?: string }) {
     const distance = FINISH_POSITION - GATE_X;
     const crash = rollCrash(entrants.length, distance);
     const crashedCar = crash ? entrants[crash.racer] : null;
+
+    const race = raceId.current;
+    later(GATE_TIMEOUT_MS, () => {
+      if (raceId.current !== race) {
+        return;
+      }
+      setLitLanes((lit) => {
+        const missing = entrants
+          .map(laneOf)
+          .filter((lane) => !lit.includes(lane));
+        return missing.length ? [...lit, ...missing] : lit;
+      });
+    });
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       const times = simulateRace(racers, distance).map((time, i) =>
@@ -464,6 +483,7 @@ export default function TrackScene({ className }: { className?: string }) {
       )
     );
     if (phase === 'idle') {
+      raceId.current += 1;
       setLitLanes([]);
       setCrashView(null);
       setLooseWheels([]);
@@ -731,34 +751,46 @@ export default function TrackScene({ className }: { className?: string }) {
                 y={0}
                 width={CAR_WIDTH}
               />
-              {crashed && (
-                <g
-                  transform={`translate(${CAR_WIDTH / 2} -10) rotate(${-angle})`}
-                >
-                  <rect
-                    x={-15}
-                    y={-8}
-                    width={30}
-                    height={15}
-                    rx={3}
-                    fill="#c62232"
-                  />
-                  <text
-                    y={3.5}
-                    textAnchor="middle"
-                    fontSize={10}
-                    fontWeight={700}
-                    letterSpacing=".08em"
-                    fontFamily="var(--font-heading), sans-serif"
-                    fill="#fff"
-                  >
-                    DNF
-                  </text>
-                </g>
-              )}
             </g>
           );
         })}
+
+        {/* The DNF tag, drawn above every car so no other car covers it. */}
+        {crashView &&
+          (() => {
+            const car = crashView.car;
+            const at = toTrack(
+              car,
+              positions[car],
+              // On the body itself, so it can't be mistaken for a neighbor's.
+              { x: CAR_WIDTH * 0.55, y: 17 },
+              ANGLE + crashView.tilt,
+              crashView.wheelsOff ? BODY_DROP : 0
+            );
+            return (
+              <g transform={`translate(${at.x} ${at.y})`}>
+                <rect
+                  x={-15}
+                  y={-8}
+                  width={30}
+                  height={15}
+                  rx={3}
+                  fill="#c62232"
+                />
+                <text
+                  y={3.5}
+                  textAnchor="middle"
+                  fontSize={10}
+                  fontWeight={700}
+                  letterSpacing=".08em"
+                  fontFamily="var(--font-heading), sans-serif"
+                  fill="#fff"
+                >
+                  DNF
+                </text>
+              </g>
+            );
+          })()}
 
         {/* Wheels that popped off, bouncing away and fading. */}
         {looseWheels.map((wheel, i) => (
