@@ -3,6 +3,7 @@
 import { isSoundOn, startLoop, stopLoop, subscribeToSound } from '@/lib/sound';
 import { useEffect, useState } from 'react';
 import Compass from './art/compass';
+import TentScout from './campsite/tent-scout';
 import SoundToggle from './sound-toggle';
 import { useToast } from './toast';
 
@@ -179,14 +180,8 @@ export default function SiteFooter() {
               />
             </picture>
           </button>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/campsite/tent-blue.svg"
-            alt=""
-            width={190}
-            height={129}
-            className="h-auto w-[190px] max-w-[22vw] max-[480px]:hidden"
-          />
+          {/* Knock on the door for a slingshot surprise. */}
+          <TentScout className="w-[190px] max-w-[22vw] max-[480px]:hidden" />
         </div>
       </div>
 
