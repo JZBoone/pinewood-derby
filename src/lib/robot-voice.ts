@@ -9,6 +9,8 @@ const PREFERRED_VOICES =
 
 let voice: SpeechSynthesisVoice | null = null;
 let primed = false;
+// True while the silent warm-up utterance is still queued or playing.
+let warming = false;
 
 function synth(): SpeechSynthesis | null {
   return typeof window !== 'undefined' && 'speechSynthesis' in window
@@ -26,6 +28,15 @@ function pickVoice() {
 if (synth()) {
   pickVoice();
   synth()?.addEventListener?.('voiceschanged', pickVoice);
+  // The speech engine and audio output start asleep, which clips the first
+  // word of the first announcement. Wake them on the first touch or key
+  // press; pointerdown fires before the click that asks for speech.
+  for (const type of ['pointerdown', 'keydown']) {
+    document.addEventListener(type, primeRobotVoice, {
+      once: true,
+      capture: true,
+    });
+  }
 }
 
 export function canSpeak(): boolean {
@@ -42,8 +53,12 @@ export function primeRobotVoice() {
     return;
   }
   primed = true;
+  warming = true;
   const silent = new SpeechSynthesisUtterance(' ');
   silent.volume = 0;
+  silent.onend = silent.onerror = () => {
+    warming = false;
+  };
   s.speak(silent);
 }
 
@@ -56,7 +71,14 @@ export function speak(text: string) {
   if (!s || !isSoundOn() || !text.trim()) {
     return;
   }
-  s.cancel();
+  // Chrome can drop the start of an utterance queued right after cancel(),
+  // so only cut off speech that is really playing, never the warm-up.
+  if (!warming && (s.speaking || s.pending)) {
+    s.cancel();
+  }
+  if (!voice) {
+    pickVoice();
+  }
   const utterance = new SpeechSynthesisUtterance(text);
   if (voice) {
     utterance.voice = voice;
