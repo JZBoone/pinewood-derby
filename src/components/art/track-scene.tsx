@@ -755,30 +755,29 @@ export default function TrackScene({ className }: { className?: string }) {
           );
         })}
 
-        {/* The DNF tag, drawn above every car so no other car covers it. */}
+        {/* The DNF tag: a callout whose pointer touches the crashed car's
+            roof, drawn above every car so nothing covers it. */}
         {crashView &&
           (() => {
             const car = crashView.car;
-            const at = toTrack(
+            const roof = toTrack(
               car,
               positions[car],
-              // On the body itself, so it can't be mistaken for a neighbor's.
-              { x: CAR_WIDTH * 0.55, y: 17 },
+              { x: 66 * CAR_SCALE, y: 4 },
               ANGLE + crashView.tilt,
               crashView.wheelsOff ? BODY_DROP : 0
             );
             return (
-              <g transform={`translate(${at.x} ${at.y})`}>
-                <rect
-                  x={-15}
-                  y={-8}
-                  width={30}
-                  height={15}
-                  rx={3}
+              <g transform={`translate(${roof.x} ${roof.y})`}>
+                <path
+                  d="M-16 -27 h32 a3 3 0 0 1 3 3 v11 a3 3 0 0 1 -3 3 h-10 l-6 7 l-6 -7 h-10 a3 3 0 0 1 -3 -3 v-11 a3 3 0 0 1 3 -3 z"
                   fill="#c62232"
+                  stroke="var(--bg)"
+                  strokeWidth={1.5}
+                  strokeLinejoin="round"
                 />
                 <text
-                  y={3.5}
+                  y={-14.5}
                   textAnchor="middle"
                   fontSize={10}
                   fontWeight={700}
